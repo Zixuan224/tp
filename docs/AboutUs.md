@@ -39,7 +39,7 @@ You can reach us at the email `seer[at]comp.nus.edu.sg`
 
 ### Janelle Lum
 
-<img src="images/jangleloom" width="200px">
+<img src="images/jangleloom.png" width="200px">
 
 [[github](http://github.com/jangleloom)]
 
