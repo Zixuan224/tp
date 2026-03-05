@@ -279,66 +279,200 @@ _{Explain here how the data archiving feature will be implemented}_
 * can type fast
 * prefers typing to mouse interactions
 * is reasonably comfortable using CLI apps
+* plays games on with a friends online
 
-**Value proposition**: manage contacts faster than a typical mouse/GUI driven app
+**Value proposition**: It allows the user to have quick access to the different aliases that their contacts may be using.
 
 
 ### User stories
 
 Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unlikely to have) - `*`
 
-| Priority | As a …​                                    | I want to …​                 | So that I can…​                                                        |
-|----------|--------------------------------------------|------------------------------|------------------------------------------------------------------------|
-| `* * *`  | new user                                   | see usage instructions       | refer to instructions when I forget how to use the App                 |
-| `* * *`  | user                                       | add a new person             |                                                                        |
-| `* * *`  | user                                       | delete a person              | remove entries that I no longer need                                   |
-| `* * *`  | user                                       | find a person by name        | locate details of persons without having to go through the entire list |
-| `* *`    | user                                       | hide private contact details | minimize chance of someone else seeing them by accident                |
-| `*`      | user with many persons in the address book | sort persons by name         | locate a person easily                                                 |
+| Priority | As a …​    | I want to …​                       | So that I can…​                                              |
+|----------|------------|------------------------------------|--------------------------------------------------------------|
+| `* * *`  | user       | add a new contact                  |                                                              |
+| `* * *`  | user       | delete a contact                   | remove contacts that I no longer need                        |
+| `* * *`  | user       | edit a contact's name              | modify a contact without removing associated alias and games |
+| `* * *`  | user       | display all contacts               |                                                              |
+| `* *`    | user       | add an alias to a contact          | keep track of alternate usernames used by the contact        |
+| `* *`    | user       | delete an alias from a contact     | remove aliases that the contact is no longer using           |
+| `* *`    | user       | add a game that the contact plays  | keep track of which games the contact plays                  |  
+| `* *`    | user       | delete a game that a contact plays | remove games that the contact no longer plays                | 
+| `*`      | new user   | see usage instructions             | refer to command syntax when I forget how to use the app     | \
 
 *{More to be added}*
 
 ### Use cases
 
-(For all use cases below, the **System** is the `AddressBook` and the **Actor** is the `user`, unless specified otherwise)
+(For all use cases below, the **System** is `Harmony` and the **Actor** is the `user`, unless specified otherwise)
 
-**Use case: Delete a person**
+**Use case: UC1 - Add a contact**
 
 **MSS**
 
-1.  User requests to list persons
-2.  AddressBook shows a list of persons
-3.  User requests to delete a specific person in the list
-4.  AddressBook deletes the person
+1.  User requests to add a contact.
+2.  System adds contact to User Contact list.
+3.  System displays updated Contact list.
 
     Use case ends.
 
 **Extensions**
 
-* 2a. The list is empty.
+* 1a. Contact already exists.
+  
+    * 1a1. System displays error message indicating duplicate Contact name.
+  
+      Use case ends.
 
-  Use case ends.
 
-* 3a. The given index is invalid.
+**Use Case: UC2 - Delete contact**
 
-    * 3a1. AddressBook shows an error message.
+**Precondition** 
+* The list is not empty.
 
-      Use case resumes at step 2.
+**MSS**
+1.  User requests to delete a specific contact by name.
+2.  System identifies the matching contact.
+3.  System removes the contact and its associated aliases and games.
+4.  System confirms deletion.
+    
+    Use case ends.
+
+**Extensions**
+
+* 2a. No contact is found with matching name.
+  * 2a1. System informs user that no matching user is found.
+  
+    Use case ends.
+
+**Use case: UC3 -  Add an alias**
+
+**MSS**
+1. User request to add an alias to a contact by specifying the name and new alias to be added.
+2. System identifies the matching contact.
+3. System add new alias to the contact.
+4. System confirms changes made.
+
+   Use case ends.
+
+**Extensions**
+
+* 1a. System detects errors in the entered field..
+  * 1a1. System notify user of the errors in the invalid entry.
+  * 1a2. User re-enter the field.
+
+     Steps 1a1-1a2 are repeated until the data entered are correct.
+  
+     Use case resumes from step 2.
+  
+
+* 1b. Contact not in database.
+  * 1b1. System notify user of the invalid contact.
+  
+    Use case ends.
+
+**Use Case: UC4 - Edit contact’s name**
+
+**Precondition**
+* Contact exists in user’s address book.
+
+**MSS**
+1. User requests to edit contact name.
+2. System shows the requested contact’s detail.
+3. User enters new name.
+4. System outputs contact updated message.
+
+**Extensions**
+* 1a. User tries to edit a non-existent contact.
+  * 1a1. System outputs: Contact does not exist.
+
+    Use case ends.
+
+* 3a. User inputs name with violations .
+  * 3a1. System outputs: invalid names message.
+  
+    Use case ends.
+
+**Use Case: UC5 - Listing all User’s contacts**
+
+**MSS**
+1. User requests to list all contacts.
+2. System displays all contacts.
+   
+   Use case ends.
+
+**Extensions**
+* 1a. User does not have any Contacts in list.
+  * 1a1. “No contacts in address book” messages pop up.
+
+    Use case ends.
+
+**Use Case: UC6 - Delete an alias**
+
+**Precondition** 
+* The contact and alias exist.
+
+**MSS**
+1. User requests to remove a specific alias from a contact.
+2. System identifies the contact and specific alias.
+3. System removes the alias from the record.
+4. System confirms the removal.
+
+   Use case ends.
+
+**Use Case: UC7 - Add a game to Contact**
+
+**Precondition**
+* Harmony is running and specified contact must already exist in the database.
+
+**MSS**
+1. User requests to add a game that a specific contact plays.
+2. System adds the game to the contact’s profile.
+3. System displays the contact’s detail panel to with the games added.
+ 
+   Use case ends.
+
+**Extensions**
+* 2a. The game is a duplicate (already exists for that specific contact)  .
+  * 2a1. System informs user that the game already exists for that contact.
+
+    Use case ends.
+
+* 2b. The game name is missing or exceeds 200 characters.
+  * 2b1. System informs the user of the invalid game field.
+
+    Use case ends.
+
+* *a. At any time, the user chooses to cancel the operation
+  * *a1. System stops the process
+  
+    Use case ends
+
+
+**Use Case: UC8 - Delete a game from Contact**
+
+**Precondition**
+* The game to be deleted exists in the User’s contact list.
+
+**MSS**
+1. User requests to remove a specific game from a contact.
+2. System removes the game from the contact.
+3. System displays the contact’s detail panel.
+
+   Use case ends.
 
 *{More to be added}*
 
 ### Non-Functional Requirements
 
-1.  Should work on any _mainstream OS_ as long as it has Java `17` or above installed.
-2.  Should be able to hold up to 1000 persons without a noticeable sluggishness in performance for typical usage.
-3.  A user with above average typing speed for regular English text (i.e. not code, not system admin commands) should be able to accomplish most of the tasks faster using commands than using the mouse.
+1.   Initial startup should take no longer than 2s.
+2.   A user with above average typing speed for regular English text (i.e. not code, not system admin commands) should be able to accomplish most of the tasks faster using commands than using the mouse.
 
 *{More to be added}*
 
 ### Glossary
 
-* **Mainstream OS**: Windows, Linux, Unix, MacOS
-* **Private contact detail**: A contact detail that is not meant to be shared with others
+* **Alias**: Alternate usernames used by the user
 
 --------------------------------------------------------------------------------------------------------------------
 
