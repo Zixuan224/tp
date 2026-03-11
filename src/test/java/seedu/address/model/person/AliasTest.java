@@ -19,7 +19,7 @@ public class AliasTest {
     }
 
     @Test
-    public void isValidAlias() {
+    public void isValidAlias_variousInputs_correctValidation() {
         // null alias
         assertThrows(NullPointerException.class, () -> Alias.isValidAlias(null));
 
@@ -29,8 +29,8 @@ public class AliasTest {
         assertFalse(Alias.isValidAlias("a".repeat(Alias.MAX_LENGTH + 1))); // too long
 
         // valid alias
-        assertTrue(Alias.isValidAlias("f0xhound"));
-        assertTrue(Alias.isValidAlias("carry me maybe"));
+        assertTrue(Alias.isValidAlias("fr1edDucky"));
+        assertTrue(Alias.isValidAlias("da biggus brain"));
         assertTrue(Alias.isValidAlias("a".repeat(Alias.MAX_LENGTH)));
         assertTrue(Alias.isValidAlias("  trimmed alias  "));
     }
@@ -43,7 +43,7 @@ public class AliasTest {
     }
 
     @Test
-    public void equals() {
+    public void equals_variousInputs_correctEquality() {
         Alias alias = new Alias("Valid Alias");
 
         // same values -> returns true
@@ -60,5 +60,8 @@ public class AliasTest {
 
         // different values -> returns false
         assertFalse(alias.equals(new Alias("Other Alias")));
+
+        // different case -> returns false (equals is case-sensitive)
+        assertFalse(alias.equals(new Alias("valid alias")));
     }
 }
