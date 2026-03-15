@@ -31,8 +31,7 @@ public class AddGameCommandTest {
         expectedGames.add(gameToAdd);
 
         Person editedPerson = new Person(
-                firstPerson.getName(), firstPerson.getPhone(), firstPerson.getEmail(),
-                firstPerson.getAddress(), firstPerson.getTags(), expectedGames);
+                firstPerson.getName(), firstPerson.getTags(), expectedGames);
 
         AddGameCommand addGameCommand = new AddGameCommand(firstPerson.getName(), gameToAdd);
 

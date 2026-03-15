@@ -20,7 +20,8 @@ public class AliasCommandParserTest {
     // Tests for add alias command
     @Test
     public void parse_addAliasValidInput_success() {
-        AddAliasCommand expected = new AddAliasCommand(new Name("Benjamin"), new Game("Valorant"), new Alias("Benjumpin"));
+        AddAliasCommand expected = new AddAliasCommand(
+                new Name("Benjamin"), new Game("Valorant"), new Alias("Benjumpin"));
         assertParseSuccess(parser, "add n/Benjamin al/Benjumpin", expected);
     }
 
@@ -51,7 +52,8 @@ public class AliasCommandParserTest {
     // Tests for delete alias command
     @Test
     public void parse_deleteAliasValidInput_success() {
-        DeleteAliasCommand expected = new DeleteAliasCommand(new Name("Benjamin"), new Game("Valorant"), new Alias("Benjumpin"));
+        DeleteAliasCommand expected = new DeleteAliasCommand(
+                new Name("Benjamin"), new Game("Valorant"), new Alias("Benjumpin"));
         assertParseSuccess(parser, "delete n/Benjamin al/Benjumpin", expected);
     }
 
