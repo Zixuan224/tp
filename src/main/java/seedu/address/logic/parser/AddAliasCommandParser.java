@@ -9,9 +9,9 @@ import java.util.stream.Stream;
 
 import seedu.address.logic.commands.AddAliasCommand;
 import seedu.address.logic.parser.exceptions.ParseException;
+import seedu.address.model.game.Game;
 import seedu.address.model.person.Alias;
 import seedu.address.model.person.Name;
-import seedu.address.model.game.Game;
 
 /**
  * Parses input arguments and creates a new AddAliasCommand object.

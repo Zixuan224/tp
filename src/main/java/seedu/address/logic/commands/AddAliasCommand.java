@@ -24,7 +24,8 @@ public class AddAliasCommand extends Command {
 
     public static final String COMMAND_WORD = "alias add";
 
-    public static final String MESSAGE_USAGE = COMMAND_WORD + ": Adds an alias to a game of an existing person in Harmony. "
+    public static final String MESSAGE_USAGE = COMMAND_WORD
+            + ": Adds an alias to a game of an existing person in Harmony. "
             + "Parameters: "
             + PREFIX_NAME + "NAME "
             + PREFIX_GAME + "GAME "

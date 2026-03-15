@@ -4,7 +4,6 @@ import static java.util.Objects.requireNonNull;
 
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Optional;
 import java.util.Set;
 
 import seedu.address.commons.core.index.Index;
@@ -93,6 +92,9 @@ public class ParserUtil {
         return tagSet;
     }
 
+    /**
+     * Parses {@code String gameName} into a {@code Game}.
+     */
     public static Game parseGame(String gameName) throws ParseException {
         requireNonNull(gameName);
         String trimmedGameName = gameName.trim();

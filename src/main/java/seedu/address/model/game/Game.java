@@ -35,6 +35,12 @@ public class Game {
         this.gameName = trimmedName;
     }
 
+    /**
+     * Constructs a {@code Game}.
+     *
+     * @param gameName A valid game name.
+     * @param aliases list of aliases that belong to gameName.
+     */
     public Game(String gameName, Set<Alias> aliases) {
         requireNonNull(gameName);
         requireNonNull(aliases);

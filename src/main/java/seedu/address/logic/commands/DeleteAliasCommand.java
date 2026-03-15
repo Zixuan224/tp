@@ -2,8 +2,8 @@ package seedu.address.logic.commands;
 
 import static java.util.Objects.requireNonNull;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_ALIAS;
-import static seedu.address.logic.parser.CliSyntax.PREFIX_NAME;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_GAME;
+import static seedu.address.logic.parser.CliSyntax.PREFIX_NAME;
 
 import java.util.HashSet;
 import java.util.Optional;
@@ -24,7 +24,8 @@ public class DeleteAliasCommand extends Command {
 
     public static final String COMMAND_WORD = "alias delete";
 
-    public static final String MESSAGE_USAGE = COMMAND_WORD + ": Deletes an alias from a game of an existing person in Harmony. "
+    public static final String MESSAGE_USAGE = COMMAND_WORD
+            + ": Deletes an alias from a game of an existing person in Harmony. "
             + "Parameters: "
             + PREFIX_NAME + "NAME "
             + PREFIX_GAME + "GAME "
