@@ -106,7 +106,7 @@ public class AddressBookParserTest {
     @Test
     public void parseCommand_aliasAdd() throws Exception {
         AddAliasCommand command = (AddAliasCommand) parser.parseCommand(
-                "alias add n/Benjamin al/Benjumpin");
+                "alias add n/Benjamin g/Valorant al/Benjumpin");
         assertEquals(new AddAliasCommand(new Name("Benjamin"), new Game("Valorant"), new Alias("Benjumpin")), command);
     }
 }
