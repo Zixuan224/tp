@@ -61,7 +61,7 @@ public class AddAliasCommand extends Command {
         requireNonNull(model);
 
         Optional<Person> personOptional = model.getFilteredPersonList().stream()
-                .filter(person -> person.getName().equals(targetName))
+                .filter(person -> person.getName().fullName.equalsIgnoreCase(targetName.fullName))
                 .findFirst();
 
         if (personOptional.isEmpty()) {
