@@ -25,14 +25,15 @@ public class DeleteAliasCommandTest {
         Alias alias = new Alias("Benjumpin");
 
         // Setup: add game and alias
-        new AddGameCommand(firstPerson.getName(), game).execute(model);
-        new AddAliasCommand(firstPerson.getName(), game, alias).execute(model);
+        new AddGameCommand(null, firstPerson.getName(), game).execute(model);
+        new AddAliasCommand(null, firstPerson.getName(), game, alias).execute(model);
 
-        DeleteAliasCommand deleteAliasCommand = new DeleteAliasCommand(firstPerson.getName(), game, alias);
+        DeleteAliasCommand deleteAliasCommand =
+                new DeleteAliasCommand(null, firstPerson.getName(), game, alias);
 
         // Expected model has the game but without the alias (same as after only adding the game)
         Model expectedModel = new ModelManager(getTypicalAddressBook(), new UserPrefs());
-        new AddGameCommand(firstPerson.getName(), game).execute(expectedModel);
+        new AddGameCommand(null, firstPerson.getName(), game).execute(expectedModel);
 
         String expectedMessage = String.format(DeleteAliasCommand.MESSAGE_SUCCESS,
                 firstPerson.getName(), game.gameName, alias);
@@ -46,9 +47,10 @@ public class DeleteAliasCommandTest {
         Game game = new Game("Valorant");
         Alias alias = new Alias("NonExistentAlias");
 
-        new AddGameCommand(firstPerson.getName(), game).execute(model);
+        new AddGameCommand(null, firstPerson.getName(), game).execute(model);
 
-        DeleteAliasCommand deleteAliasCommand = new DeleteAliasCommand(firstPerson.getName(), game, alias);
+        DeleteAliasCommand deleteAliasCommand =
+                new DeleteAliasCommand(null, firstPerson.getName(), game, alias);
         assertCommandFailure(deleteAliasCommand, model, DeleteAliasCommand.MESSAGE_ALIAS_NOT_FOUND);
     }
 
@@ -58,7 +60,8 @@ public class DeleteAliasCommandTest {
         Game game = new Game("NonExistentGame");
         Alias alias = new Alias("SomeAlias");
 
-        DeleteAliasCommand deleteAliasCommand = new DeleteAliasCommand(firstPerson.getName(), game, alias);
+        DeleteAliasCommand deleteAliasCommand =
+                new DeleteAliasCommand(null, firstPerson.getName(), game, alias);
         assertCommandFailure(deleteAliasCommand, model, DeleteAliasCommand.MESSAGE_GAME_NOT_FOUND);
     }
 
@@ -68,7 +71,7 @@ public class DeleteAliasCommandTest {
         Game game = new Game("Valorant");
         Alias alias = new Alias("SomeAlias");
 
-        DeleteAliasCommand deleteAliasCommand = new DeleteAliasCommand(notInModelName, game, alias);
+        DeleteAliasCommand deleteAliasCommand = new DeleteAliasCommand(null, notInModelName, game, alias);
         assertCommandFailure(deleteAliasCommand, model, DeleteAliasCommand.MESSAGE_PERSON_NOT_FOUND);
     }
 
@@ -79,15 +82,15 @@ public class DeleteAliasCommandTest {
         Alias alias = new Alias("Benjumpin");
 
         // Setup: add game and alias using exact name
-        new AddGameCommand(firstPerson.getName(), game).execute(model);
-        new AddAliasCommand(firstPerson.getName(), game, alias).execute(model);
+        new AddGameCommand(null, firstPerson.getName(), game).execute(model);
+        new AddAliasCommand(null, firstPerson.getName(), game, alias).execute(model);
 
         // Use all-lowercase version of the stored name
         Name lowerCaseName = new Name(firstPerson.getName().fullName.toLowerCase());
-        DeleteAliasCommand deleteAliasCommand = new DeleteAliasCommand(lowerCaseName, game, alias);
+        DeleteAliasCommand deleteAliasCommand = new DeleteAliasCommand(null, lowerCaseName, game, alias);
 
         Model expectedModel = new ModelManager(getTypicalAddressBook(), new UserPrefs());
-        new AddGameCommand(firstPerson.getName(), game).execute(expectedModel);
+        new AddGameCommand(null, firstPerson.getName(), game).execute(expectedModel);
 
         String expectedMessage = String.format(DeleteAliasCommand.MESSAGE_SUCCESS,
                 firstPerson.getName(), game.gameName, alias);

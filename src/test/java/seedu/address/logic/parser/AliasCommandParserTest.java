@@ -4,6 +4,7 @@ import static seedu.address.logic.Messages.MESSAGE_INVALID_COMMAND_FORMAT;
 import static seedu.address.logic.Messages.MESSAGE_UNKNOWN_COMMAND;
 import static seedu.address.logic.parser.CommandParserTestUtil.assertParseFailure;
 import static seedu.address.logic.parser.CommandParserTestUtil.assertParseSuccess;
+import static seedu.address.testutil.TypicalIndexes.INDEX_FIRST_PERSON;
 
 import org.junit.jupiter.api.Test;
 
@@ -19,10 +20,17 @@ public class AliasCommandParserTest {
 
     // Tests for add alias command
     @Test
-    public void parse_addAliasValidInput_success() {
-        AddAliasCommand expected = new AddAliasCommand(new Name("Benjamin"),
+    public void parse_addAliasValidInputByName_success() {
+        AddAliasCommand expected = new AddAliasCommand(null, new Name("Benjamin"),
                 new Game("Valorant"), new Alias("Benjumpin"));
         assertParseSuccess(parser, "add n/Benjamin g/Valorant al/Benjumpin", expected);
+    }
+
+    @Test
+    public void parse_addAliasValidInputByIndex_success() {
+        AddAliasCommand expected = new AddAliasCommand(INDEX_FIRST_PERSON, null,
+                new Game("Valorant"), new Alias("Benjumpin"));
+        assertParseSuccess(parser, "add 1 g/Valorant al/Benjumpin", expected);
     }
 
     @Test
@@ -51,10 +59,17 @@ public class AliasCommandParserTest {
 
     // Tests for delete alias command
     @Test
-    public void parse_deleteAliasValidInput_success() {
-        DeleteAliasCommand expected = new DeleteAliasCommand(new Name("Benjamin"),
+    public void parse_deleteAliasValidInputByName_success() {
+        DeleteAliasCommand expected = new DeleteAliasCommand(null, new Name("Benjamin"),
                 new Game("Valorant"), new Alias("Benjumpin"));
         assertParseSuccess(parser, "delete n/Benjamin g/Valorant al/Benjumpin", expected);
+    }
+
+    @Test
+    public void parse_deleteAliasValidInputByIndex_success() {
+        DeleteAliasCommand expected = new DeleteAliasCommand(INDEX_FIRST_PERSON, null,
+                new Game("Valorant"), new Alias("Benjumpin"));
+        assertParseSuccess(parser, "delete 1 g/Valorant al/Benjumpin", expected);
     }
 
     @Test
