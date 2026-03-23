@@ -244,6 +244,55 @@ public class LogicManagerTest {
         assertEquals(expectedModel, model);
     }
 
+    @Test
+    public void execute_deleteConfirmYes_storageThrowsIoException_throwsCommandException() throws Exception {
+        Person person = new PersonBuilder(AMY).withTags().build();
+
+        // Inject a storage that always throws on save
+        JsonAddressBookStorage failingStorage = new JsonAddressBookStorage(
+                temporaryFolder.resolve("failing.json")) {
+            @Override
+            public void saveAddressBook(ReadOnlyAddressBook addressBook, Path filePath)
+                    throws IOException {
+                throw DUMMY_IO_EXCEPTION;
+            }
+        };
+        StorageManager storage = new StorageManager(failingStorage,
+                new JsonUserPrefsStorage(temporaryFolder.resolve("prefs.json")));
+        logic = new LogicManager(model, storage);
+
+        model.addPerson(person);
+        logic.execute("contact delete n/" + person.getName());
+
+        assertThrows(CommandException.class,
+                String.format(LogicManager.FILE_OPS_ERROR_FORMAT, DUMMY_IO_EXCEPTION.getMessage()),
+                () -> logic.execute("y"));
+    }
+
+    @Test
+    public void execute_deleteConfirmYes_storageThrowsAdException_throwsCommandException() throws Exception {
+        Person person = new PersonBuilder(AMY).withTags().build();
+
+        JsonAddressBookStorage failingStorage = new JsonAddressBookStorage(
+                temporaryFolder.resolve("failing2.json")) {
+            @Override
+            public void saveAddressBook(ReadOnlyAddressBook addressBook, Path filePath)
+                    throws IOException {
+                throw DUMMY_AD_EXCEPTION;
+            }
+        };
+        StorageManager storage = new StorageManager(failingStorage,
+                new JsonUserPrefsStorage(temporaryFolder.resolve("prefs2.json")));
+        logic = new LogicManager(model, storage);
+
+        model.addPerson(person);
+        logic.execute("contact delete n/" + person.getName());
+
+        assertThrows(CommandException.class,
+                String.format(LogicManager.FILE_OPS_PERMISSION_ERROR_FORMAT, DUMMY_AD_EXCEPTION.getMessage()),
+                () -> logic.execute("y"));
+    }
+
     /**
      * Tests the Logic component's handling of an {@code IOException} thrown by the Storage component.
      *
