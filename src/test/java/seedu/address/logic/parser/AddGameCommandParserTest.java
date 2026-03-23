@@ -21,14 +21,14 @@ public class AddGameCommandParserTest {
     public void parse_validArgsByIndex_returnsAddGameCommand() {
         // Simulates: game add 1 g/Minecraft
         assertParseSuccess(parser, " 1 g/Minecraft",
-                new AddGameCommand(INDEX_FIRST_PERSON, null, validGame));
+                new AddGameCommand(INDEX_FIRST_PERSON, null, validGame, false));
     }
 
     @Test
     public void parse_validArgsByName_returnsAddGameCommand() {
         // Simulates: game add n/Zi Xuan g/Minecraft
         assertParseSuccess(parser, " n/Zi Xuan g/Minecraft",
-                new AddGameCommand(null, validName, validGame));
+                new AddGameCommand(null, validName, validGame, false));
     }
 
     @Test

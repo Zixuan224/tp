@@ -27,15 +27,15 @@ public class DeleteAliasCommandTest {
         Alias alias = new Alias("Benjumpin");
 
         // Setup: add game and alias
-        new AddGameCommand(null, firstPerson.getName(), game).execute(model);
-        new AddAliasCommand(null, firstPerson.getName(), game, alias).execute(model);
+        new AddGameCommand(null, firstPerson.getName(), game, false).execute(model);
+        new AddAliasCommand(null, firstPerson.getName(), game, alias, false).execute(model);
 
         DeleteAliasCommand deleteAliasCommand =
-                new DeleteAliasCommand(null, firstPerson.getName(), game, alias);
+                new DeleteAliasCommand(null, firstPerson.getName(), game, alias, false);
 
         // Expected model has the game but without the alias (same as after only adding the game)
         Model expectedModel = new ModelManager(getTypicalAddressBook(), new UserPrefs());
-        new AddGameCommand(null, firstPerson.getName(), game).execute(expectedModel);
+        new AddGameCommand(null, firstPerson.getName(), game, false).execute(expectedModel);
 
         String expectedMessage = String.format(DeleteAliasCommand.MESSAGE_SUCCESS,
                 firstPerson.getName(), game.gameName, alias);
@@ -49,10 +49,10 @@ public class DeleteAliasCommandTest {
         Game game = new Game("Valorant");
         Alias alias = new Alias("NonExistentAlias");
 
-        new AddGameCommand(null, firstPerson.getName(), game).execute(model);
+        new AddGameCommand(null, firstPerson.getName(), game, false).execute(model);
 
         DeleteAliasCommand deleteAliasCommand =
-                new DeleteAliasCommand(null, firstPerson.getName(), game, alias);
+                new DeleteAliasCommand(null, firstPerson.getName(), game, alias, false);
         assertCommandFailure(deleteAliasCommand, model, DeleteAliasCommand.MESSAGE_ALIAS_NOT_FOUND);
     }
 
@@ -63,7 +63,7 @@ public class DeleteAliasCommandTest {
         Alias alias = new Alias("SomeAlias");
 
         DeleteAliasCommand deleteAliasCommand =
-                new DeleteAliasCommand(null, firstPerson.getName(), game, alias);
+                new DeleteAliasCommand(null, firstPerson.getName(), game, alias, false);
         assertCommandFailure(deleteAliasCommand, model, DeleteAliasCommand.MESSAGE_GAME_NOT_FOUND);
     }
 
@@ -73,7 +73,7 @@ public class DeleteAliasCommandTest {
         Game game = new Game("Valorant");
         Alias alias = new Alias("SomeAlias");
 
-        DeleteAliasCommand deleteAliasCommand = new DeleteAliasCommand(null, notInModelName, game, alias);
+        DeleteAliasCommand deleteAliasCommand = new DeleteAliasCommand(null, notInModelName, game, alias, false);
         assertCommandFailure(deleteAliasCommand, model, DeleteAliasCommand.MESSAGE_PERSON_NOT_FOUND);
     }
 
@@ -84,15 +84,15 @@ public class DeleteAliasCommandTest {
         Alias alias = new Alias("Benjumpin");
 
         // Setup: add game and alias using exact name
-        new AddGameCommand(null, firstPerson.getName(), game).execute(model);
-        new AddAliasCommand(null, firstPerson.getName(), game, alias).execute(model);
+        new AddGameCommand(null, firstPerson.getName(), game, false).execute(model);
+        new AddAliasCommand(null, firstPerson.getName(), game, alias, false).execute(model);
 
         // Use all-lowercase version of the stored name
         Name lowerCaseName = new Name(firstPerson.getName().fullName.toLowerCase());
-        DeleteAliasCommand deleteAliasCommand = new DeleteAliasCommand(null, lowerCaseName, game, alias);
+        DeleteAliasCommand deleteAliasCommand = new DeleteAliasCommand(null, lowerCaseName, game, alias, false);
 
         Model expectedModel = new ModelManager(getTypicalAddressBook(), new UserPrefs());
-        new AddGameCommand(null, firstPerson.getName(), game).execute(expectedModel);
+        new AddGameCommand(null, firstPerson.getName(), game, false).execute(expectedModel);
 
         String expectedMessage = String.format(DeleteAliasCommand.MESSAGE_SUCCESS,
                 firstPerson.getName(), game.gameName, alias);
@@ -107,15 +107,15 @@ public class DeleteAliasCommandTest {
         Alias alias = new Alias("Benjumpin");
 
         // Setup: add game and alias first
-        new AddGameCommand(INDEX_FIRST_PERSON, null, game).execute(model);
-        new AddAliasCommand(INDEX_FIRST_PERSON, null, game, alias).execute(model);
+        new AddGameCommand(INDEX_FIRST_PERSON, null, game, false).execute(model);
+        new AddAliasCommand(INDEX_FIRST_PERSON, null, game, alias, false).execute(model);
 
         // Test deleting alias by Index (Name is null)
         DeleteAliasCommand deleteAliasCommand =
-                new DeleteAliasCommand(INDEX_FIRST_PERSON, null, game, alias);
+                new DeleteAliasCommand(INDEX_FIRST_PERSON, null, game, alias, false);
 
         Model expectedModel = new ModelManager(getTypicalAddressBook(), new UserPrefs());
-        new AddGameCommand(INDEX_FIRST_PERSON, null, game).execute(expectedModel);
+        new AddGameCommand(INDEX_FIRST_PERSON, null, game, false).execute(expectedModel);
 
         String expectedMessage = String.format(DeleteAliasCommand.MESSAGE_SUCCESS,
                 firstPerson.getName(), game.gameName, alias);
@@ -129,7 +129,7 @@ public class DeleteAliasCommandTest {
         Game game = new Game("Valorant");
         Alias alias = new Alias("SomeAlias");
 
-        DeleteAliasCommand deleteAliasCommand = new DeleteAliasCommand(outOfBoundIndex, null, game, alias);
+        DeleteAliasCommand deleteAliasCommand = new DeleteAliasCommand(outOfBoundIndex, null, game, alias, false);
 
         assertCommandFailure(deleteAliasCommand,
                 model,
@@ -145,15 +145,15 @@ public class DeleteAliasCommandTest {
         Name nameA = new Name("Alice");
 
         DeleteAliasCommand deleteAliasByIndex =
-                new DeleteAliasCommand(INDEX_FIRST_PERSON, null, gameA, aliasA);
-        DeleteAliasCommand deleteAliasByName = new DeleteAliasCommand(null, nameA, gameA, aliasA);
+                new DeleteAliasCommand(INDEX_FIRST_PERSON, null, gameA, aliasA, false);
+        DeleteAliasCommand deleteAliasByName = new DeleteAliasCommand(null, nameA, gameA, aliasA, false);
 
         // same object -> returns true
         org.junit.jupiter.api.Assertions.assertTrue(deleteAliasByIndex.equals(deleteAliasByIndex));
 
         // same values -> returns true
         DeleteAliasCommand deleteAliasByIndexCopy =
-                new DeleteAliasCommand(INDEX_FIRST_PERSON, null, gameA, aliasA);
+                new DeleteAliasCommand(INDEX_FIRST_PERSON, null, gameA, aliasA, false);
         org.junit.jupiter.api.Assertions.assertTrue(deleteAliasByIndex.equals(deleteAliasByIndexCopy));
 
         // different types -> returns false
@@ -166,12 +166,12 @@ public class DeleteAliasCommandTest {
         org.junit.jupiter.api.Assertions.assertFalse(deleteAliasByIndex.equals(deleteAliasByName));
 
         // different game -> returns false
-        DeleteAliasCommand deleteDiffGame = new DeleteAliasCommand(INDEX_FIRST_PERSON, null, gameB, aliasA);
+        DeleteAliasCommand deleteDiffGame = new DeleteAliasCommand(INDEX_FIRST_PERSON, null, gameB, aliasA, false);
         org.junit.jupiter.api.Assertions.assertFalse(deleteAliasByIndex.equals(deleteDiffGame));
 
         // different alias -> returns false
         DeleteAliasCommand deleteDiffAlias =
-                new DeleteAliasCommand(INDEX_FIRST_PERSON, null, gameA, aliasB);
+                new DeleteAliasCommand(INDEX_FIRST_PERSON, null, gameA, aliasB, false);
         org.junit.jupiter.api.Assertions.assertFalse(deleteAliasByIndex.equals(deleteDiffAlias));
     }
 }

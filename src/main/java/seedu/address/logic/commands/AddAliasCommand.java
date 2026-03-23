@@ -48,44 +48,44 @@ public class AddAliasCommand extends Command {
     private final Name targetName;
     private final Game targetGame;
     private final Alias aliasToAdd;
+    private final boolean useUserProfile;
 
     /**
-     * Creates a AddAliasCommand to add {@code alias} from the person with {@code targetName}.
+     * Creates a AddAliasCommand to add {@code alias} to the person.
      */
-    public AddAliasCommand(Index targetIndex, Name targetName, Game game, Alias alias) {
+    public AddAliasCommand(Index targetIndex, Name targetName, Game game, Alias alias, boolean useUserProfile) {
         requireNonNull(game);
         requireNonNull(alias);
         this.targetIndex = targetIndex;
         this.targetName = targetName;
         this.targetGame = game;
         this.aliasToAdd = alias;
+        this.useUserProfile = useUserProfile;
     }
 
     @Override
     public CommandResult execute(Model model) throws CommandException {
         requireNonNull(model);
-        List<Person> lastShownList = model.getFilteredPersonList();
-        Person personToEdit = null;
+        Person personToEdit;
 
-        // 1. Universal Find Person Block
-        if (targetIndex != null) {
-            if (targetIndex.getZeroBased() >= lastShownList.size()) {
-                throw new CommandException(Messages.MESSAGE_INVALID_PERSON_DISPLAYED_INDEX);
-            }
-            personToEdit = lastShownList.get(targetIndex.getZeroBased());
-        } else if (targetName != null) {
-            Optional<Person> personOptional = lastShownList.stream()
-                    .filter(person -> person.getName().fullName.equalsIgnoreCase(targetName.fullName))
-                    .findFirst();
-
-            if (personOptional.isEmpty()) {
+        if (useUserProfile) {
+            personToEdit = model.getUserProfile()
+                    .orElseThrow(() -> new CommandException("No user profile found."));
+        } else {
+            List<Person> lastShownList = model.getFilteredPersonList();
+            if (targetIndex != null) {
+                if (targetIndex.getZeroBased() >= lastShownList.size()) {
+                    throw new CommandException(Messages.MESSAGE_INVALID_PERSON_DISPLAYED_INDEX);
+                }
+                personToEdit = lastShownList.get(targetIndex.getZeroBased());
+            } else if (targetName != null) {
+                personToEdit = lastShownList.stream()
+                        .filter(person -> person.getName().fullName.equalsIgnoreCase(targetName.fullName))
+                        .findFirst()
+                        .orElseThrow(() -> new CommandException(MESSAGE_PERSON_NOT_FOUND));
+            } else {
                 throw new CommandException(MESSAGE_PERSON_NOT_FOUND);
             }
-            personToEdit = personOptional.get();
-        }
-
-        if (personToEdit == null) {
-            throw new CommandException(MESSAGE_PERSON_NOT_FOUND);
         }
 
         // 2. Find the game
@@ -116,7 +116,8 @@ public class AddAliasCommand extends Command {
         Person editedPerson = new Person(
                 personToEdit.getName(),
                 personToEdit.getTags(),
-                updatedGames
+                updatedGames,
+                personToEdit.isUserProfile()
         );
 
         model.setPerson(personToEdit, editedPerson);
@@ -148,7 +149,8 @@ public class AddAliasCommand extends Command {
 
         return isSameIndex && isSameName
                 && targetGame.equals(e.targetGame)
-                && aliasToAdd.equals(e.aliasToAdd);
+                && aliasToAdd.equals(e.aliasToAdd)
+                && useUserProfile == e.useUserProfile;
     }
 
     @Override

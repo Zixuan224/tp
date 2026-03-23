@@ -23,14 +23,14 @@ public class AliasCommandParserTest {
     @Test
     public void parse_addAliasValidInputByName_success() {
         AddAliasCommand expected = new AddAliasCommand(null, new Name("Benjamin"),
-                new Game("Valorant"), new Alias("Benjumpin"));
+                new Game("Valorant"), new Alias("Benjumpin"), false);
         assertParseSuccess(parser, "add n/Benjamin g/Valorant al/Benjumpin", expected);
     }
 
     @Test
     public void parse_addAliasValidInputByIndex_success() {
         AddAliasCommand expected = new AddAliasCommand(INDEX_FIRST_PERSON, null,
-                new Game("Valorant"), new Alias("Benjumpin"));
+                new Game("Valorant"), new Alias("Benjumpin"), false);
         assertParseSuccess(parser, "add 1 g/Valorant al/Benjumpin", expected);
     }
 
@@ -58,14 +58,14 @@ public class AliasCommandParserTest {
     @Test
     public void parse_deleteAliasValidInputByName_success() {
         DeleteAliasCommand expected = new DeleteAliasCommand(null, new Name("Benjamin"),
-                new Game("Valorant"), new Alias("Benjumpin"));
+                new Game("Valorant"), new Alias("Benjumpin"), false);
         assertParseSuccess(parser, "delete n/Benjamin g/Valorant al/Benjumpin", expected);
     }
 
     @Test
     public void parse_deleteAliasValidInputByIndex_success() {
         DeleteAliasCommand expected = new DeleteAliasCommand(INDEX_FIRST_PERSON, null,
-                new Game("Valorant"), new Alias("Benjumpin"));
+                new Game("Valorant"), new Alias("Benjumpin"), false);
         assertParseSuccess(parser, "delete 1 g/Valorant al/Benjumpin", expected);
     }
 

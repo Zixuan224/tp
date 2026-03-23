@@ -25,9 +25,9 @@ public class ListGameCommandTest {
         Game gameToAdd = new Game("Minecraft");
 
         // Setup: Add one game
-        new AddGameCommand(null, firstPerson.getName(), gameToAdd).execute(model);
+        new AddGameCommand(null, firstPerson.getName(), gameToAdd, false).execute(model);
 
-        ListGameCommand listGameCommand = new ListGameCommand(null, firstPerson.getName());
+        ListGameCommand listGameCommand = new ListGameCommand(null, firstPerson.getName(), false);
 
         // Expected model doesn't change during a list command
         Model expectedModel = new ModelManager(model.getAddressBook(), new UserPrefs());
@@ -41,7 +41,7 @@ public class ListGameCommandTest {
     @Test
     public void execute_noGames_success() {
         Person firstPerson = model.getFilteredPersonList().get(0);
-        ListGameCommand listGameCommand = new ListGameCommand(null, firstPerson.getName());
+        ListGameCommand listGameCommand = new ListGameCommand(null, firstPerson.getName(), false);
 
         Model expectedModel = new ModelManager(model.getAddressBook(), new UserPrefs());
         String expectedMessage = String.format(ListGameCommand.MESSAGE_NO_GAMES, firstPerson.getName().fullName);
@@ -52,7 +52,7 @@ public class ListGameCommandTest {
     @Test
     public void execute_contactNotFoundByName_failure() {
         Name notInModelName = new Name("Unknown Person Name");
-        ListGameCommand listGameCommand = new ListGameCommand(null, notInModelName);
+        ListGameCommand listGameCommand = new ListGameCommand(null, notInModelName, false);
 
         assertCommandFailure(listGameCommand, model, ListGameCommand.MESSAGE_CONTACT_NOT_FOUND);
     }
@@ -65,10 +65,10 @@ public class ListGameCommandTest {
         Game gameToAdd = new Game("Minecraft");
 
         // Setup: Add one game
-        new AddGameCommand(INDEX_FIRST_PERSON, null, gameToAdd).execute(model);
+        new AddGameCommand(INDEX_FIRST_PERSON, null, gameToAdd, false).execute(model);
 
         // Test listing by Index (Name is null)
-        ListGameCommand listGameCommand = new ListGameCommand(INDEX_FIRST_PERSON, null);
+        ListGameCommand listGameCommand = new ListGameCommand(INDEX_FIRST_PERSON, null, false);
 
         Model expectedModel = new ModelManager(model.getAddressBook(), new UserPrefs());
         String expectedMessage = String.format(ListGameCommand.MESSAGE_SUCCESS,
@@ -82,7 +82,7 @@ public class ListGameCommandTest {
     public void execute_invalidIndex_failure() {
         Index outOfBoundIndex = Index.fromOneBased(model.getFilteredPersonList().size() + 1);
 
-        ListGameCommand listGameCommand = new ListGameCommand(outOfBoundIndex, null);
+        ListGameCommand listGameCommand = new ListGameCommand(outOfBoundIndex, null, false);
 
         assertCommandFailure(listGameCommand, model,
                 seedu.address.logic.Messages.MESSAGE_INVALID_PERSON_DISPLAYED_INDEX);
@@ -94,14 +94,14 @@ public class ListGameCommandTest {
         Name nameB = new Name("Bob");
         Index secondIndex = Index.fromOneBased(2);
 
-        ListGameCommand listByIndex = new ListGameCommand(INDEX_FIRST_PERSON, null);
-        ListGameCommand listByName = new ListGameCommand(null, nameA);
+        ListGameCommand listByIndex = new ListGameCommand(INDEX_FIRST_PERSON, null, false);
+        ListGameCommand listByName = new ListGameCommand(null, nameA, false);
 
         // same object -> returns true
         org.junit.jupiter.api.Assertions.assertTrue(listByIndex.equals(listByIndex));
 
         // same values -> returns true
-        ListGameCommand listByIndexCopy = new ListGameCommand(INDEX_FIRST_PERSON, null);
+        ListGameCommand listByIndexCopy = new ListGameCommand(INDEX_FIRST_PERSON, null, false);
         org.junit.jupiter.api.Assertions.assertTrue(listByIndex.equals(listByIndexCopy));
 
         // different types -> returns false
@@ -114,11 +114,11 @@ public class ListGameCommandTest {
         org.junit.jupiter.api.Assertions.assertFalse(listByIndex.equals(listByName));
 
         // different index -> returns false
-        ListGameCommand listByDiffIndex = new ListGameCommand(secondIndex, null);
+        ListGameCommand listByDiffIndex = new ListGameCommand(secondIndex, null, false);
         org.junit.jupiter.api.Assertions.assertFalse(listByIndex.equals(listByDiffIndex));
 
         // different name -> returns false
-        ListGameCommand listByDiffName = new ListGameCommand(null, nameB);
+        ListGameCommand listByDiffName = new ListGameCommand(null, nameB, false);
         org.junit.jupiter.api.Assertions.assertFalse(listByName.equals(listByDiffName));
     }
 }

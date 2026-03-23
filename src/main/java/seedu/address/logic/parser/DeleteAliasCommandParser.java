@@ -37,22 +37,23 @@ public class DeleteAliasCommandParser implements Parser<DeleteAliasCommand> {
 
         argMultimap.verifyNoDuplicatePrefixesFor(PREFIX_NAME, PREFIX_GAME, PREFIX_ALIAS);
 
-        String preamble = argMultimap.getPreamble();
+        String preamble = argMultimap.getPreamble().trim();
+        boolean useUserProfile = preamble.equals("0");
         boolean hasNamePrefix = argMultimap.getValue(PREFIX_NAME).isPresent();
 
-        // 2. Validate mutually exclusive index/name using our helper
-        ParserUtil.verifyIndexOrNamePresent(preamble, hasNamePrefix, DeleteAliasCommand.MESSAGE_USAGE);
+        if (!useUserProfile) {
+            ParserUtil.verifyIndexOrNamePresent(preamble, hasNamePrefix, DeleteAliasCommand.MESSAGE_USAGE);
+        } else if (hasNamePrefix) {
+            throw new ParseException("Please provide either an index OR a name, not both.");
+        }
 
-        // 3. Extract whichever target is present (the other will safely be null)
-        Index index = preamble.isEmpty() ? null : ParserUtil.parseIndex(preamble);
+        Index index = (!useUserProfile && !preamble.isEmpty()) ? ParserUtil.parseIndex(preamble) : null;
         Name name = hasNamePrefix ? ParserUtil.parseName(argMultimap.getValue(PREFIX_NAME).get()) : null;
 
-        // 4. Parse the game and alias
         Game game = ParserUtil.parseGame(argMultimap.getValue(PREFIX_GAME).get());
         Alias alias = ParserUtil.parseAlias(argMultimap.getValue(PREFIX_ALIAS).get());
 
-        // 5. Pass both index and name to the command
-        return new DeleteAliasCommand(index, name, game, alias);
+        return new DeleteAliasCommand(index, name, game, alias, useUserProfile);
     }
 
     /**

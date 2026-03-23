@@ -21,14 +21,14 @@ public class DeleteGameCommandParserTest {
     public void parse_validArgsByIndex_returnsDeleteGameCommand() {
         // Simulates: game delete 1 g/Minecraft
         assertParseSuccess(parser, " 1 g/Minecraft",
-                new DeleteGameCommand(INDEX_FIRST_PERSON, null, validGame));
+                new DeleteGameCommand(INDEX_FIRST_PERSON, null, validGame, false));
     }
 
     @Test
     public void parse_validArgsByName_returnsDeleteGameCommand() {
         // Simulates: game delete n/Zi Xuan g/Minecraft
         assertParseSuccess(parser, " n/Zi Xuan g/Minecraft",
-                new DeleteGameCommand(null, validName, validGame));
+                new DeleteGameCommand(null, validName, validGame, false));
     }
 
     @Test
