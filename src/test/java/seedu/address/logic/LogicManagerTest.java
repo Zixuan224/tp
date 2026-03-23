@@ -245,7 +245,7 @@ public class LogicManagerTest {
     }
 
     @Test
-    public void execute_deleteConfirmYes_storageThrowsIoException_throwsCommandException() throws Exception {
+    public void execute_deleteConfirmYes_storageIoExceptionThrown() throws Exception {
         Person person = new PersonBuilder(AMY).withTags().build();
 
         // Inject a storage that always throws on save
@@ -265,12 +265,12 @@ public class LogicManagerTest {
         logic.execute("contact delete n/" + person.getName());
 
         assertThrows(CommandException.class,
-                String.format(LogicManager.FILE_OPS_ERROR_FORMAT, DUMMY_IO_EXCEPTION.getMessage()),
-                () -> logic.execute("y"));
+                String.format(LogicManager.FILE_OPS_ERROR_FORMAT, DUMMY_IO_EXCEPTION.getMessage()), () ->
+                logic.execute("y"));
     }
 
     @Test
-    public void execute_deleteConfirmYes_storageThrowsAdException_throwsCommandException() throws Exception {
+    public void execute_deleteConfirmYes_storageAdExceptionThrown() throws Exception {
         Person person = new PersonBuilder(AMY).withTags().build();
 
         JsonAddressBookStorage failingStorage = new JsonAddressBookStorage(
@@ -289,8 +289,8 @@ public class LogicManagerTest {
         logic.execute("contact delete n/" + person.getName());
 
         assertThrows(CommandException.class,
-                String.format(LogicManager.FILE_OPS_PERMISSION_ERROR_FORMAT, DUMMY_AD_EXCEPTION.getMessage()),
-                () -> logic.execute("y"));
+                String.format(LogicManager.FILE_OPS_PERMISSION_ERROR_FORMAT, DUMMY_AD_EXCEPTION.getMessage()), () ->
+                logic.execute("y"));
     }
 
     /**
