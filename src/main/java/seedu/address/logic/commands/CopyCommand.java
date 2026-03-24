@@ -96,8 +96,9 @@ public class CopyCommand extends Command {
 
     /**
      * Saves the generated string to the user's system clipboard.
+     * Protected to allow overriding in headless unit tests.
      */
-    private void copyToClipboard(String text) {
+    protected void copyToClipboard(String text) {
         final Clipboard clipboard = Clipboard.getSystemClipboard();
         final ClipboardContent content = new ClipboardContent();
         content.putString(text);
