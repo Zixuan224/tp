@@ -14,6 +14,8 @@ import static seedu.address.testutil.TypicalIndexes.INDEX_FIRST_PERSON;
 import static seedu.address.testutil.TypicalIndexes.INDEX_SECOND_PERSON;
 import static seedu.address.testutil.TypicalPersons.getTypicalAddressBook;
 
+import java.util.HashSet;
+
 import org.junit.jupiter.api.Test;
 
 import seedu.address.commons.core.index.Index;
@@ -23,6 +25,7 @@ import seedu.address.model.AddressBook;
 import seedu.address.model.Model;
 import seedu.address.model.ModelManager;
 import seedu.address.model.UserPrefs;
+import seedu.address.model.person.Name;
 import seedu.address.model.person.Person;
 import seedu.address.testutil.EditPersonDescriptorBuilder;
 import seedu.address.testutil.PersonBuilder;
@@ -168,6 +171,30 @@ public class EditCommandTest {
 
         // different descriptor -> returns false
         assertFalse(standardCommand.equals(new EditCommand(INDEX_FIRST_PERSON, DESC_BOB)));
+    }
+
+    @Test
+    public void execute_useUserProfile_success() throws Exception {
+        Person userProfile = new Person(new Name("John Doe"), new HashSet<>(), new HashSet<>(), true);
+        AddressBook ab = new AddressBook();
+        ab.addPerson(userProfile);
+        Model profileModel = new ModelManager(ab, new UserPrefs());
+
+        EditPersonDescriptor descriptor = new EditPersonDescriptorBuilder().withName("Jane Doe").build();
+        EditCommand editCommand = new EditCommand(descriptor, true);
+
+        CommandResult result = editCommand.execute(profileModel);
+        assertEquals(String.format(EditCommand.MESSAGE_EDIT_PERSON_SUCCESS,
+                Messages.format(profileModel.getUserProfile().get())), result.getFeedbackToUser());
+    }
+
+    @Test
+    public void execute_noProfile_failure() {
+        Model emptyModel = new ModelManager(new AddressBook(), new UserPrefs());
+        EditPersonDescriptor descriptor = new EditPersonDescriptorBuilder().withName("Jane Doe").build();
+        EditCommand editCommand = new EditCommand(descriptor, true);
+
+        assertCommandFailure(editCommand, emptyModel, "No user profile found.");
     }
 
     @Test

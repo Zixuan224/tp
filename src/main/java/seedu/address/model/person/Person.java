@@ -23,19 +23,32 @@ public class Person {
     // Data fields
     private final Set<Tag> tags = new HashSet<>();
     private final Set<Game> games = new HashSet<>();
+    private final boolean isUserProfile;
+
+    /**
+     * Every field must be present and not null. isUserProfile defaults to false.
+     */
+    public Person(Name name, Set<Tag> tags, Set<Game> games) {
+        this(name, tags, games, false);
+    }
 
     /**
      * Every field must be present and not null.
      */
-    public Person(Name name, Set<Tag> tags, Set<Game> games) {
+    public Person(Name name, Set<Tag> tags, Set<Game> games, boolean isUserProfile) {
         requireAllNonNull(name, tags);
         this.name = name;
         this.tags.addAll(tags);
         this.games.addAll(games);
+        this.isUserProfile = isUserProfile;
     }
 
     public Name getName() {
         return name;
+    }
+
+    public boolean isUserProfile() {
+        return isUserProfile;
     }
 
     /**

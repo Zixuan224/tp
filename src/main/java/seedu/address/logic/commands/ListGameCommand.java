@@ -4,7 +4,6 @@ import static java.util.Objects.requireNonNull;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_NAME;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import seedu.address.commons.core.index.Index;
@@ -34,40 +33,40 @@ public class ListGameCommand extends Command {
 
     private final Index targetIndex;
     private final Name targetName;
+    private final boolean useUserProfile;
 
     /**
-     * Creates a ListGameCommand to list all games {@code targetIndex} from the person with {@code targetName}.
+     * Creates a ListGameCommand to list all games from the person at {@code targetIndex} or with {@code targetName}.
      */
-    public ListGameCommand(Index targetIndex, Name targetName) {
+    public ListGameCommand(Index targetIndex, Name targetName, boolean useUserProfile) {
         this.targetIndex = targetIndex;
         this.targetName = targetName;
+        this.useUserProfile = useUserProfile;
     }
 
     @Override
     public CommandResult execute(Model model) throws CommandException {
         requireNonNull(model);
-        List<Person> lastShownList = model.getFilteredPersonList();
-        Person personToEdit = null;
+        Person personToEdit;
 
-        // 1. Universal Find Person Block
-        if (targetIndex != null) {
-            if (targetIndex.getZeroBased() >= lastShownList.size()) {
-                throw new CommandException(Messages.MESSAGE_INVALID_PERSON_DISPLAYED_INDEX);
-            }
-            personToEdit = lastShownList.get(targetIndex.getZeroBased());
-        } else if (targetName != null) {
-            Optional<Person> personOptional = lastShownList.stream()
-                    .filter(person -> person.getName().fullName.equalsIgnoreCase(targetName.fullName))
-                    .findFirst();
-
-            if (personOptional.isEmpty()) {
+        if (useUserProfile) {
+            personToEdit = model.getUserProfile()
+                    .orElseThrow(() -> new CommandException("No user profile found."));
+        } else {
+            List<Person> lastShownList = model.getFilteredPersonList();
+            if (targetIndex != null) {
+                if (targetIndex.getZeroBased() >= lastShownList.size()) {
+                    throw new CommandException(Messages.MESSAGE_INVALID_PERSON_DISPLAYED_INDEX);
+                }
+                personToEdit = lastShownList.get(targetIndex.getZeroBased());
+            } else if (targetName != null) {
+                personToEdit = lastShownList.stream()
+                        .filter(person -> person.getName().fullName.equalsIgnoreCase(targetName.fullName))
+                        .findFirst()
+                        .orElseThrow(() -> new CommandException(MESSAGE_CONTACT_NOT_FOUND));
+            } else {
                 throw new CommandException(MESSAGE_CONTACT_NOT_FOUND);
             }
-            personToEdit = personOptional.get();
-        }
-
-        if (personToEdit == null) {
-            throw new CommandException(MESSAGE_CONTACT_NOT_FOUND);
         }
 
         // 2. Format and return the list of games
@@ -98,6 +97,6 @@ public class ListGameCommand extends Command {
         boolean isSameName = (targetName == null && e.targetName == null)
                 || (targetName != null && targetName.equals(e.targetName));
 
-        return isSameIndex && isSameName;
+        return isSameIndex && isSameName && useUserProfile == e.useUserProfile;
     }
 }
