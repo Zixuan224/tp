@@ -2,6 +2,8 @@ package seedu.address.logic.commands;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static seedu.address.logic.parser.CliSyntax.PREFIX_ALIAS;
+import static seedu.address.logic.parser.CliSyntax.PREFIX_GAME;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_NAME;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_TAG;
 import static seedu.address.testutil.Assert.assertThrows;
@@ -41,6 +43,16 @@ public class CommandTestUtil {
 
     public static final EditCommand.EditPersonDescriptor DESC_AMY;
     public static final EditCommand.EditPersonDescriptor DESC_BOB;
+
+    public static final String VALID_GAME_MINECRAFT = "Minecraft";
+    public static final String VALID_GAME_VALORANT = "Valorant";
+    public static final String VALID_ALIAS_STEVE = "Steve";
+    public static final String VALID_ALIAS_JETT = "Jett";
+
+    public static final String GAME_DESC_MINECRAFT = " " + PREFIX_GAME + VALID_GAME_MINECRAFT;
+    public static final String GAME_DESC_VALORANT = " " + PREFIX_GAME + VALID_GAME_VALORANT;
+    public static final String ALIAS_DESC_STEVE = " " + PREFIX_ALIAS + VALID_ALIAS_STEVE;
+    public static final String ALIAS_DESC_JETT = " " + PREFIX_ALIAS + VALID_ALIAS_JETT;
 
     static {
         DESC_AMY = new EditPersonDescriptorBuilder().withName(VALID_NAME_AMY)

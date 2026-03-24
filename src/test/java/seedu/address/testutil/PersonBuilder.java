@@ -6,6 +6,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import seedu.address.model.game.Game;
+import seedu.address.model.person.Alias;
 import seedu.address.model.person.Name;
 import seedu.address.model.person.Person;
 import seedu.address.model.tag.Tag;
@@ -61,6 +62,15 @@ public class PersonBuilder {
      */
     public PersonBuilder withGames(String... games) {
         this.games = Arrays.stream(games).map(Game::new).collect(Collectors.toSet());
+        return this;
+    }
+
+    /**
+     * Adds a game with associated aliases to the {@code Person} that we are building.
+     */
+    public PersonBuilder withGameAndAliases(String gameName, String... aliases) {
+        Set<Alias> aliasSet = Arrays.stream(aliases).map(Alias::new).collect(Collectors.toSet());
+        this.games.add(new Game(gameName, aliasSet));
         return this;
     }
 
