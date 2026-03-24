@@ -11,7 +11,6 @@ import java.util.HashSet;
 
 import org.junit.jupiter.api.Test;
 
-import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.model.AddressBook;
 import seedu.address.model.Model;
 import seedu.address.model.ModelManager;
@@ -115,7 +114,7 @@ public class DeleteGameCommandTest {
     }
 
     @Test
-    public void execute_useUserProfile_noProfile_failure() {
+    public void execute_noProfile_failure() {
         Model emptyModel = new ModelManager(new AddressBook(), new UserPrefs());
         Game gameToDelete = new Game("Valorant");
         DeleteGameCommand deleteGameCommand = new DeleteGameCommand(null, null, gameToDelete, true);
