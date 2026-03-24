@@ -1,5 +1,8 @@
 package seedu.address.logic.commands;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static seedu.address.logic.commands.CommandTestUtil.assertCommandFailure;
 import static seedu.address.logic.commands.CommandTestUtil.assertCommandSuccess;
 import static seedu.address.testutil.TypicalIndexes.INDEX_FIRST_PERSON;
@@ -155,6 +158,51 @@ public class AddAliasCommandTest {
         assertCommandFailure(addAliasCommand,
                 model,
                 seedu.address.logic.Messages.MESSAGE_INVALID_PERSON_DISPLAYED_INDEX);
+    }
+
+    @Test
+    public void execute_useUserProfile_success() throws Exception {
+        Person userProfile = new Person(new Name("John Doe"), new HashSet<>(), new HashSet<>(), true);
+        AddressBook ab = new AddressBook();
+        ab.addPerson(userProfile);
+        Model profileModel = new ModelManager(ab, new UserPrefs());
+
+        Game game = new Game("Valorant");
+        new AddGameCommand(null, null, game, true).execute(profileModel);
+
+        Alias alias = new Alias("JohnV");
+        AddAliasCommand addAliasCommand = new AddAliasCommand(null, null, game, alias, true);
+        String expectedMessage = String.format(AddAliasCommand.MESSAGE_SUCCESS, "John Doe", game.gameName, alias);
+
+        CommandResult result = addAliasCommand.execute(profileModel);
+        assertEquals(expectedMessage, result.getFeedbackToUser());
+        assertTrue(profileModel.getUserProfile().isPresent());
+    }
+
+    @Test
+    public void execute_noProfile_failure() {
+        Model emptyModel = new ModelManager(new AddressBook(), new UserPrefs());
+        Game game = new Game("Valorant");
+        Alias alias = new Alias("JohnV");
+
+        AddAliasCommand addAliasCommand = new AddAliasCommand(null, null, game, alias, true);
+        assertCommandFailure(addAliasCommand, emptyModel, "No user profile found.");
+    }
+
+    @Test
+    public void execute_nullIndexAndName_failure() {
+        Game game = new Game("Valorant");
+        Alias alias = new Alias("SomeAlias");
+        AddAliasCommand addAliasCommand = new AddAliasCommand(null, null, game, alias, false);
+        assertCommandFailure(addAliasCommand, model, AddAliasCommand.MESSAGE_PERSON_NOT_FOUND);
+    }
+
+    @Test
+    public void toStringMethod() {
+        Game game = new Game("Valorant");
+        Alias alias = new Alias("Benjumpin");
+        AddAliasCommand cmd = new AddAliasCommand(INDEX_FIRST_PERSON, null, game, alias, false);
+        assertNotNull(cmd.toString());
     }
 
     @Test

@@ -1,13 +1,19 @@
 package seedu.address.logic.commands;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static seedu.address.logic.commands.CommandTestUtil.assertCommandFailure;
 import static seedu.address.logic.commands.CommandTestUtil.assertCommandSuccess;
 import static seedu.address.testutil.TypicalIndexes.INDEX_FIRST_PERSON;
 import static seedu.address.testutil.TypicalPersons.getTypicalAddressBook;
 
+import java.util.HashSet;
+
 import org.junit.jupiter.api.Test;
 
 import seedu.address.commons.core.index.Index;
+import seedu.address.model.AddressBook;
 import seedu.address.model.Model;
 import seedu.address.model.ModelManager;
 import seedu.address.model.UserPrefs;
@@ -134,6 +140,52 @@ public class DeleteAliasCommandTest {
         assertCommandFailure(deleteAliasCommand,
                 model,
                 seedu.address.logic.Messages.MESSAGE_INVALID_PERSON_DISPLAYED_INDEX);
+    }
+
+    @Test
+    public void execute_useUserProfile_success() throws Exception {
+        Person userProfile = new Person(new Name("John Doe"), new HashSet<>(), new HashSet<>(), true);
+        AddressBook ab = new AddressBook();
+        ab.addPerson(userProfile);
+        Model profileModel = new ModelManager(ab, new UserPrefs());
+
+        Game game = new Game("Valorant");
+        Alias alias = new Alias("JohnV");
+        new AddGameCommand(null, null, game, true).execute(profileModel);
+        new AddAliasCommand(null, null, game, alias, true).execute(profileModel);
+
+        DeleteAliasCommand deleteAliasCommand = new DeleteAliasCommand(null, null, game, alias, true);
+        String expectedMessage = String.format(DeleteAliasCommand.MESSAGE_SUCCESS, "John Doe", game.gameName, alias);
+
+        CommandResult result = deleteAliasCommand.execute(profileModel);
+        assertEquals(expectedMessage, result.getFeedbackToUser());
+        assertTrue(profileModel.getUserProfile().isPresent());
+    }
+
+    @Test
+    public void execute_noProfile_failure() {
+        Model emptyModel = new ModelManager(new AddressBook(), new UserPrefs());
+        Game game = new Game("Valorant");
+        Alias alias = new Alias("JohnV");
+
+        DeleteAliasCommand deleteAliasCommand = new DeleteAliasCommand(null, null, game, alias, true);
+        assertCommandFailure(deleteAliasCommand, emptyModel, "No user profile found.");
+    }
+
+    @Test
+    public void execute_nullIndexAndName_failure() {
+        Game game = new Game("Valorant");
+        Alias alias = new Alias("SomeAlias");
+        DeleteAliasCommand deleteAliasCommand = new DeleteAliasCommand(null, null, game, alias, false);
+        assertCommandFailure(deleteAliasCommand, model, DeleteAliasCommand.MESSAGE_PERSON_NOT_FOUND);
+    }
+
+    @Test
+    public void toStringMethod() {
+        Game game = new Game("Valorant");
+        Alias alias = new Alias("Benjumpin");
+        DeleteAliasCommand cmd = new DeleteAliasCommand(INDEX_FIRST_PERSON, null, game, alias, false);
+        assertNotNull(cmd.toString());
     }
 
     @Test
