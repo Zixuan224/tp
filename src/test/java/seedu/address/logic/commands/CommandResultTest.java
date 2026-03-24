@@ -3,9 +3,13 @@ package seedu.address.logic.commands;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
+
+import seedu.address.model.person.Person;
+import seedu.address.testutil.PersonBuilder;
 
 public class CommandResultTest {
     @Test
@@ -33,6 +37,10 @@ public class CommandResultTest {
 
         // different exit value -> returns false
         assertFalse(commandResult.equals(new CommandResult("feedback", false, true)));
+
+        // awaiting confirmation vs not -> returns false
+        Person person = new PersonBuilder().withName("Alice Pauline").build();
+        assertFalse(commandResult.equals(new CommandResult("feedback", person)));
     }
 
     @Test
@@ -53,11 +61,30 @@ public class CommandResultTest {
     }
 
     @Test
+    public void isAwaitingConfirmation_defaultConstructor_returnsFalse() {
+        CommandResult commandResult = new CommandResult("feedback");
+        assertFalse(commandResult.isAwaitingConfirmation());
+        assertNull(commandResult.getPendingPerson());
+    }
+
+    @Test
+    public void isAwaitingConfirmation_confirmationConstructor_returnsTrue() {
+        Person person = new PersonBuilder().withName("Alice Pauline").build();
+        CommandResult commandResult = new CommandResult("confirm?", person);
+
+        assertTrue(commandResult.isAwaitingConfirmation());
+        assertEquals(person, commandResult.getPendingPerson());
+        assertFalse(commandResult.isShowHelp());
+        assertFalse(commandResult.isExit());
+    }
+
+    @Test
     public void toStringMethod() {
         CommandResult commandResult = new CommandResult("feedback");
         String expected = CommandResult.class.getCanonicalName() + "{feedbackToUser="
                 + commandResult.getFeedbackToUser() + ", showHelp=" + commandResult.isShowHelp()
-                + ", exit=" + commandResult.isExit() + "}";
+                + ", exit=" + commandResult.isExit() + ", awaitingConfirmation="
+                + commandResult.isAwaitingConfirmation() + "}";
         assertEquals(expected, commandResult.toString());
     }
 }
