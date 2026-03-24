@@ -4,6 +4,7 @@ import static java.util.Objects.requireNonNull;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_NAME;
 
 import seedu.address.commons.util.ToStringBuilder;
+import seedu.address.logic.Messages;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.model.Model;
 import seedu.address.model.person.Name;
@@ -23,6 +24,8 @@ public class DeleteContactCommand extends Command {
 
     public static final String MESSAGE_DELETE_PERSON_SUCCESS = "Contact deleted: %1$s";
     public static final String MESSAGE_PERSON_NOT_FOUND = "Error: Name not found";
+    public static final String MESSAGE_DELETE_CONFIRMATION =
+            "%1$s\nAre you sure you want to delete %2$s? (y/n)";
 
     private final Name targetName;
 
@@ -39,8 +42,9 @@ public class DeleteContactCommand extends Command {
                 .findFirst()
                 .orElseThrow(() -> new CommandException(MESSAGE_PERSON_NOT_FOUND));
 
-        model.deletePerson(personToDelete);
-        return new CommandResult(String.format(MESSAGE_DELETE_PERSON_SUCCESS, personToDelete.getName()));
+        String confirmationMessage = String.format(MESSAGE_DELETE_CONFIRMATION,
+                Messages.format(personToDelete), personToDelete.getName());
+        return new CommandResult(confirmationMessage, personToDelete);
     }
 
     @Override

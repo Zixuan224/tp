@@ -33,7 +33,7 @@ public class JsonAdaptedPersonTest {
     @Test
     public void toModelType_invalidName_throwsIllegalValueException() {
         JsonAdaptedPerson person =
-                new JsonAdaptedPerson(INVALID_NAME, VALID_TAGS, VALID_GAMES);
+                new JsonAdaptedPerson(INVALID_NAME, VALID_TAGS, VALID_GAMES, false);
         String expectedMessage = Name.MESSAGE_CONSTRAINTS;
         assertThrows(IllegalValueException.class, expectedMessage, person::toModelType);
     }
@@ -42,7 +42,7 @@ public class JsonAdaptedPersonTest {
     public void toModelType_nullName_throwsIllegalValueException() {
         JsonAdaptedPerson person = new JsonAdaptedPerson(null,
                 VALID_TAGS,
-                VALID_GAMES);
+                VALID_GAMES, false);
         String expectedMessage = String.format(MISSING_FIELD_MESSAGE_FORMAT, Name.class.getSimpleName());
         assertThrows(IllegalValueException.class, expectedMessage, person::toModelType);
     }
@@ -54,7 +54,7 @@ public class JsonAdaptedPersonTest {
         JsonAdaptedPerson person =
                 new JsonAdaptedPerson(VALID_NAME,
                         invalidTags,
-                        VALID_GAMES);
+                        VALID_GAMES, false);
         assertThrows(IllegalValueException.class, person::toModelType);
     }
 

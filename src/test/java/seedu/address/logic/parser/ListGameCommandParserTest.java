@@ -19,13 +19,13 @@ public class ListGameCommandParserTest {
         // Simulates: game list n/Alice Pauline
         assertParseSuccess(parser,
                 " n/Alice Pauline",
-                new ListGameCommand(null, new Name("Alice Pauline")));
+                new ListGameCommand(null, new Name("Alice Pauline"), false));
     }
 
     @Test
     public void parse_validArgsByIndex_returnsListGameCommand() {
         // Simulates: game list 1
-        assertParseSuccess(parser, " 1", new ListGameCommand(INDEX_FIRST_PERSON, null));
+        assertParseSuccess(parser, " 1", new ListGameCommand(INDEX_FIRST_PERSON, null, false));
     }
 
     @Test

@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static seedu.address.logic.commands.CommandTestUtil.assertCommandFailure;
-import static seedu.address.logic.commands.CommandTestUtil.assertCommandSuccess;
 import static seedu.address.logic.commands.CommandTestUtil.showPersonAtIndex;
 import static seedu.address.testutil.TypicalIndexes.INDEX_FIRST_PERSON;
 import static seedu.address.testutil.TypicalPersons.ALICE;
@@ -13,6 +12,7 @@ import static seedu.address.testutil.TypicalPersons.getTypicalAddressBook;
 
 import org.junit.jupiter.api.Test;
 
+import seedu.address.logic.Messages;
 import seedu.address.model.Model;
 import seedu.address.model.ModelManager;
 import seedu.address.model.UserPrefs;
@@ -28,17 +28,21 @@ public class DeleteContactCommandTest {
     private Model model = new ModelManager(getTypicalAddressBook(), new UserPrefs());
 
     @Test
-    public void execute_validNameUnfilteredList_success() {
+    public void execute_validNameUnfilteredList_returnsConfirmation() throws Exception {
         Person personToDelete = ALICE;
         DeleteContactCommand deleteCommand = new DeleteContactCommand(personToDelete.getName());
 
-        String expectedMessage = String.format(DeleteContactCommand.MESSAGE_DELETE_PERSON_SUCCESS,
-                personToDelete.getName());
+        CommandResult result = deleteCommand.execute(model);
 
-        ModelManager expectedModel = new ModelManager(model.getAddressBook(), new UserPrefs());
-        expectedModel.deletePerson(personToDelete);
+        assertTrue(result.isAwaitingConfirmation());
+        assertEquals(personToDelete, result.getPendingPerson());
 
-        assertCommandSuccess(deleteCommand, model, expectedMessage, expectedModel);
+        String expectedMessage = String.format(DeleteContactCommand.MESSAGE_DELETE_CONFIRMATION,
+                Messages.format(personToDelete), personToDelete.getName());
+        assertEquals(expectedMessage, result.getFeedbackToUser());
+
+        // model must NOT be modified until confirmation
+        assertTrue(model.getFilteredPersonList().contains(personToDelete));
     }
 
     @Test
@@ -50,20 +54,19 @@ public class DeleteContactCommandTest {
     }
 
     @Test
-    public void execute_validNameFilteredList_success() {
+    public void execute_validNameFilteredList_returnsConfirmation() throws Exception {
         showPersonAtIndex(model, INDEX_FIRST_PERSON); // shows only ALICE
 
         Person personToDelete = ALICE;
         DeleteContactCommand deleteCommand = new DeleteContactCommand(personToDelete.getName());
 
-        String expectedMessage = String.format(DeleteContactCommand.MESSAGE_DELETE_PERSON_SUCCESS,
-                personToDelete.getName());
+        CommandResult result = deleteCommand.execute(model);
 
-        Model expectedModel = new ModelManager(model.getAddressBook(), new UserPrefs());
-        expectedModel.deletePerson(personToDelete);
-        showNoPerson(expectedModel);
+        assertTrue(result.isAwaitingConfirmation());
+        assertEquals(personToDelete, result.getPendingPerson());
 
-        assertCommandSuccess(deleteCommand, model, expectedMessage, expectedModel);
+        // model must NOT be modified until confirmation
+        assertTrue(model.getFilteredPersonList().contains(personToDelete));
     }
 
     @Test
