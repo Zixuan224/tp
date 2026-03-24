@@ -21,7 +21,7 @@ import seedu.address.model.person.Person;
 /**
  * Deletes a game from an existing contact in the address book.
  */
-public class DeleteGameCommand extends Command {
+public class DeleteGameCommand extends Command implements UndoableCommand {
 
     public static final String COMMAND_WORD = "delete";
     public static final String MESSAGE_USAGE = "game " + COMMAND_WORD
@@ -38,6 +38,8 @@ public class DeleteGameCommand extends Command {
     private final Index targetIndex;
     private final Name targetName;
     private final Game gameToDelete;
+    private Person personBeforeEdit;
+    private Person personAfterEdit;
 
     /**
      * @param targetIndex the index of the person.
@@ -91,12 +93,20 @@ public class DeleteGameCommand extends Command {
         Person editedPerson = new Person(
                 personToEdit.getName(), personToEdit.getTags(), updatedGames);
 
+        personBeforeEdit = personToEdit;
+        personAfterEdit = editedPerson;
         model.setPerson(personToEdit, editedPerson);
         model.updateFilteredPersonList(PREDICATE_SHOW_ALL_PERSONS);
 
         return new CommandResult(String.format(MESSAGE_SUCCESS,
                 gameToDelete.gameName,
                 editedPerson.getName().fullName));
+    }
+
+    @Override
+    public void undo(Model model) {
+        model.setPerson(personAfterEdit, personBeforeEdit);
+        model.updateFilteredPersonList(PREDICATE_SHOW_ALL_PERSONS);
     }
 
     @Override

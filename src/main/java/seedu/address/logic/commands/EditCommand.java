@@ -26,7 +26,7 @@ import seedu.address.model.tag.Tag;
 /**
  * Edits the details of an existing person in the address book.
  */
-public class EditCommand extends Command {
+public class EditCommand extends Command implements UndoableCommand {
 
     public static final String COMMAND_WORD = "edit";
 
@@ -43,6 +43,8 @@ public class EditCommand extends Command {
 
     private final Index index;
     private final EditPersonDescriptor editPersonDescriptor;
+    private Person personBeforeEdit;
+    private Person personAfterEdit;
 
     /**
      * @param index                of the person in the filtered person list to edit
@@ -72,6 +74,8 @@ public class EditCommand extends Command {
             throw new CommandException(MESSAGE_DUPLICATE_PERSON);
         }
 
+        personBeforeEdit = personToEdit;
+        personAfterEdit = editedPerson;
         model.setPerson(personToEdit, editedPerson);
         model.updateFilteredPersonList(PREDICATE_SHOW_ALL_PERSONS);
         return new CommandResult(String.format(MESSAGE_EDIT_PERSON_SUCCESS, Messages.format(editedPerson)));
@@ -89,6 +93,12 @@ public class EditCommand extends Command {
         Set<Game> updatedGames = personToEdit.getGames();
 
         return new Person(updatedName, updatedTags, updatedGames);
+    }
+
+    @Override
+    public void undo(Model model) {
+        model.setPerson(personAfterEdit, personBeforeEdit);
+        model.updateFilteredPersonList(PREDICATE_SHOW_ALL_PERSONS);
     }
 
     @Override

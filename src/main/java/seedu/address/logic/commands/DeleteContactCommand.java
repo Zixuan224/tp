@@ -12,7 +12,7 @@ import seedu.address.model.person.Person;
 /**
  * Deletes a person identified by name from the address book.
  */
-public class DeleteContactCommand extends Command {
+public class DeleteContactCommand extends Command implements UndoableCommand {
 
     public static final String COMMAND_WORD = "contact delete";
 
@@ -25,6 +25,7 @@ public class DeleteContactCommand extends Command {
     public static final String MESSAGE_PERSON_NOT_FOUND = "Error: Name not found";
 
     private final Name targetName;
+    private Person deletedPerson;
 
     public DeleteContactCommand(Name targetName) {
         this.targetName = targetName;
@@ -39,8 +40,14 @@ public class DeleteContactCommand extends Command {
                 .findFirst()
                 .orElseThrow(() -> new CommandException(MESSAGE_PERSON_NOT_FOUND));
 
+        deletedPerson = personToDelete;
         model.deletePerson(personToDelete);
         return new CommandResult(String.format(MESSAGE_DELETE_PERSON_SUCCESS, personToDelete.getName()));
+    }
+
+    @Override
+    public void undo(Model model) {
+        model.addPerson(deletedPerson);
     }
 
     @Override

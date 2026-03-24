@@ -21,7 +21,7 @@ import seedu.address.model.person.Person;
 /**
  * Adds a game to an existing contact in the address book.
  */
-public class AddGameCommand extends Command {
+public class AddGameCommand extends Command implements UndoableCommand {
 
     public static final String COMMAND_WORD = "add";
 
@@ -40,6 +40,8 @@ public class AddGameCommand extends Command {
     private final Index targetIndex;
     private final Name targetName;
     private final Game gameToAdd;
+    private Person personBeforeEdit;
+    private Person personAfterEdit;
 
     /**
      * @param targetIndex the index of the person.
@@ -93,10 +95,18 @@ public class AddGameCommand extends Command {
         Person editedPerson = new Person(
                 personToEdit.getName(), personToEdit.getTags(), updatedGames);
 
+        personBeforeEdit = personToEdit;
+        personAfterEdit = editedPerson;
         model.setPerson(personToEdit, editedPerson);
         model.updateFilteredPersonList(PREDICATE_SHOW_ALL_PERSONS);
 
         return new CommandResult(String.format(MESSAGE_SUCCESS, gameToAdd.gameName, editedPerson.getName().fullName));
+    }
+
+    @Override
+    public void undo(Model model) {
+        model.setPerson(personAfterEdit, personBeforeEdit);
+        model.updateFilteredPersonList(PREDICATE_SHOW_ALL_PERSONS);
     }
 
     @Override

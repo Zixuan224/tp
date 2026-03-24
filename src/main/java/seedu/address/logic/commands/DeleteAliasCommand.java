@@ -23,7 +23,7 @@ import seedu.address.model.person.Person;
 /**
  * Deletes an alias from an existing person in Harmony.
  */
-public class DeleteAliasCommand extends Command {
+public class DeleteAliasCommand extends Command implements UndoableCommand {
 
     public static final String COMMAND_WORD = "alias delete";
 
@@ -47,6 +47,8 @@ public class DeleteAliasCommand extends Command {
     private final Name targetName;
     private final Game targetGame;
     private final Alias aliasToDelete;
+    private Person personBeforeEdit;
+    private Person personAfterEdit;
 
     /**
      * Creates a DeleteAliasCommand to remove {@code alias} from the person with {@code targetName}.
@@ -111,6 +113,8 @@ public class DeleteAliasCommand extends Command {
                 updatedGames
         );
 
+        personBeforeEdit = personToEdit;
+        personAfterEdit = editedPerson;
         model.setPerson(personToEdit, editedPerson);
 
         return new CommandResult(String.format(
@@ -118,6 +122,11 @@ public class DeleteAliasCommand extends Command {
                 editedPerson.getName(),
                 updatedGame.gameName,
                 aliasToDelete));
+    }
+
+    @Override
+    public void undo(Model model) {
+        model.setPerson(personAfterEdit, personBeforeEdit);
     }
 
     @Override

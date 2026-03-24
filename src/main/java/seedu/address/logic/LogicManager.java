@@ -3,6 +3,8 @@ package seedu.address.logic;
 import java.io.IOException;
 import java.nio.file.AccessDeniedException;
 import java.nio.file.Path;
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.logging.Logger;
 
 import javafx.collections.ObservableList;
@@ -10,6 +12,8 @@ import seedu.address.commons.core.GuiSettings;
 import seedu.address.commons.core.LogsCenter;
 import seedu.address.logic.commands.Command;
 import seedu.address.logic.commands.CommandResult;
+import seedu.address.logic.commands.UndoCommand;
+import seedu.address.logic.commands.UndoableCommand;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.logic.parser.AddressBookParser;
 import seedu.address.logic.parser.exceptions.ParseException;
@@ -32,6 +36,7 @@ public class LogicManager implements Logic {
     private final Model model;
     private final Storage storage;
     private final AddressBookParser addressBookParser;
+    private final Deque<UndoableCommand> commandHistory = new ArrayDeque<>();
 
     /**
      * Constructs a {@code LogicManager} with the given {@code Model} and {@code Storage}.
@@ -47,8 +52,14 @@ public class LogicManager implements Logic {
         logger.info("----------------[USER COMMAND][" + commandText + "]");
 
         CommandResult commandResult;
-        Command command = addressBookParser.parseCommand(commandText);
+        Command command = commandText.trim().equals(UndoCommand.COMMAND_WORD)
+                ? new UndoCommand(commandHistory)
+                : addressBookParser.parseCommand(commandText);
         commandResult = command.execute(model);
+
+        if (command instanceof UndoableCommand) {
+            commandHistory.push((UndoableCommand) command);
+        }
 
         try {
             storage.saveAddressBook(model.getAddressBook());
