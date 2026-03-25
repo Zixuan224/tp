@@ -32,12 +32,16 @@ public class EditCommandParser implements Parser<EditCommand> {
         ArgumentMultimap argMultimap =
                 ArgumentTokenizer.tokenize(args, PREFIX_NAME, PREFIX_TAG);
 
-        Index index;
+        String preamble = argMultimap.getPreamble().trim();
+        boolean useUserProfile = preamble.equals("0");
 
-        try {
-            index = ParserUtil.parseIndex(argMultimap.getPreamble());
-        } catch (ParseException pe) {
-            throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT, EditCommand.MESSAGE_USAGE), pe);
+        Index index = null;
+        if (!useUserProfile) {
+            try {
+                index = ParserUtil.parseIndex(preamble);
+            } catch (ParseException pe) {
+                throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT, EditCommand.MESSAGE_USAGE), pe);
+            }
         }
 
         argMultimap.verifyNoDuplicatePrefixesFor(PREFIX_NAME);
@@ -54,6 +58,9 @@ public class EditCommandParser implements Parser<EditCommand> {
             throw new ParseException(EditCommand.MESSAGE_NOT_EDITED);
         }
 
+        if (useUserProfile) {
+            return new EditCommand(editPersonDescriptor, true);
+        }
         return new EditCommand(index, editPersonDescriptor);
     }
 

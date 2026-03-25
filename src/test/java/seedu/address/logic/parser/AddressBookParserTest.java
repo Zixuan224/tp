@@ -114,7 +114,7 @@ public class AddressBookParserTest {
                 "alias add n/Benjamin g/Valorant al/Benjumpin");
         assertEquals(new AddAliasCommand(
                 null,
-                new Name("Benjamin"), new Game("Valorant"), new Alias("Benjumpin")
+                new Name("Benjamin"), new Game("Valorant"), new Alias("Benjumpin"), false
         ), command);
     }
 
@@ -124,7 +124,7 @@ public class AddressBookParserTest {
                 "alias delete n/Benjamin g/Valorant al/Benjumpin");
         assertEquals(new DeleteAliasCommand(null,
                 new Name("Benjamin"),
-                new Game("Valorant"), new Alias("Benjumpin")
+                new Game("Valorant"), new Alias("Benjumpin"), false
         ), command);
     }
 
@@ -134,7 +134,7 @@ public class AddressBookParserTest {
                 "game add n/Benjamin g/Valorant");
         assertEquals(new AddGameCommand(null,
                 new Name("Benjamin"),
-                new Game("Valorant")
+                new Game("Valorant"), false
         ), command);
     }
 
@@ -144,7 +144,7 @@ public class AddressBookParserTest {
                 "game delete n/Benjamin g/Valorant");
         assertEquals(new DeleteGameCommand(null,
                 new Name("Benjamin"),
-                new Game("Valorant")
+                new Game("Valorant"), false
         ), command);
     }
 
@@ -152,6 +152,6 @@ public class AddressBookParserTest {
     public void parseCommand_gameList() throws Exception {
         ListGameCommand command = (ListGameCommand) parser.parseCommand(
                 "game list n/Benjamin");
-        assertEquals(new ListGameCommand(null, new Name("Benjamin")), command);
+        assertEquals(new ListGameCommand(null, new Name("Benjamin"), false), command);
     }
 }

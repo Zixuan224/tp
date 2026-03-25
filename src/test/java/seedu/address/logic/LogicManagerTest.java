@@ -1,6 +1,8 @@
 package seedu.address.logic;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static seedu.address.logic.Messages.MESSAGE_UNKNOWN_COMMAND;
 import static seedu.address.logic.commands.CommandTestUtil.NAME_DESC_AMY;
 import static seedu.address.logic.commands.DeleteContactCommand.MESSAGE_PERSON_NOT_FOUND;
@@ -17,6 +19,7 @@ import org.junit.jupiter.api.io.TempDir;
 
 import seedu.address.logic.commands.AddContactCommand;
 import seedu.address.logic.commands.CommandResult;
+import seedu.address.logic.commands.DeleteContactCommand;
 import seedu.address.logic.commands.ListCommand;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.logic.parser.exceptions.ParseException;
@@ -84,6 +87,105 @@ public class LogicManagerTest {
         assertThrows(UnsupportedOperationException.class, () -> logic.getFilteredPersonList().remove(0));
     }
 
+    // ==================== Delete confirmation flow tests ====================
+
+    @Test
+    public void execute_deleteContactCommand_returnsAwaitingConfirmation() throws Exception {
+        Person person = new PersonBuilder(AMY).withTags().build();
+        model.addPerson(person);
+
+        CommandResult result = logic.execute("contact delete n/" + person.getName());
+
+        assertTrue(result.isAwaitingConfirmation());
+        assertEquals(person, result.getPendingPerson());
+        assertTrue(model.getFilteredPersonList().contains(person));
+    }
+
+    @Test
+    public void execute_deleteConfirmYes_deletesContact() throws Exception {
+        Person person = new PersonBuilder(AMY).withTags().build();
+        model.addPerson(person);
+        logic.execute("contact delete n/" + person.getName());
+
+        CommandResult result = logic.execute("y");
+
+        assertEquals(String.format(DeleteContactCommand.MESSAGE_DELETE_PERSON_SUCCESS,
+                person.getName()), result.getFeedbackToUser());
+        assertFalse(model.getFilteredPersonList().contains(person));
+    }
+
+    @Test
+    public void execute_deleteConfirmYesFull_deletesContact() throws Exception {
+        Person person = new PersonBuilder(AMY).withTags().build();
+        model.addPerson(person);
+        logic.execute("contact delete n/" + person.getName());
+
+        CommandResult result = logic.execute("yes");
+
+        assertEquals(String.format(DeleteContactCommand.MESSAGE_DELETE_PERSON_SUCCESS,
+                person.getName()), result.getFeedbackToUser());
+        assertFalse(model.getFilteredPersonList().contains(person));
+    }
+
+    @Test
+    public void execute_deleteConfirmNo_cancelsDeletion() throws Exception {
+        Person person = new PersonBuilder(AMY).withTags().build();
+        model.addPerson(person);
+        logic.execute("contact delete n/" + person.getName());
+
+        CommandResult result = logic.execute("n");
+
+        assertEquals("Deletion of " + person.getName() + " cancelled.", result.getFeedbackToUser());
+        assertTrue(model.getFilteredPersonList().contains(person));
+    }
+
+    @Test
+    public void execute_deleteConfirmNoFull_cancelsDeletion() throws Exception {
+        Person person = new PersonBuilder(AMY).withTags().build();
+        model.addPerson(person);
+        logic.execute("contact delete n/" + person.getName());
+
+        CommandResult result = logic.execute("no");
+
+        assertEquals("Deletion of " + person.getName() + " cancelled.", result.getFeedbackToUser());
+        assertTrue(model.getFilteredPersonList().contains(person));
+    }
+
+    @Test
+    public void execute_deleteConfirmInvalidInput_cancelsDeletion() throws Exception {
+        Person person = new PersonBuilder(AMY).withTags().build();
+        model.addPerson(person);
+        logic.execute("contact delete n/" + person.getName());
+
+        CommandResult result = logic.execute("maybe");
+
+        assertEquals("Invalid input. Deletion of " + person.getName() + " cancelled.",
+                result.getFeedbackToUser());
+        assertTrue(model.getFilteredPersonList().contains(person));
+    }
+
+    @Test
+    public void execute_deleteConfirmYes_subsequentCommandsWorkNormally() throws Exception {
+        Person person = new PersonBuilder(AMY).withTags().build();
+        model.addPerson(person);
+        logic.execute("contact delete n/" + person.getName());
+        logic.execute("y");
+
+        CommandResult result = logic.execute(ListCommand.COMMAND_WORD);
+        assertEquals(ListCommand.MESSAGE_SUCCESS, result.getFeedbackToUser());
+    }
+
+    @Test
+    public void execute_deleteConfirmNo_subsequentCommandsWorkNormally() throws Exception {
+        Person person = new PersonBuilder(AMY).withTags().build();
+        model.addPerson(person);
+        logic.execute("contact delete n/" + person.getName());
+        logic.execute("n");
+
+        CommandResult result = logic.execute(ListCommand.COMMAND_WORD);
+        assertEquals(ListCommand.MESSAGE_SUCCESS, result.getFeedbackToUser());
+    }
+
     /**
      * Executes the command and confirms that
      * - no exceptions are thrown <br>
@@ -140,6 +242,55 @@ public class LogicManagerTest {
                                       String expectedMessage, Model expectedModel) {
         assertThrows(expectedException, expectedMessage, () -> logic.execute(inputCommand));
         assertEquals(expectedModel, model);
+    }
+
+    @Test
+    public void execute_deleteConfirmYes_storageIoExceptionThrown() throws Exception {
+        Person person = new PersonBuilder(AMY).withTags().build();
+
+        // Inject a storage that always throws on save
+        JsonAddressBookStorage failingStorage = new JsonAddressBookStorage(
+                temporaryFolder.resolve("failing.json")) {
+            @Override
+            public void saveAddressBook(ReadOnlyAddressBook addressBook, Path filePath)
+                    throws IOException {
+                throw DUMMY_IO_EXCEPTION;
+            }
+        };
+        StorageManager storage = new StorageManager(failingStorage,
+                new JsonUserPrefsStorage(temporaryFolder.resolve("prefs.json")));
+        logic = new LogicManager(model, storage);
+
+        model.addPerson(person);
+        logic.execute("contact delete n/" + person.getName());
+
+        assertThrows(CommandException.class,
+                String.format(LogicManager.FILE_OPS_ERROR_FORMAT, DUMMY_IO_EXCEPTION.getMessage()), () ->
+                logic.execute("y"));
+    }
+
+    @Test
+    public void execute_deleteConfirmYes_storageAdExceptionThrown() throws Exception {
+        Person person = new PersonBuilder(AMY).withTags().build();
+
+        JsonAddressBookStorage failingStorage = new JsonAddressBookStorage(
+                temporaryFolder.resolve("failing2.json")) {
+            @Override
+            public void saveAddressBook(ReadOnlyAddressBook addressBook, Path filePath)
+                    throws IOException {
+                throw DUMMY_AD_EXCEPTION;
+            }
+        };
+        StorageManager storage = new StorageManager(failingStorage,
+                new JsonUserPrefsStorage(temporaryFolder.resolve("prefs2.json")));
+        logic = new LogicManager(model, storage);
+
+        model.addPerson(person);
+        logic.execute("contact delete n/" + person.getName());
+
+        assertThrows(CommandException.class,
+                String.format(LogicManager.FILE_OPS_PERMISSION_ERROR_FORMAT, DUMMY_AD_EXCEPTION.getMessage()), () ->
+                logic.execute("y"));
     }
 
     /**

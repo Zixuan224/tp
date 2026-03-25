@@ -12,6 +12,7 @@ import seedu.address.commons.core.GuiSettings;
 import seedu.address.commons.core.LogsCenter;
 import seedu.address.logic.commands.Command;
 import seedu.address.logic.commands.CommandResult;
+import seedu.address.logic.commands.DeleteContactCommand;
 import seedu.address.logic.commands.UndoCommand;
 import seedu.address.logic.commands.UndoableCommand;
 import seedu.address.logic.commands.exceptions.CommandException;
@@ -36,6 +37,8 @@ public class LogicManager implements Logic {
     private final Model model;
     private final Storage storage;
     private final AddressBookParser addressBookParser;
+    private Person pendingDeletePerson = null;
+    private DeleteContactCommand pendingDeleteCommand = null;
     private final Deque<UndoableCommand> commandHistory = new ArrayDeque<>();
 
     /**
@@ -51,11 +54,23 @@ public class LogicManager implements Logic {
     public CommandResult execute(String commandText) throws CommandException, ParseException {
         logger.info("----------------[USER COMMAND][" + commandText + "]");
 
+        if (pendingDeletePerson != null) {
+            return handleDeleteConfirmation(commandText);
+        }
+
         CommandResult commandResult;
         Command command = commandText.trim().equals(UndoCommand.COMMAND_WORD)
                 ? new UndoCommand(commandHistory)
                 : addressBookParser.parseCommand(commandText);
         commandResult = command.execute(model);
+
+        if (commandResult.isAwaitingConfirmation()) {
+            pendingDeletePerson = commandResult.getPendingPerson();
+            if (command instanceof DeleteContactCommand) {
+                pendingDeleteCommand = (DeleteContactCommand) command;
+            }
+            return commandResult;
+        }
 
         if (command instanceof UndoableCommand) {
             commandHistory.push((UndoableCommand) command);
@@ -70,6 +85,38 @@ public class LogicManager implements Logic {
         }
 
         return commandResult;
+    }
+
+    /**
+     * Handles the user's y/n response to a pending delete confirmation.
+     */
+    private CommandResult handleDeleteConfirmation(String commandText) throws CommandException {
+        String response = commandText.trim().toLowerCase();
+        Person person = pendingDeletePerson;
+        String name = person.getName().toString();
+        pendingDeletePerson = null;
+        DeleteContactCommand deleteCommand = pendingDeleteCommand;
+        pendingDeleteCommand = null;
+
+        if (response.equals("y") || response.equals("yes")) {
+            model.deletePerson(person);
+            if (deleteCommand != null) {
+                deleteCommand.setDeletedPerson(person);
+                commandHistory.push(deleteCommand);
+            }
+            try {
+                storage.saveAddressBook(model.getAddressBook());
+            } catch (AccessDeniedException e) {
+                throw new CommandException(String.format(FILE_OPS_PERMISSION_ERROR_FORMAT, e.getMessage()), e);
+            } catch (IOException ioe) {
+                throw new CommandException(String.format(FILE_OPS_ERROR_FORMAT, ioe.getMessage()), ioe);
+            }
+            return new CommandResult(String.format(DeleteContactCommand.MESSAGE_DELETE_PERSON_SUCCESS, name));
+        } else if (response.equals("n") || response.equals("no")) {
+            return new CommandResult("Deletion of " + name + " cancelled.");
+        } else {
+            return new CommandResult("Invalid input. Deletion of " + name + " cancelled.");
+        }
     }
 
     @Override

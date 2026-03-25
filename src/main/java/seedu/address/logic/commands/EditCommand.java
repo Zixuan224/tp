@@ -45,6 +45,7 @@ public class EditCommand extends Command implements UndoableCommand {
     private final EditPersonDescriptor editPersonDescriptor;
     private Person personBeforeEdit;
     private Person personAfterEdit;
+    private final boolean useUserProfile;
 
     /**
      * @param index                of the person in the filtered person list to edit
@@ -56,18 +57,37 @@ public class EditCommand extends Command implements UndoableCommand {
 
         this.index = index;
         this.editPersonDescriptor = new EditPersonDescriptor(editPersonDescriptor);
+        this.useUserProfile = false;
+    }
+
+    /**
+     * @param editPersonDescriptor details to edit the user profile with
+     * @param useUserProfile       true if targeting the user profile via index 0
+     */
+    public EditCommand(EditPersonDescriptor editPersonDescriptor, boolean useUserProfile) {
+        requireNonNull(editPersonDescriptor);
+        this.index = null;
+        this.editPersonDescriptor = new EditPersonDescriptor(editPersonDescriptor);
+        this.useUserProfile = useUserProfile;
     }
 
     @Override
     public CommandResult execute(Model model) throws CommandException {
         requireNonNull(model);
-        List<Person> lastShownList = model.getFilteredPersonList();
 
-        if (index.getZeroBased() >= lastShownList.size()) {
-            throw new CommandException(Messages.MESSAGE_INVALID_PERSON_DISPLAYED_INDEX);
+        Person personToEdit;
+
+        if (useUserProfile) {
+            personToEdit = model.getUserProfile()
+                    .orElseThrow(() -> new CommandException("No user profile found."));
+        } else {
+            List<Person> lastShownList = model.getFilteredPersonList();
+            if (index.getZeroBased() >= lastShownList.size()) {
+                throw new CommandException(Messages.MESSAGE_INVALID_PERSON_DISPLAYED_INDEX);
+            }
+            personToEdit = lastShownList.get(index.getZeroBased());
         }
 
-        Person personToEdit = lastShownList.get(index.getZeroBased());
         Person editedPerson = createEditedPerson(personToEdit, editPersonDescriptor);
 
         if (!personToEdit.isSamePerson(editedPerson) && model.hasPerson(editedPerson)) {
@@ -83,7 +103,7 @@ public class EditCommand extends Command implements UndoableCommand {
 
     /**
      * Creates and returns a {@code Person} with the details of {@code personToEdit}
-     * edited with {@code editPersonDescriptor}.
+     * edited with {@code editPersonDescriptor}. Preserves the isUserProfile flag.
      */
     private static Person createEditedPerson(Person personToEdit, EditPersonDescriptor editPersonDescriptor) {
         assert personToEdit != null;
@@ -92,7 +112,7 @@ public class EditCommand extends Command implements UndoableCommand {
         Set<Tag> updatedTags = editPersonDescriptor.getTags().orElse(personToEdit.getTags());
         Set<Game> updatedGames = personToEdit.getGames();
 
-        return new Person(updatedName, updatedTags, updatedGames);
+        return new Person(updatedName, updatedTags, updatedGames, personToEdit.isUserProfile());
     }
 
     @Override
@@ -113,8 +133,11 @@ public class EditCommand extends Command implements UndoableCommand {
         }
 
         EditCommand otherEditCommand = (EditCommand) other;
-        return index.equals(otherEditCommand.index)
-                && editPersonDescriptor.equals(otherEditCommand.editPersonDescriptor);
+        boolean sameIndex = (index == null && otherEditCommand.index == null)
+                || (index != null && index.equals(otherEditCommand.index));
+        return sameIndex
+                && editPersonDescriptor.equals(otherEditCommand.editPersonDescriptor)
+                && useUserProfile == otherEditCommand.useUserProfile;
     }
 
     @Override

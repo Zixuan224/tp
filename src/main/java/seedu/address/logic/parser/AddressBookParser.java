@@ -78,6 +78,9 @@ public class AddressBookParser {
         case GameCommandParser.COMMAND_WORD:
             return new GameCommandParser().parse(arguments);
 
+        case ProfileCommandParser.COMMAND_WORD:
+            return new ProfileCommandParser().parse(arguments);
+
         default:
             logger.finer("This user input caused a ParseException: " + userInput);
             throw new ParseException(MESSAGE_UNKNOWN_COMMAND);

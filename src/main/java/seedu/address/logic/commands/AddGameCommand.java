@@ -42,47 +42,51 @@ public class AddGameCommand extends Command implements UndoableCommand {
     private final Game gameToAdd;
     private Person personBeforeEdit;
     private Person personAfterEdit;
+    private final boolean useUserProfile;
 
     /**
-     * @param targetIndex the index of the person.
-     * @param targetName  of the person in the filtered person list to edit.
-     * @param gameToAdd   the game to add to the person.
+     * @param targetIndex    the index of the person.
+     * @param targetName     of the person in the filtered person list to edit.
+     * @param gameToAdd      the game to add to the person.
+     * @param useUserProfile true if targeting the user profile via index 0.
      */
-    public AddGameCommand(Index targetIndex, Name targetName, Game gameToAdd) {
-        requireNonNull(gameToAdd); // Added safety check for the required game
+    public AddGameCommand(Index targetIndex, Name targetName, Game gameToAdd, boolean useUserProfile) {
+        requireNonNull(gameToAdd);
         this.targetIndex = targetIndex;
         this.targetName = targetName;
         this.gameToAdd = gameToAdd;
+        this.useUserProfile = useUserProfile;
     }
 
     @Override
     public CommandResult execute(Model model) throws CommandException {
         requireNonNull(model);
-        List<Person> lastShownList = model.getFilteredPersonList();
-        Person personToEdit = null;
+        Person personToEdit;
 
-        // 2. The Universal Find Person Block (handles both Index and Name safely)
-        if (targetIndex != null) {
-            if (targetIndex.getZeroBased() >= lastShownList.size()) {
-                throw new CommandException(Messages.MESSAGE_INVALID_PERSON_DISPLAYED_INDEX);
-            }
-            personToEdit = lastShownList.get(targetIndex.getZeroBased());
-        } else if (targetName != null) {
-            Optional<Person> personOptional = lastShownList.stream()
-                    .filter(person -> person.getName().fullName.equalsIgnoreCase(targetName.fullName))
-                    .findFirst();
-
-            if (personOptional.isEmpty()) {
+        if (useUserProfile) {
+            personToEdit = model.getUserProfile()
+                    .orElseThrow(() -> new CommandException("No user profile found."));
+        } else {
+            List<Person> lastShownList = model.getFilteredPersonList();
+            if (targetIndex != null) {
+                if (targetIndex.getZeroBased() >= lastShownList.size()) {
+                    throw new CommandException(Messages.MESSAGE_INVALID_PERSON_DISPLAYED_INDEX);
+                }
+                personToEdit = lastShownList.get(targetIndex.getZeroBased());
+            } else if (targetName != null) {
+                personToEdit = lastShownList.stream()
+                        .filter(person -> person.getName().fullName.equalsIgnoreCase(targetName.fullName))
+                        .findFirst()
+                        .orElseThrow(() -> new CommandException(MESSAGE_CONTACT_NOT_FOUND));
+            } else {
                 throw new CommandException(MESSAGE_CONTACT_NOT_FOUND);
             }
-            personToEdit = personOptional.get();
         }
 
         if (personToEdit == null) {
             throw new CommandException(MESSAGE_CONTACT_NOT_FOUND);
         }
 
-        // Check for duplicate games
         if (personToEdit.getGames().contains(gameToAdd)) {
             throw new CommandException(MESSAGE_DUPLICATE_GAME);
         }
@@ -93,7 +97,7 @@ public class AddGameCommand extends Command implements UndoableCommand {
 
         // Create a copy of the person with the updated games
         Person editedPerson = new Person(
-                personToEdit.getName(), personToEdit.getTags(), updatedGames);
+                personToEdit.getName(), personToEdit.getTags(), updatedGames, personToEdit.isUserProfile());
 
         personBeforeEdit = personToEdit;
         personAfterEdit = editedPerson;
@@ -125,6 +129,6 @@ public class AddGameCommand extends Command implements UndoableCommand {
         boolean isSameName = (targetName == null && e.targetName == null)
                 || (targetName != null && targetName.equals(e.targetName));
 
-        return isSameIndex && isSameName && gameToAdd.equals(e.gameToAdd);
+        return isSameIndex && isSameName && gameToAdd.equals(e.gameToAdd) && useUserProfile == e.useUserProfile;
     }
 }

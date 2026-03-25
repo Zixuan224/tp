@@ -35,7 +35,7 @@ public class AddGameCommandTest {
         Person editedPerson = new Person(
                 firstPerson.getName(), firstPerson.getTags(), expectedGames);
 
-        AddGameCommand addGameCommand = new AddGameCommand(null, firstPerson.getName(), gameToAdd);
+        AddGameCommand addGameCommand = new AddGameCommand(null, firstPerson.getName(), gameToAdd, false);
 
         String expectedMessage = String.format(AddGameCommand.MESSAGE_SUCCESS,
                 gameToAdd.gameName,
@@ -51,7 +51,7 @@ public class AddGameCommandTest {
     public void execute_duplicateGame_failure() throws Exception {
         Person firstPerson = model.getFilteredPersonList().get(0);
         Game gameToAdd = new Game("Minecraft");
-        AddGameCommand addGameCommand = new AddGameCommand(null, firstPerson.getName(), gameToAdd);
+        AddGameCommand addGameCommand = new AddGameCommand(null, firstPerson.getName(), gameToAdd, false);
 
         // Add the game once successfully
         addGameCommand.execute(model);
@@ -64,7 +64,7 @@ public class AddGameCommandTest {
     public void execute_contactNotFound_failure() {
         Name notInModelName = new Name("Unknown Person Name");
         Game gameToAdd = new Game("Minecraft");
-        AddGameCommand addGameCommand = new AddGameCommand(null, notInModelName, gameToAdd);
+        AddGameCommand addGameCommand = new AddGameCommand(null, notInModelName, gameToAdd, false);
 
         assertCommandFailure(addGameCommand, model, AddGameCommand.MESSAGE_CONTACT_NOT_FOUND);
     }
@@ -76,7 +76,7 @@ public class AddGameCommandTest {
 
         // Use all-lowercase version of the stored name
         Name lowerCaseName = new Name(firstPerson.getName().fullName.toLowerCase());
-        AddGameCommand addGameCommand = new AddGameCommand(null, lowerCaseName, gameToAdd);
+        AddGameCommand addGameCommand = new AddGameCommand(null, lowerCaseName, gameToAdd, false);
 
         Set<Game> expectedGames = new HashSet<>(firstPerson.getGames());
         expectedGames.add(gameToAdd);
@@ -98,7 +98,7 @@ public class AddGameCommandTest {
         Game gameToAdd = new Game("Minecraft");
 
         // Testing the Index path (Name is null)
-        AddGameCommand addGameCommand = new AddGameCommand(INDEX_FIRST_PERSON, null, gameToAdd);
+        AddGameCommand addGameCommand = new AddGameCommand(INDEX_FIRST_PERSON, null, gameToAdd, false);
 
         Set<Game> expectedGames = new HashSet<>(firstPerson.getGames());
         expectedGames.add(gameToAdd);
@@ -119,7 +119,7 @@ public class AddGameCommandTest {
         // Create an index that is larger than the size of the list
         Index outOfBoundIndex = Index.fromOneBased(model.getFilteredPersonList().size() + 1);
         Game gameToAdd = new Game("Minecraft");
-        AddGameCommand addGameCommand = new AddGameCommand(outOfBoundIndex, null, gameToAdd);
+        AddGameCommand addGameCommand = new AddGameCommand(outOfBoundIndex, null, gameToAdd, false);
 
         assertCommandFailure(addGameCommand,
                 model,
@@ -132,14 +132,14 @@ public class AddGameCommandTest {
         Game gameB = new Game("Valorant");
         Name nameA = new Name("Alice");
 
-        AddGameCommand addGameByIndex = new AddGameCommand(INDEX_FIRST_PERSON, null, gameA);
-        AddGameCommand addGameByName = new AddGameCommand(null, nameA, gameA);
+        AddGameCommand addGameByIndex = new AddGameCommand(INDEX_FIRST_PERSON, null, gameA, false);
+        AddGameCommand addGameByName = new AddGameCommand(null, nameA, gameA, false);
 
         // same object -> returns true
         org.junit.jupiter.api.Assertions.assertTrue(addGameByIndex.equals(addGameByIndex));
 
         // same values -> returns true
-        AddGameCommand addGameByIndexCopy = new AddGameCommand(INDEX_FIRST_PERSON, null, gameA);
+        AddGameCommand addGameByIndexCopy = new AddGameCommand(INDEX_FIRST_PERSON, null, gameA, false);
         org.junit.jupiter.api.Assertions.assertTrue(addGameByIndex.equals(addGameByIndexCopy));
 
         // different types -> returns false
@@ -149,7 +149,7 @@ public class AddGameCommandTest {
         org.junit.jupiter.api.Assertions.assertFalse(addGameByIndex.equals(null));
 
         // different game -> returns false
-        AddGameCommand addDiffGame = new AddGameCommand(INDEX_FIRST_PERSON, null, gameB);
+        AddGameCommand addDiffGame = new AddGameCommand(INDEX_FIRST_PERSON, null, gameB, false);
         org.junit.jupiter.api.Assertions.assertFalse(addGameByIndex.equals(addDiffGame));
 
         // different target types (index vs name) -> returns false

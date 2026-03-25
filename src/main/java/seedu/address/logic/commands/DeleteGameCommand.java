@@ -40,40 +40,45 @@ public class DeleteGameCommand extends Command implements UndoableCommand {
     private final Game gameToDelete;
     private Person personBeforeEdit;
     private Person personAfterEdit;
+    private final boolean useUserProfile;
 
     /**
-     * @param targetIndex the index of the person.
-     * @param targetName of the person in the filtered person list to edit.
-     * @param gameToDelete the game to remove from the person.
+     * @param targetIndex    the index of the person.
+     * @param targetName     of the person in the filtered person list to edit.
+     * @param gameToDelete   the game to remove from the person.
+     * @param useUserProfile true if targeting the user profile via index 0.
      */
-    public DeleteGameCommand(Index targetIndex, Name targetName, Game gameToDelete) {
+    public DeleteGameCommand(Index targetIndex, Name targetName, Game gameToDelete, boolean useUserProfile) {
         requireNonNull(gameToDelete);
         this.targetIndex = targetIndex;
         this.targetName = targetName;
         this.gameToDelete = gameToDelete;
+        this.useUserProfile = useUserProfile;
     }
 
     @Override
     public CommandResult execute(Model model) throws CommandException {
         requireNonNull(model);
-        List<Person> lastShownList = model.getFilteredPersonList();
-        Person personToEdit = null;
+        Person personToEdit;
 
-        // 1. Find the target person using either Index OR Name
-        if (targetIndex != null) {
-            if (targetIndex.getZeroBased() >= lastShownList.size()) {
-                throw new CommandException(Messages.MESSAGE_INVALID_PERSON_DISPLAYED_INDEX);
-            }
-            personToEdit = lastShownList.get(targetIndex.getZeroBased());
-        } else if (targetName != null) {
-            Optional<Person> personOptional = lastShownList.stream()
-                    .filter(person -> person.getName().fullName.equalsIgnoreCase(targetName.fullName))
-                    .findFirst();
-
-            if (personOptional.isEmpty()) {
+        if (useUserProfile) {
+            personToEdit = model.getUserProfile()
+                    .orElseThrow(() -> new CommandException("No user profile found."));
+        } else {
+            List<Person> lastShownList = model.getFilteredPersonList();
+            if (targetIndex != null) {
+                if (targetIndex.getZeroBased() >= lastShownList.size()) {
+                    throw new CommandException(Messages.MESSAGE_INVALID_PERSON_DISPLAYED_INDEX);
+                }
+                personToEdit = lastShownList.get(targetIndex.getZeroBased());
+            } else if (targetName != null) {
+                personToEdit = lastShownList.stream()
+                        .filter(person -> person.getName().fullName.equalsIgnoreCase(targetName.fullName))
+                        .findFirst()
+                        .orElseThrow(() -> new CommandException(MESSAGE_CONTACT_NOT_FOUND));
+            } else {
                 throw new CommandException(MESSAGE_CONTACT_NOT_FOUND);
             }
-            personToEdit = personOptional.get();
         }
 
         if (personToEdit == null) {
@@ -91,7 +96,7 @@ public class DeleteGameCommand extends Command implements UndoableCommand {
 
         // Create a copy of the person with the updated games
         Person editedPerson = new Person(
-                personToEdit.getName(), personToEdit.getTags(), updatedGames);
+                personToEdit.getName(), personToEdit.getTags(), updatedGames, personToEdit.isUserProfile());
 
         personBeforeEdit = personToEdit;
         personAfterEdit = editedPerson;
@@ -125,6 +130,6 @@ public class DeleteGameCommand extends Command implements UndoableCommand {
         boolean isSameName = (targetName == null && e.targetName == null)
                 || (targetName != null && targetName.equals(e.targetName));
 
-        return isSameIndex && isSameName && gameToDelete.equals(e.gameToDelete);
+        return isSameIndex && isSameName && gameToDelete.equals(e.gameToDelete) && useUserProfile == e.useUserProfile;
     }
 }

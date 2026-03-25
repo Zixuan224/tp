@@ -25,6 +25,7 @@ class JsonAdaptedPerson {
     private final String name;
     private final List<JsonAdaptedTag> tags = new ArrayList<>();
     private final List<JsonAdaptedGame> games = new ArrayList<>();
+    private final boolean isUserProfile;
 
     /**
      * Constructs a {@code JsonAdaptedPerson} with the given person details.
@@ -32,8 +33,10 @@ class JsonAdaptedPerson {
     @JsonCreator
     public JsonAdaptedPerson(@JsonProperty("name") String name,
                              @JsonProperty("tags") List<JsonAdaptedTag> tags,
-                             @JsonProperty("games") List<JsonAdaptedGame> games) {
+                             @JsonProperty("games") List<JsonAdaptedGame> games,
+                             @JsonProperty("isUserProfile") boolean isUserProfile) {
         this.name = name;
+        this.isUserProfile = isUserProfile;
         if (tags != null) {
             this.tags.addAll(tags);
         }
@@ -47,6 +50,7 @@ class JsonAdaptedPerson {
      */
     public JsonAdaptedPerson(Person source) {
         name = source.getName().fullName;
+        isUserProfile = source.isUserProfile();
         tags.addAll(source.getTags().stream()
                 .map(JsonAdaptedTag::new)
                 .collect(Collectors.toList()));
@@ -80,7 +84,7 @@ class JsonAdaptedPerson {
 
         final Set<Game> modelGames = new HashSet<>(personGames);
         final Set<Tag> modelTags = new HashSet<>(personTags);
-        return new Person(modelName, modelTags, modelGames);
+        return new Person(modelName, modelTags, modelGames, isUserProfile);
     }
 
 }

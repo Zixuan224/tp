@@ -21,14 +21,14 @@ public class DeleteGameCommandParserTest {
     public void parse_validArgsByIndex_returnsDeleteGameCommand() {
         // Simulates: game delete 1 g/Minecraft
         assertParseSuccess(parser, " 1 g/Minecraft",
-                new DeleteGameCommand(INDEX_FIRST_PERSON, null, validGame));
+                new DeleteGameCommand(INDEX_FIRST_PERSON, null, validGame, false));
     }
 
     @Test
     public void parse_validArgsByName_returnsDeleteGameCommand() {
         // Simulates: game delete n/Zi Xuan g/Minecraft
         assertParseSuccess(parser, " n/Zi Xuan g/Minecraft",
-                new DeleteGameCommand(null, validName, validGame));
+                new DeleteGameCommand(null, validName, validGame, false));
     }
 
     @Test
@@ -45,5 +45,19 @@ public class DeleteGameCommandParserTest {
 
         assertParseFailure(parser, " 1", expectedMessage);
         assertParseFailure(parser, " n/Zi Xuan", expectedMessage);
+    }
+
+    @Test
+    public void parse_indexZero_returnsUserProfileCommand() {
+        // Simulates: game delete 0 g/Minecraft (user profile)
+        assertParseSuccess(parser, " 0 g/Minecraft",
+                new DeleteGameCommand(null, null, validGame, true));
+    }
+
+    @Test
+    public void parse_indexZeroWithName_throwsParseException() {
+        // Index 0 and name prefix together is invalid
+        assertParseFailure(parser, " 0 n/Zi Xuan g/Minecraft",
+                "Please provide either an index OR a name, not both.");
     }
 }

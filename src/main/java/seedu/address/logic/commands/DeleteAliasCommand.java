@@ -49,40 +49,44 @@ public class DeleteAliasCommand extends Command implements UndoableCommand {
     private final Alias aliasToDelete;
     private Person personBeforeEdit;
     private Person personAfterEdit;
+    private final boolean useUserProfile;
 
     /**
-     * Creates a DeleteAliasCommand to remove {@code alias} from the person with {@code targetName}.
+     * Creates a DeleteAliasCommand to remove {@code alias} from the person.
      */
-    public DeleteAliasCommand(Index targetIndex, Name targetName, Game game, Alias alias) {
+    public DeleteAliasCommand(Index targetIndex, Name targetName, Game game, Alias alias, boolean useUserProfile) {
         requireNonNull(game);
         requireNonNull(alias);
         this.targetIndex = targetIndex;
         this.targetName = targetName;
         this.targetGame = game;
         this.aliasToDelete = alias;
+        this.useUserProfile = useUserProfile;
     }
 
     @Override
     public CommandResult execute(Model model) throws CommandException {
         requireNonNull(model);
-        List<Person> lastShownList = model.getFilteredPersonList();
-        Person personToEdit = null;
+        Person personToEdit;
 
-        // 1. Find the target person using either Index OR Name
-        if (targetIndex != null) {
-            if (targetIndex.getZeroBased() >= lastShownList.size()) {
-                throw new CommandException(Messages.MESSAGE_INVALID_PERSON_DISPLAYED_INDEX);
-            }
-            personToEdit = lastShownList.get(targetIndex.getZeroBased());
-        } else if (targetName != null) {
-            Optional<Person> personOptional = lastShownList.stream()
-                    .filter(person -> person.getName().fullName.equalsIgnoreCase(targetName.fullName))
-                    .findFirst();
-
-            if (personOptional.isEmpty()) {
+        if (useUserProfile) {
+            personToEdit = model.getUserProfile()
+                    .orElseThrow(() -> new CommandException("No user profile found."));
+        } else {
+            List<Person> lastShownList = model.getFilteredPersonList();
+            if (targetIndex != null) {
+                if (targetIndex.getZeroBased() >= lastShownList.size()) {
+                    throw new CommandException(Messages.MESSAGE_INVALID_PERSON_DISPLAYED_INDEX);
+                }
+                personToEdit = lastShownList.get(targetIndex.getZeroBased());
+            } else if (targetName != null) {
+                personToEdit = lastShownList.stream()
+                        .filter(person -> person.getName().fullName.equalsIgnoreCase(targetName.fullName))
+                        .findFirst()
+                        .orElseThrow(() -> new CommandException(MESSAGE_PERSON_NOT_FOUND));
+            } else {
                 throw new CommandException(MESSAGE_PERSON_NOT_FOUND);
             }
-            personToEdit = personOptional.get();
         }
 
         Optional<Game> gameOptional = personToEdit.getGames().stream()
@@ -110,7 +114,8 @@ public class DeleteAliasCommand extends Command implements UndoableCommand {
         Person editedPerson = new Person(
                 personToEdit.getName(),
                 personToEdit.getTags(),
-                updatedGames
+                updatedGames,
+                personToEdit.isUserProfile()
         );
 
         personBeforeEdit = personToEdit;
@@ -146,7 +151,8 @@ public class DeleteAliasCommand extends Command implements UndoableCommand {
 
         return isSameIndex && isSameName
                 && targetGame.equals(e.targetGame)
-                && aliasToDelete.equals(e.aliasToDelete);
+                && aliasToDelete.equals(e.aliasToDelete)
+                && useUserProfile == e.useUserProfile;
     }
 
     @Override

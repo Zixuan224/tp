@@ -26,24 +26,26 @@ public class DeleteGameCommandParser implements Parser<DeleteGameCommand> {
             throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT, DeleteGameCommand.MESSAGE_USAGE));
         }
 
-        String preamble = argMultimap.getPreamble();
+        String preamble = argMultimap.getPreamble().trim();
+        boolean useUserProfile = preamble.equals("0");
         boolean hasNamePrefix = argMultimap.getValue(PREFIX_NAME).isPresent();
 
-        // 1. Validate mutually exclusive index/name using our new helper
-        ParserUtil.verifyIndexOrNamePresent(preamble, hasNamePrefix, DeleteGameCommand.MESSAGE_USAGE);
+        if (!useUserProfile) {
+            ParserUtil.verifyIndexOrNamePresent(preamble, hasNamePrefix, DeleteGameCommand.MESSAGE_USAGE);
+        } else if (hasNamePrefix) {
+            throw new ParseException("Please provide either an index OR a name, not both.");
+        }
 
-        // 2. Extract whichever target is present (the other will safely be null)
-        Index index = preamble.isEmpty() ? null : ParserUtil.parseIndex(preamble);
+        Index index = (!useUserProfile && !preamble.isEmpty()) ? ParserUtil.parseIndex(preamble) : null;
         Name name = hasNamePrefix ? ParserUtil.parseName(argMultimap.getValue(PREFIX_NAME).get()) : null;
 
-        // 3. Parse the game
         String gameString = argMultimap.getValue(PREFIX_GAME).get();
         if (!Game.isValidGameName(gameString)) {
             throw new ParseException(Game.MESSAGE_CONSTRAINTS);
         }
         Game game = new Game(gameString);
 
-        return new DeleteGameCommand(index, name, game);
+        return new DeleteGameCommand(index, name, game, useUserProfile);
     }
 
     private static boolean arePrefixesPresent(ArgumentMultimap argumentMultimap, Prefix... prefixes) {
