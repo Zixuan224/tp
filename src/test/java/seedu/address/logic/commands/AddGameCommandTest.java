@@ -35,16 +35,23 @@ public class AddGameCommandTest {
         Person editedPerson = new Person(
                 firstPerson.getName(), firstPerson.getTags(), expectedGames);
 
-        AddGameCommand addGameCommand = new AddGameCommand(null, firstPerson.getName(), gameToAdd, false);
+        AddGameCommand addGameCommand = new AddGameCommand(null,
+                firstPerson.getName(),
+                gameToAdd,
+                false);
 
         String expectedMessage = String.format(AddGameCommand.MESSAGE_SUCCESS,
                 gameToAdd.gameName,
                 editedPerson.getName().fullName);
 
+        CommandResult expectedCommandResult = new CommandResult(expectedMessage,
+                false,
+                false,
+                editedPerson);
         Model expectedModel = new ModelManager(new AddressBook(model.getAddressBook()), new UserPrefs());
         expectedModel.setPerson(firstPerson, editedPerson);
 
-        assertCommandSuccess(addGameCommand, model, expectedMessage, expectedModel);
+        assertCommandSuccess(addGameCommand, model, expectedCommandResult, expectedModel);
     }
 
     @Test
@@ -86,10 +93,15 @@ public class AddGameCommandTest {
                 gameToAdd.gameName,
                 firstPerson.getName().fullName);
 
+        CommandResult expectedCommandResult = new CommandResult(expectedMessage,
+                false,
+                false,
+                editedPerson);
+
         Model expectedModel = new ModelManager(new AddressBook(model.getAddressBook()), new UserPrefs());
         expectedModel.setPerson(firstPerson, editedPerson);
 
-        assertCommandSuccess(addGameCommand, model, expectedMessage, expectedModel);
+        assertCommandSuccess(addGameCommand, model, expectedCommandResult, expectedModel);
     }
 
     @Test
@@ -108,10 +120,12 @@ public class AddGameCommandTest {
                 gameToAdd.gameName,
                 firstPerson.getName().fullName);
 
+        CommandResult expectedCommandResult = new CommandResult(expectedMessage, false, false, editedPerson);
+
         Model expectedModel = new ModelManager(new AddressBook(model.getAddressBook()), new UserPrefs());
         expectedModel.setPerson(firstPerson, editedPerson);
 
-        assertCommandSuccess(addGameCommand, model, expectedMessage, expectedModel);
+        assertCommandSuccess(addGameCommand, model, expectedCommandResult, expectedModel);
     }
 
     @Test

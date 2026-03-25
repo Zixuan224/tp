@@ -126,7 +126,10 @@ public class AddAliasCommand extends Command {
                 MESSAGE_SUCCESS,
                 editedPerson.getName(),
                 updatedGame.gameName,
-                aliasToAdd));
+                aliasToAdd),
+                false,
+                false,
+                editedPerson);
     }
 
     @Override

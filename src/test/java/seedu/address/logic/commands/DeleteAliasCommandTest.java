@@ -2,7 +2,6 @@ package seedu.address.logic.commands;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static seedu.address.logic.commands.CommandTestUtil.assertCommandFailure;
 import static seedu.address.logic.commands.CommandTestUtil.assertCommandSuccess;
 import static seedu.address.testutil.TypicalIndexes.INDEX_FIRST_PERSON;
@@ -43,10 +42,14 @@ public class DeleteAliasCommandTest {
         Model expectedModel = new ModelManager(getTypicalAddressBook(), new UserPrefs());
         new AddGameCommand(null, firstPerson.getName(), game, false).execute(expectedModel);
 
+        Person editedPerson = expectedModel.getFilteredPersonList().get(0);
+
         String expectedMessage = String.format(DeleteAliasCommand.MESSAGE_SUCCESS,
                 firstPerson.getName(), game.gameName, alias);
 
-        assertCommandSuccess(deleteAliasCommand, model, expectedMessage, expectedModel);
+        CommandResult expectedCommandResult = new CommandResult(expectedMessage, false, false, editedPerson);
+
+        assertCommandSuccess(deleteAliasCommand, model, expectedCommandResult, expectedModel);
     }
 
     @Test
@@ -100,10 +103,14 @@ public class DeleteAliasCommandTest {
         Model expectedModel = new ModelManager(getTypicalAddressBook(), new UserPrefs());
         new AddGameCommand(null, firstPerson.getName(), game, false).execute(expectedModel);
 
+        Person editedPerson = expectedModel.getFilteredPersonList().get(0);
+
         String expectedMessage = String.format(DeleteAliasCommand.MESSAGE_SUCCESS,
                 firstPerson.getName(), game.gameName, alias);
 
-        assertCommandSuccess(deleteAliasCommand, model, expectedMessage, expectedModel);
+        CommandResult expectedCommandResult = new CommandResult(expectedMessage, false, false, editedPerson);
+
+        assertCommandSuccess(deleteAliasCommand, model, expectedCommandResult, expectedModel);
     }
 
     @Test
@@ -123,10 +130,14 @@ public class DeleteAliasCommandTest {
         Model expectedModel = new ModelManager(getTypicalAddressBook(), new UserPrefs());
         new AddGameCommand(INDEX_FIRST_PERSON, null, game, false).execute(expectedModel);
 
+        Person editedPerson = expectedModel.getFilteredPersonList().get(0);
+
         String expectedMessage = String.format(DeleteAliasCommand.MESSAGE_SUCCESS,
                 firstPerson.getName(), game.gameName, alias);
 
-        assertCommandSuccess(deleteAliasCommand, model, expectedMessage, expectedModel);
+        CommandResult expectedCommandResult = new CommandResult(expectedMessage, false, false, editedPerson);
+
+        assertCommandSuccess(deleteAliasCommand, model, expectedCommandResult, expectedModel);
     }
 
     @Test
@@ -159,7 +170,7 @@ public class DeleteAliasCommandTest {
 
         CommandResult result = deleteAliasCommand.execute(profileModel);
         assertEquals(expectedMessage, result.getFeedbackToUser());
-        assertTrue(profileModel.getUserProfile().isPresent());
+        assertEquals(profileModel.getUserProfile().get(), result.getViewedPerson());
     }
 
     @Test

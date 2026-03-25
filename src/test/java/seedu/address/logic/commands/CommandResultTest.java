@@ -19,6 +19,7 @@ public class CommandResultTest {
         // same values -> returns true
         assertTrue(commandResult.equals(new CommandResult("feedback")));
         assertTrue(commandResult.equals(new CommandResult("feedback", false, false)));
+        assertTrue(commandResult.equals(new CommandResult("feedback", false, false, null)));
 
         // same object -> returns true
         assertTrue(commandResult.equals(commandResult));
@@ -41,6 +42,16 @@ public class CommandResultTest {
         // awaiting confirmation vs not -> returns false
         Person person = new PersonBuilder().withName("Alice Pauline").build();
         assertFalse(commandResult.equals(new CommandResult("feedback", person)));
+
+        // different personToView value -> returns false
+        assertFalse(commandResult.equals(new CommandResult("feedback", false, false, person)));
+
+        // different pendingPerson value -> returns false
+        Person alice = new PersonBuilder().withName("Alice").build();
+        Person bob = new PersonBuilder().withName("Bob").build();
+        CommandResult commandResultAlice = new CommandResult("feedback", alice);
+        CommandResult commandResultBob = new CommandResult("feedback", bob);
+        assertFalse(commandResultAlice.equals(commandResultBob));
 
         //same themeToSwitch -> returns true
         assertEquals(new CommandResult("feedback", "light"), new CommandResult("feedback", "light"));
@@ -68,6 +79,10 @@ public class CommandResultTest {
         // different exit value -> returns different hashcode
         assertNotEquals(commandResult.hashCode(), new CommandResult("feedback", false, true).hashCode());
 
+        // different personToView value -> returns different hashcode
+        Person person = new PersonBuilder().withName("Alice Pauline").build();
+        assertNotEquals(commandResult.hashCode(), new CommandResult("feedback", false, false, person).hashCode());
+
         // different themeToSwitch -> returns different hashcode
         assertNotEquals(new CommandResult("feedback", "light").hashCode(),
                 new CommandResult("feedback", "dark").hashCode());
@@ -78,6 +93,7 @@ public class CommandResultTest {
         CommandResult commandResult = new CommandResult("feedback");
         assertFalse(commandResult.isAwaitingConfirmation());
         assertNull(commandResult.getPendingPerson());
+        assertNull(commandResult.getViewedPerson());
     }
 
     @Test
@@ -89,6 +105,7 @@ public class CommandResultTest {
         assertEquals(person, commandResult.getPendingPerson());
         assertFalse(commandResult.isShowHelp());
         assertFalse(commandResult.isExit());
+        assertNull(commandResult.getViewedPerson());
     }
 
     @Test
@@ -98,7 +115,9 @@ public class CommandResultTest {
                 + commandResult.getFeedbackToUser() + ", showHelp=" + commandResult.isShowHelp()
                 + ", exit=" + commandResult.isExit() + ", awaitingConfirmation="
                 + commandResult.isAwaitingConfirmation() + ", themeToSwitch="
-                + commandResult.getThemeToSwitch() + "}";
+                + commandResult.getThemeToSwitch() + ", pendingPerson="
+                + commandResult.getPendingPerson() + ", personToView="
+                + commandResult.getViewedPerson() + "}";
         assertEquals(expected, commandResult.toString());
     }
 }
