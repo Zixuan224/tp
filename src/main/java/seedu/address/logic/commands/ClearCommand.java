@@ -14,10 +14,10 @@ import seedu.address.model.person.Person;
  */
 public class ClearCommand extends Command implements UndoableCommand {
 
-    private ReadOnlyAddressBook previousAddressBook;
-
-    public static final String MESSAGE_SUCCESS = "Address book has been cleared!";
     public static final String COMMAND_WORD = "clear";
+    public static final String MESSAGE_SUCCESS = "Address book has been cleared!";
+
+    private ReadOnlyAddressBook previousAddressBook;
 
 
     @Override
