@@ -52,7 +52,9 @@ public class AddAliasCommandTest {
         String expectedMessage = String.format(AddAliasCommand.MESSAGE_SUCCESS,
                 editedPerson.getName(), game.gameName, alias);
 
-        assertCommandSuccess(addAliasCommand, model, expectedMessage, expectedModel);
+        CommandResult expectedCommandResult = new CommandResult(expectedMessage, false, false, editedPerson);
+
+        assertCommandSuccess(addAliasCommand, model, expectedCommandResult, expectedModel);
     }
 
     @Test
@@ -115,7 +117,9 @@ public class AddAliasCommandTest {
         String expectedMessage = String.format(AddAliasCommand.MESSAGE_SUCCESS,
                 editedPerson.getName(), game.gameName, alias);
 
-        assertCommandSuccess(addAliasCommand, model, expectedMessage, expectedModel);
+        CommandResult expectedCommandResult = new CommandResult(expectedMessage, false, false, editedPerson);
+
+        assertCommandSuccess(addAliasCommand, model, expectedCommandResult, expectedModel);
     }
 
     @Test
@@ -144,7 +148,10 @@ public class AddAliasCommandTest {
         String expectedMessage = String.format(AddAliasCommand.MESSAGE_SUCCESS,
                 editedPerson.getName(), game.gameName, alias);
 
-        assertCommandSuccess(addAliasCommand, model, expectedMessage, expectedModel);
+
+        CommandResult expectedCommandResult = new CommandResult(expectedMessage, false, false, editedPerson);
+
+        assertCommandSuccess(addAliasCommand, model, expectedCommandResult, expectedModel);
     }
 
     @Test
@@ -177,6 +184,8 @@ public class AddAliasCommandTest {
         CommandResult result = addAliasCommand.execute(profileModel);
         assertEquals(expectedMessage, result.getFeedbackToUser());
         assertTrue(profileModel.getUserProfile().isPresent());
+        assertEquals(profileModel.getUserProfile().get(), result.getViewedPerson());
+        assertTrue(profileModel.getUserProfile().get().getGames().iterator().next().getAliases().contains(alias));
     }
 
     @Test

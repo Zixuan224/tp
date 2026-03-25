@@ -1,16 +1,36 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.geometry.Insets?>
 
 <VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
-      spacing="15" styleClass="pane-with-border">
-    <padding>
-        <Insets top="20" right="20" bottom="20" left="20" />
-    </padding>
+      styleClass="pane-with-border" alignment="CENTER" VBox.vgrow="ALWAYS">
 
-    <Label fx:id="name" styleClass="cell_big_label" text="Select a profile to view" wrapText="true"/>
+    <Label fx:id="placeholderText"
+           text="No profile selected.&#10;Type 'profile view' or 'profile view [INDEX]' to inspect."
+           styleClass="cell_small_label" style="-fx-text-fill: derive(white, -40%);
+            -fx-font-size: 14px; -fx-font-style: italic;"
+           wrapText="true" textAlignment="CENTER">
+        <padding>
+            <Insets top="20" right="20" bottom="20" left="20" />
+        </padding>
+    </Label>
 
-    <VBox fx:id="gamesList" spacing="8" />
+    <ScrollPane fx:id="profileContainer" fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED"
+                style="-fx-background-color: transparent; -fx-background: transparent;"
+                visible="false" managed="false" VBox.vgrow="ALWAYS">
+        <VBox spacing="15">
+            <padding>
+                <Insets top="25" right="25" bottom="25" left="25" />
+            </padding>
+
+            <Label fx:id="name" styleClass="label-header" style="-fx-font-size: 26px;
+             -fx-text-fill: white; -fx-font-weight: bold;" wrapText="true"/>
+
+            <VBox fx:id="gamesList" spacing="8" />
+        </VBox>
+    </ScrollPane>
+
 </VBox>

@@ -38,15 +38,19 @@ public class DeleteAliasCommandTest {
 
         DeleteAliasCommand deleteAliasCommand =
                 new DeleteAliasCommand(null, firstPerson.getName(), game, alias, false);
-
+        
         // Expected model has the game but without the alias (same as after only adding the game)
         Model expectedModel = new ModelManager(getTypicalAddressBook(), new UserPrefs());
         new AddGameCommand(null, firstPerson.getName(), game, false).execute(expectedModel);
 
+        Person editedPerson = expectedModel.getFilteredPersonList().get(0);
+
         String expectedMessage = String.format(DeleteAliasCommand.MESSAGE_SUCCESS,
                 firstPerson.getName(), game.gameName, alias);
 
-        assertCommandSuccess(deleteAliasCommand, model, expectedMessage, expectedModel);
+        CommandResult expectedCommandResult = new CommandResult(expectedMessage, false, false, editedPerson);
+
+        assertCommandSuccess(deleteAliasCommand, model, expectedCommandResult, expectedModel);
     }
 
     @Test
@@ -100,10 +104,14 @@ public class DeleteAliasCommandTest {
         Model expectedModel = new ModelManager(getTypicalAddressBook(), new UserPrefs());
         new AddGameCommand(null, firstPerson.getName(), game, false).execute(expectedModel);
 
+        Person editedPerson = expectedModel.getFilteredPersonList().get(0);
+
         String expectedMessage = String.format(DeleteAliasCommand.MESSAGE_SUCCESS,
                 firstPerson.getName(), game.gameName, alias);
 
-        assertCommandSuccess(deleteAliasCommand, model, expectedMessage, expectedModel);
+        CommandResult expectedCommandResult = new CommandResult(expectedMessage, false, false, editedPerson);
+
+        assertCommandSuccess(deleteAliasCommand, model, expectedCommandResult, expectedModel);
     }
 
     @Test
@@ -123,10 +131,14 @@ public class DeleteAliasCommandTest {
         Model expectedModel = new ModelManager(getTypicalAddressBook(), new UserPrefs());
         new AddGameCommand(INDEX_FIRST_PERSON, null, game, false).execute(expectedModel);
 
+        Person editedPerson = expectedModel.getFilteredPersonList().get(0);
+
         String expectedMessage = String.format(DeleteAliasCommand.MESSAGE_SUCCESS,
                 firstPerson.getName(), game.gameName, alias);
 
-        assertCommandSuccess(deleteAliasCommand, model, expectedMessage, expectedModel);
+        CommandResult expectedCommandResult = new CommandResult(expectedMessage, false, false, editedPerson);
+
+        assertCommandSuccess(deleteAliasCommand, model, expectedCommandResult, expectedModel);
     }
 
     @Test
@@ -159,7 +171,7 @@ public class DeleteAliasCommandTest {
 
         CommandResult result = deleteAliasCommand.execute(profileModel);
         assertEquals(expectedMessage, result.getFeedbackToUser());
-        assertTrue(profileModel.getUserProfile().isPresent());
+        assertEquals(profileModel.getUserProfile().get(), result.getViewedPerson());
     }
 
     @Test

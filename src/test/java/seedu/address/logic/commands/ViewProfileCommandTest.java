@@ -35,8 +35,7 @@ public class ViewProfileCommandTest {
 
         CommandResult result = new ViewProfileCommand().execute(model);
 
-        // We use your static helper method here to predict the exact string!
-        String expectedMessage = "Displaying your profile.\n\n" + ViewProfileCommand.formatProfileDisplay(userProfile);
+        String expectedMessage = ViewProfileCommand.MESSAGE_SUCCESS_SELF;
 
         assertEquals(expectedMessage, result.getFeedbackToUser());
         assertEquals(userProfile, result.getViewedPerson());
@@ -56,7 +55,8 @@ public class ViewProfileCommandTest {
         ViewProfileCommand viewCommand = new ViewProfileCommand(null, personToView.getName());
 
         // Use the formatted display to match our new text box output
-        String expectedMessage = ViewProfileCommand.formatProfileDisplay(personToView);
+        String expectedMessage = String.format(ViewProfileCommand.MESSAGE_SUCCESS_CONTACT,
+                personToView.getName().fullName);
         CommandResult expectedCommandResult = new CommandResult(expectedMessage,
                 false,
                 false,
@@ -71,8 +71,8 @@ public class ViewProfileCommandTest {
         Person personToView = typicalModel.getFilteredPersonList().get(0);
         ViewProfileCommand viewCommand = new ViewProfileCommand(INDEX_FIRST_PERSON, null);
 
-        // Use the formatted display to match our new text box output
-        String expectedMessage = ViewProfileCommand.formatProfileDisplay(personToView);
+        String expectedMessage = String.format(ViewProfileCommand.MESSAGE_SUCCESS_CONTACT,
+                personToView.getName().fullName);
         CommandResult expectedCommandResult = new CommandResult(expectedMessage, false, false, personToView);
         Model expectedModel = new ModelManager(typicalModel.getAddressBook(), new UserPrefs());
 

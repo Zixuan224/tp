@@ -2,6 +2,8 @@ package seedu.address.ui;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
+//import javafx.scene.control.Tooltip;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import seedu.address.model.person.Person;
@@ -13,6 +15,10 @@ public class ViewPanel extends UiPart<Region> {
     private static final String FXML = "ViewPanel.fxml";
 
     @FXML
+    private Label placeholderText;
+    @FXML
+    private ScrollPane profileContainer;
+    @FXML
     private Label name;
     @FXML
     private VBox gamesList;
@@ -22,8 +28,6 @@ public class ViewPanel extends UiPart<Region> {
      */
     public ViewPanel() {
         super(FXML);
-        // Default empty state before any command is run
-        name.setText("Select a profile to view.");
     }
 
     /**
@@ -34,33 +38,57 @@ public class ViewPanel extends UiPart<Region> {
             return;
         }
 
-        // 1. Set the Name
-        name.setText(person.getName().fullName);
+        // 1. show profile container, hide placeholder text
+        placeholderText.setVisible(false);
+        placeholderText.setManaged(false);
+        profileContainer.setVisible(true);
+        profileContainer.setManaged(true);
 
-        // 2. Clear out any previous games
+        // 2. Set the Name
+        name.setText("User: " + person.getName().fullName);
+
+        // 3. Clear out any previous games
         gamesList.getChildren().clear();
 
         // 3. Populate the Games and Aliases
         if (person.getGames().isEmpty()) {
-            Label emptyLabel = new Label("Games: None added yet.");
-            emptyLabel.getStyleClass().add("cell_small_label");
+            Label emptyLabel = new Label("No games added yet.");
+            emptyLabel.setStyle("-fx-text-fill: derive(white, -30%); -fx-font-style: italic;");
             gamesList.getChildren().add(emptyLabel);
         } else {
-            Label gamesTitle = new Label("Games:");
-            gamesTitle.setStyle("-fx-font-weight: bold; -fx-text-fill: white; -fx-font-size: 14px;");
+            Label gamesTitle = new Label("GAMES & ALIASES");
+            gamesTitle.setStyle("-fx-font-weight: bold;"
+                    + " -fx-text-fill: #b3d4ff;"
+                    + " -fx-font-size: 13px;"
+                    + " -fx-padding: 10 0 5 0;");
             gamesList.getChildren().add(gamesTitle);
 
             person.getGames().forEach(game -> {
-                StringBuilder gameText = new StringBuilder(" • " + game.gameName);
+                VBox gameBox = new VBox();
+                gameBox.setStyle("-fx-background-color: derive(#1d1d1d, 20%);"
+                        + " -fx-padding: 10;"
+                        + " -fx-background-radius: 5;");
+
+                Label gameNameLabel = new Label("🎮 " + game.gameName);
+                gameNameLabel.setWrapText(true); // Wrap text
+                //gameNameLabel.setMaxWidth(300); // Force wrap if it's one giant word without spaces
+                gameNameLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: white; -fx-font-size: 14px;");
+                gameBox.getChildren().add(gameNameLabel);
+
                 if (!game.getAliases().isEmpty()) {
-                    gameText.append(" [Aliases: ");
-                    game.getAliases().forEach(alias -> gameText.append(alias).append(", "));
-                    gameText.setLength(gameText.length() - 2); // Remove trailing comma and space
-                    gameText.append("]");
+                    StringBuilder aliasText = new StringBuilder("Alias: ");
+                    game.getAliases().forEach(alias -> aliasText.append(alias).append(", "));
+                    aliasText.setLength(aliasText.length() - 2); // Remove trailing comma and space
+
+                    Label aliasLabel = new Label(aliasText.toString());
+                    aliasLabel.setStyle("-fx-text-fill: derive(white, -20%);"
+                            + " -fx-font-size: 12px;"
+                            + " -fx-padding: 3 0 0 5;");
+                    aliasLabel.setWrapText(true);
+                    gameBox.getChildren().add(aliasLabel);
                 }
-                Label gameLabel = new Label(gameText.toString());
-                gameLabel.getStyleClass().add("cell_small_label"); // Uses standard AB3 styling
-                gamesList.getChildren().add(gameLabel);
+
+                gamesList.getChildren().add(gameBox);
             });
         }
     }
