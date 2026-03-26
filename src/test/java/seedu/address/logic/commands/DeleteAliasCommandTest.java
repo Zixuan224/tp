@@ -181,6 +181,27 @@ public class DeleteAliasCommandTest {
     }
 
     @Test
+    public void undo_deleteAlias_aliasRestored() throws Exception {
+        Person firstPerson = model.getFilteredPersonList().get(0);
+        Game game = new Game("Valorant");
+        Alias alias = new Alias("Benjumpin");
+
+        new AddGameCommand(null, firstPerson.getName(), game, false).execute(model);
+        new AddAliasCommand(null, firstPerson.getName(), game, alias, false).execute(model);
+
+        DeleteAliasCommand deleteAliasCommand =
+                new DeleteAliasCommand(null, firstPerson.getName(), game, alias, false);
+        deleteAliasCommand.execute(model);
+        deleteAliasCommand.undo(model);
+
+        Game gameAfterUndo = model.getFilteredPersonList().get(0).getGames().stream()
+                .filter(g -> g.equals(game))
+                .findFirst()
+                .orElseThrow();
+        assertTrue(gameAfterUndo.getAliases().contains(alias));
+    }
+
+    @Test
     public void toStringMethod() {
         Game game = new Game("Valorant");
         Alias alias = new Alias("Benjumpin");

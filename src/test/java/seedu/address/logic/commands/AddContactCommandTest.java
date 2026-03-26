@@ -21,8 +21,10 @@ import seedu.address.logic.Messages;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.model.AddressBook;
 import seedu.address.model.Model;
+import seedu.address.model.ModelManager;
 import seedu.address.model.ReadOnlyAddressBook;
 import seedu.address.model.ReadOnlyUserPrefs;
+import seedu.address.model.UserPrefs;
 import seedu.address.model.person.Person;
 import seedu.address.testutil.PersonBuilder;
 
@@ -84,6 +86,19 @@ public class AddContactCommandTest {
         AddContactCommand addCommand = new AddContactCommand(ALICE);
         String expected = AddContactCommand.class.getCanonicalName() + "{toAdd=" + ALICE + "}";
         assertEquals(expected, addCommand.toString());
+    }
+
+    @Test
+    public void undo_addContact_personRemoved() throws Exception {
+        Model model = new ModelManager();
+        Person validPerson = new PersonBuilder().build();
+        AddContactCommand addCommand = new AddContactCommand(validPerson);
+
+        addCommand.execute(model);
+        assertTrue(model.hasPerson(validPerson));
+
+        addCommand.undo(model);
+        assertFalse(model.hasPerson(validPerson));
     }
 
     /**

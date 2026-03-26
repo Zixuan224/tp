@@ -151,6 +151,20 @@ public class DeleteGameCommandTest {
     }
 
     @Test
+    public void undo_deleteGame_gameRestored() throws Exception {
+        Person firstPerson = model.getFilteredPersonList().get(0);
+        Game gameToProcess = new Game("Minecraft");
+
+        new AddGameCommand(null, firstPerson.getName(), gameToProcess, false).execute(model);
+        DeleteGameCommand deleteGameCommand =
+                new DeleteGameCommand(null, firstPerson.getName(), gameToProcess, false);
+        deleteGameCommand.execute(model);
+        deleteGameCommand.undo(model);
+
+        assertTrue(model.getFilteredPersonList().get(0).getGames().contains(gameToProcess));
+    }
+
+    @Test
     public void equals() {
         Game gameA = new Game("Minecraft");
         Game gameB = new Game("Valorant");

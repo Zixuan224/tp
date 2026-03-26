@@ -162,6 +162,18 @@ public class AddGameCommandTest {
     }
 
     @Test
+    public void undo_addGame_gameRemoved() throws Exception {
+        Person firstPerson = model.getFilteredPersonList().get(0);
+        Game gameToAdd = new Game("Minecraft");
+        AddGameCommand addGameCommand = new AddGameCommand(null, firstPerson.getName(), gameToAdd, false);
+
+        addGameCommand.execute(model);
+        addGameCommand.undo(model);
+
+        Assertions.assertFalse(model.getFilteredPersonList().get(0).getGames().contains(gameToAdd));
+    }
+
+    @Test
     public void equals() {
         Game gameA = new Game("Minecraft");
         Game gameB = new Game("Valorant");

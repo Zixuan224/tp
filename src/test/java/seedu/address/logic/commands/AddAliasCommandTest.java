@@ -1,6 +1,7 @@
 package seedu.address.logic.commands;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static seedu.address.logic.commands.CommandTestUtil.assertCommandFailure;
@@ -195,6 +196,24 @@ public class AddAliasCommandTest {
         Alias alias = new Alias("SomeAlias");
         AddAliasCommand addAliasCommand = new AddAliasCommand(null, null, game, alias, false);
         assertCommandFailure(addAliasCommand, model, AddAliasCommand.MESSAGE_PERSON_NOT_FOUND);
+    }
+
+    @Test
+    public void undo_addAlias_aliasRemoved() throws Exception {
+        Person firstPerson = model.getFilteredPersonList().get(0);
+        Game game = new Game("Valorant");
+        Alias alias = new Alias("Benjumpin");
+
+        new AddGameCommand(null, firstPerson.getName(), game, false).execute(model);
+        AddAliasCommand addAliasCommand = new AddAliasCommand(null, firstPerson.getName(), game, alias, false);
+        addAliasCommand.execute(model);
+        addAliasCommand.undo(model);
+
+        Game gameAfterUndo = model.getFilteredPersonList().get(0).getGames().stream()
+                .filter(g -> g.equals(game))
+                .findFirst()
+                .orElseThrow();
+        assertFalse(gameAfterUndo.getAliases().contains(alias));
     }
 
     @Test

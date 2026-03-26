@@ -207,6 +207,19 @@ public class EditCommandTest {
     }
 
     @Test
+    public void undo_editPerson_personReverted() throws Exception {
+        AddressBook originalAddressBook = new AddressBook(model.getAddressBook());
+
+        EditPersonDescriptor descriptor = new EditPersonDescriptorBuilder().withName(VALID_NAME_BOB).build();
+        EditCommand editCommand = new EditCommand(INDEX_FIRST_PERSON, descriptor);
+
+        editCommand.execute(model);
+        editCommand.undo(model);
+
+        assertEquals(originalAddressBook, model.getAddressBook());
+    }
+
+    @Test
     public void toStringMethod() {
         Index index = Index.fromOneBased(1);
         EditPersonDescriptor editPersonDescriptor = new EditPersonDescriptor();
