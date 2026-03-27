@@ -165,12 +165,15 @@ This section describes some noteworthy details on how certain features are imple
 The `contact edit` command allows users to rename an existing contact while preserving all associated games and aliases. It is implemented via `EditContactCommand`, parsed by `EditContactCommandParser`, and routed through `ContactCommandParser`.
 
 **Parsing flow:**
-1. `AddressBookParser` receives `"contact edit n/Janelle e/Jan"` and dispatches to `ContactCommandParser`.
+1. `AddressBookParser` receives `"contact edit 1 e/Jan"` (or `"contact edit n/Janelle e/Jan"`) and dispatches to `ContactCommandParser`.
 2. `ContactCommandParser` splits on the first token (`"edit"`) and delegates the remaining args to `EditContactCommandParser`.
-3. `EditContactCommandParser` tokenizes using `PREFIX_NAME` (`n/`) and `PREFIX_NEW_NAME` (`e/`), validates both are present, and returns an `EditContactCommand(targetName, newName)`.
+3. `EditContactCommandParser` tokenizes using `PREFIX_NAME` (`n/`) and `PREFIX_NEW_NAME` (`e/`). It then determines the target via `ParserUtil.verifyIndexOrNamePresent` — either an index from the preamble, a name from `n/`, or `0` for the user profile — and returns an `EditContactCommand(targetIndex, targetName, newName, useUserProfile)`.
 
 **Execution flow:**
-1. `EditContactCommand#execute()` searches `model.getFilteredPersonList()` for a `Person` whose `getName()` equals `targetName`.
+1. `EditContactCommand#execute()` resolves the target `Person`:
+   * If `useUserProfile` is true, retrieves the user profile via `model.getUserProfile()`.
+   * If `targetIndex` is set, retrieves the person at that index from the filtered list.
+   * If `targetName` is set, searches `model.getFilteredPersonList()` for a case-insensitive name match.
 2. If not found, a `CommandException` with `MESSAGE_PERSON_NOT_FOUND` is thrown.
 3. A new `Person` is created with `newName` and the original person's `tags`, `games`, and `isUserProfile` flag.
 4. If the new name already belongs to a different person, a `CommandException` with `MESSAGE_DUPLICATE_PERSON` is thrown.
@@ -180,7 +183,7 @@ The `contact edit` command allows users to rename an existing contact while pres
 **Design considerations:**
 
 * **Immutable `Person` model** — `Person` objects are immutable; editing creates a new `Person` rather than mutating the existing one. This keeps the model simple and consistent with the rest of the codebase.
-* **Name-based lookup** — The command identifies contacts by name rather than index, matching the approach used by `game add/delete` and `alias add/delete` for consistency.
+* **Index and name-based lookup** — The command supports both index and name identification, consistent with `alias edit` and `view`. A single constructor `(Index, Name, Name, boolean)` is used with the unused field passed as `null`, matching the pattern used by `EditAliasCommand`.
 * **Games and aliases preserved** — The new `Person` is constructed with the original person's `games` map, so all associated data is retained after a rename.
 
 ### \[Proposed\] Undo/redo feature
@@ -550,13 +553,22 @@ testers are expected to do more *exploratory* testing.
 
 1. Renaming a contact while all persons are shown
 
-   1. Prerequisites: List all persons using the `list` command. At least one contact in the list (e.g. `Alex Yeoh`).
+   1. Prerequisites: List all persons using the `list` command. At least one contact in the list (e.g. `Alex Yeoh` at index 1).
 
    1. Test case: `contact edit n/Alex Yeoh e/Alex`<br>
       Expected: Contact is renamed. Success message `Contact updated: Alex Yeoh → Alex` shown.
 
+   1. Test case: `contact edit 1 e/Alex`<br>
+      Expected: First contact is renamed. Success message `Contact updated: [original name] → Alex` shown.
+
    1. Test case: `contact edit n/NonExistent e/NewName`<br>
       Expected: No contact is renamed. Error message `Error: Name not found` shown.
+
+   1. Test case: `contact edit 999 e/NewName` (index out of bounds)<br>
+      Expected: No contact is renamed. Invalid index error shown.
+
+   1. Test case: `contact edit 1 n/Alex Yeoh e/NewName` (both index and name provided)<br>
+      Expected: No contact is renamed. Error message `Please provide either an index OR a name, not both.` shown.
 
    1. Test case: `contact edit n/Alex Yeoh e/Bernice Yu` (where `Bernice Yu` already exists)<br>
       Expected: No contact is renamed. Error message `Error: A contact with that name already exists` shown.

@@ -36,7 +36,7 @@ public class ContactCommandParserTest {
 
     @Test
     public void parseEdit_validArgs_success() {
-        EditContactCommand expectedInput = new EditContactCommand(new Name("Janelle"), new Name("Jan"));
+        EditContactCommand expectedInput = new EditContactCommand(null, new Name("Janelle"), new Name("Jan"), false);
         assertParseSuccess(parser, " edit n/Janelle e/Jan", expectedInput);
     }
 

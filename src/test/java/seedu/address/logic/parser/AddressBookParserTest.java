@@ -19,6 +19,7 @@ import seedu.address.logic.commands.ClearCommand;
 import seedu.address.logic.commands.DeleteAliasCommand;
 import seedu.address.logic.commands.DeleteContactCommand;
 import seedu.address.logic.commands.DeleteGameCommand;
+import seedu.address.logic.commands.EditAliasCommand;
 import seedu.address.logic.commands.EditContactCommand;
 import seedu.address.logic.commands.ExitCommand;
 import seedu.address.logic.commands.FindCommand;
@@ -59,10 +60,36 @@ public class AddressBookParserTest {
     }
 
     @Test
-    public void parseCommand_contactEdit() throws Exception {
+    public void parseCommand_contactEditByName() throws Exception {
         EditContactCommand command = (EditContactCommand) parser.parseCommand(
                 "contact edit n/Janelle e/Jan");
-        assertEquals(new EditContactCommand(new Name("Janelle"), new Name("Jan")), command);
+        assertEquals(new EditContactCommand(null, new Name("Janelle"), new Name("Jan"), false), command);
+    }
+
+    @Test
+    public void parseCommand_contactEditByIndex() throws Exception {
+        EditContactCommand command = (EditContactCommand) parser.parseCommand(
+                "contact edit 1 e/Jan");
+        assertEquals(new EditContactCommand(
+                seedu.address.commons.core.index.Index.fromOneBased(1), null, new Name("Jan"), false), command);
+    }
+
+    @Test
+    public void parseCommand_aliasEditByName() throws Exception {
+        EditAliasCommand command = (EditAliasCommand) parser.parseCommand(
+                "alias edit n/Benjamin g/Valorant al/JohnnyV na/JohnnyValorant");
+        assertEquals(new EditAliasCommand(
+                null, new Name("Benjamin"),
+                new Game("Valorant"), new Alias("JohnnyV"), new Alias("JohnnyValorant"), false), command);
+    }
+
+    @Test
+    public void parseCommand_aliasEditByIndex() throws Exception {
+        EditAliasCommand command = (EditAliasCommand) parser.parseCommand(
+                "alias edit 1 g/Valorant al/JohnnyV na/JohnnyValorant");
+        assertEquals(new EditAliasCommand(
+                seedu.address.commons.core.index.Index.fromOneBased(1), null,
+                new Game("Valorant"), new Alias("JohnnyV"), new Alias("JohnnyValorant"), false), command);
     }
 
     @Test

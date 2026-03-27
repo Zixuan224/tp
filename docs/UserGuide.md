@@ -105,14 +105,18 @@ Format: `list`
 
 Renames an existing contact in Harmony.
 
-Format: `contact edit n/NAME e/NEW_NAME`
+Format:
+* By index: `contact edit INDEX e/NEW_NAME`
+* By name: `contact edit n/NAME e/NEW_NAME`
 
-* Finds the contact with the exact name matching `NAME` (case-sensitive).
-* Renames that contact to `NEW_NAME`.
+* `INDEX` refers to the index number shown in the displayed contact list. Must be a positive integer.
+* Use `0` as the index to edit your own user profile.
+* Providing both `INDEX` and `n/NAME` at the same time is not allowed.
 * The contact's games and aliases are preserved after the rename.
 * `NEW_NAME` must not already belong to another contact.
 
 Examples:
+* `contact edit 1 e/John Smith` Renames the 1st contact to `John Smith`.
 * `contact edit n/John Doe e/John Smith` Renames `John Doe` to `John Smith`.
 * `contact edit n/Betsy Crowe e/Elizabeth Crowe` Renames `Betsy Crowe` to `Elizabeth Crowe`.
 
@@ -311,7 +315,7 @@ Action              | Format, Examples
 **Add**             | `add n/NAME [t/TAG]…​` <br> e.g., `add n/James Ho t/friend t/colleague`
 **Clear**           | `clear`
 **Delete**          | `delete INDEX`<br> e.g., `delete 3`
-**Contact Edit**    | `contact edit n/NAME e/NEW_NAME`<br> e.g., `contact edit n/James Ho e/James Lee`
+**Contact Edit**    | `contact edit INDEX e/NEW_NAME` or `contact edit n/NAME e/NEW_NAME`<br> e.g., `contact edit 1 e/James Lee` or `contact edit n/James Ho e/James Lee`
 **Find (name)**     | `find KEYWORD [MORE_KEYWORDS]`<br> e.g., `find James Jake`
 **Find (game)**     | `find g/GAME_NAME`<br> e.g., `find g/Valorant`
 **Find (alias)**    | `find al/ALIAS`<br> e.g., `find al/Benjumpin`

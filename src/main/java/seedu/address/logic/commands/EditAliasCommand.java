@@ -55,6 +55,12 @@ public class EditAliasCommand extends Command {
 
     /**
      * Creates an EditAliasCommand to update {@code oldAlias} to {@code newAlias} for the person.
+     * @param targetIndex    index of the contact to edit, or null if using name/profile
+     * @param targetName     current name of the contact to edit, or null if using index/profile
+     * @param targetGame     the game for which the alias belongs to
+     * @param oldAlias       the alias to be edited
+     * @param newAlias       the new alias to update to
+     * @param useUserProfile true if targeting the user profile via index 0
      */
     public EditAliasCommand(Index targetIndex, Name targetName, Game game,
                             Alias oldAlias, Alias newAlias, boolean useUserProfile) {
