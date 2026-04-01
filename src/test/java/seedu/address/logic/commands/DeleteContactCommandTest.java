@@ -83,6 +83,42 @@ public class DeleteContactCommandTest {
     }
 
     @Test
+    public void execute_nameLowercase_returnsConfirmation() throws Exception {
+        // ALICE has name "Alice Pauline"; search with all-lowercase should still find her
+        Name lowercaseName = new Name("alice pauline");
+        DeleteContactCommand deleteCommand = new DeleteContactCommand(null, lowercaseName, false);
+
+        CommandResult result = deleteCommand.execute(model);
+
+        assertTrue(result.isAwaitingConfirmation());
+        assertEquals(ALICE, result.getPendingPerson());
+    }
+
+    @Test
+    public void execute_nameUppercase_returnsConfirmation() throws Exception {
+        // ALICE has name "Alice Pauline"; search with all-uppercase should still find her
+        Name uppercaseName = new Name("ALICE PAULINE");
+        DeleteContactCommand deleteCommand = new DeleteContactCommand(null, uppercaseName, false);
+
+        CommandResult result = deleteCommand.execute(model);
+
+        assertTrue(result.isAwaitingConfirmation());
+        assertEquals(ALICE, result.getPendingPerson());
+    }
+
+    @Test
+    public void execute_nameMixedCase_returnsConfirmation() throws Exception {
+        // ALICE has name "Alice Pauline"; search with mixed casing should still find her
+        Name mixedCaseName = new Name("aLiCe pAuLiNe");
+        DeleteContactCommand deleteCommand = new DeleteContactCommand(null, mixedCaseName, false);
+
+        CommandResult result = deleteCommand.execute(model);
+
+        assertTrue(result.isAwaitingConfirmation());
+        assertEquals(ALICE, result.getPendingPerson());
+    }
+
+    @Test
     public void execute_validNameFilteredList_returnsConfirmation() throws Exception {
         showPersonAtIndex(model, INDEX_FIRST_PERSON); // shows only ALICE
 
