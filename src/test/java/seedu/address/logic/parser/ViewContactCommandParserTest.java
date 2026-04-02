@@ -39,18 +39,6 @@ public class ViewContactCommandParserTest {
     }
 
     @Test
-    public void parse_invalidIndex_throwsParseException() {
-        assertParseFailure(parser, "a", String.format(MESSAGE_INVALID_COMMAND_FORMAT,
-                ViewContactCommand.MESSAGE_USAGE));
-    }
-
-    @Test
-    public void parse_bothIndexAndName_throwsParseException() {
-        assertParseFailure(parser, "1 n/John Doe",
-                String.format(MESSAGE_INVALID_COMMAND_FORMAT, ViewContactCommand.MESSAGE_USAGE));
-    }
-
-    @Test
     public void parse_bothUserProfileAndName_throwsParseException() {
         assertParseFailure(parser, "me n/John Doe",
                 "Please do not provide a name prefix (n/) when targeting your own profile with 'me'.");

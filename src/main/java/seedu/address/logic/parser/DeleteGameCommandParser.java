@@ -33,7 +33,7 @@ public class DeleteGameCommandParser implements Parser<DeleteGameCommand> {
         if (!useUserProfile) {
             ParserUtil.verifyIndexOrNamePresent(preamble, hasNamePrefix, DeleteGameCommand.MESSAGE_USAGE);
         } else if (hasNamePrefix) {
-            throw new ParseException("Please do not provide a name prefix (n/)"
+            throw new ParseException("Please do not provide a name prefix (n/) "
                     + "when targeting your own profile with 'me'.");
         }
 

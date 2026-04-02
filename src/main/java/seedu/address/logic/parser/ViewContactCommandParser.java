@@ -16,6 +16,8 @@ public class ViewContactCommandParser implements Parser<ViewContactCommand> {
     public ViewContactCommand parse(String args) throws ParseException {
         ArgumentMultimap argMultimap = ArgumentTokenizer.tokenize(args, PREFIX_NAME);
 
+        argMultimap.verifyNoDuplicatePrefixesFor(PREFIX_NAME);
+
         String preamble = argMultimap.getPreamble().trim();
         boolean useUserProfile = preamble.equalsIgnoreCase("me");
         boolean hasNamePrefix = argMultimap.getValue(PREFIX_NAME).isPresent();
