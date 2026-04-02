@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import seedu.address.logic.commands.AddContactCommand;
 import seedu.address.logic.commands.DeleteContactCommand;
 import seedu.address.logic.commands.EditContactCommand;
+import seedu.address.logic.commands.ViewContactCommand;
 import seedu.address.model.person.Name;
 import seedu.address.testutil.PersonBuilder;
 import seedu.address.testutil.TypicalIndexes;
@@ -37,11 +38,6 @@ public class ContactCommandParserTest {
     }
 
     @Test
-    public void parse_unknownAction_throwsParseException() {
-        assertParseFailure(parser, " unknown", MESSAGE_UNKNOWN_COMMAND);
-    }
-
-    @Test
     public void parseEdit_validArgs_success() {
         EditContactCommand expectedInput = new EditContactCommand(null, new Name("Janelle"), new Name("Jan"), false);
         assertParseSuccess(parser, " edit n/Janelle e/Jan", expectedInput);
@@ -51,6 +47,33 @@ public class ContactCommandParserTest {
     public void parseEdit_missingArgs_failure() {
         assertParseFailure(parser, " edit",
                 String.format(MESSAGE_INVALID_COMMAND_FORMAT, EditContactCommand.MESSAGE_USAGE));
+    }
+
+    // --- VIEW TESTS ---
+
+    @Test
+    public void parseView_validArgsByName_success() {
+        ViewContactCommand expected = new ViewContactCommand(null, new Name("Alice"), false);
+        assertParseSuccess(parser, " view n/Alice", expected);
+    }
+
+    @Test
+    public void parseView_validArgsByIndex_success() {
+        ViewContactCommand expected = new ViewContactCommand(TypicalIndexes.INDEX_FIRST_PERSON, null, false);
+        assertParseSuccess(parser, " view 1", expected);
+    }
+
+    @Test
+    public void parseView_validArgsByProfile_success() {
+        ViewContactCommand expected = new ViewContactCommand(null, null, true);
+        assertParseSuccess(parser, " view me", expected);
+    }
+
+    // --- BASE ROUTING TESTS ---
+
+    @Test
+    public void parse_unknownAction_throwsParseException() {
+        assertParseFailure(parser, " unknown", MESSAGE_UNKNOWN_COMMAND);
     }
 
     @Test

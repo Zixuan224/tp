@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static seedu.address.logic.Messages.MESSAGE_INVALID_COMMAND_FORMAT;
 import static seedu.address.logic.Messages.MESSAGE_UNKNOWN_COMMAND;
 import static seedu.address.testutil.Assert.assertThrows;
+import static seedu.address.testutil.TypicalIndexes.INDEX_FIRST_PERSON;
 
 import java.util.Arrays;
 import java.util.List;
@@ -16,6 +17,7 @@ import seedu.address.logic.commands.AddAliasCommand;
 import seedu.address.logic.commands.AddContactCommand;
 import seedu.address.logic.commands.AddGameCommand;
 import seedu.address.logic.commands.ClearCommand;
+import seedu.address.logic.commands.CopyCommand;
 import seedu.address.logic.commands.DeleteAliasCommand;
 import seedu.address.logic.commands.DeleteContactCommand;
 import seedu.address.logic.commands.DeleteGameCommand;
@@ -75,6 +77,13 @@ public class AddressBookParserTest {
     }
 
     @Test
+    public void parseCommand_contactEditByProfile() throws Exception {
+        EditContactCommand command = (EditContactCommand) parser.parseCommand(
+                "contact edit me e/Jan");
+        assertEquals(new EditContactCommand(null, null, new Name("Jan"), true), command);
+    }
+
+    @Test
     public void parseCommand_aliasEditByName() throws Exception {
         EditAliasCommand command = (EditAliasCommand) parser.parseCommand(
                 "alias edit n/Benjamin g/Valorant al/JohnnyV na/JohnnyValorant");
@@ -90,6 +99,15 @@ public class AddressBookParserTest {
         assertEquals(new EditAliasCommand(
                 seedu.address.commons.core.index.Index.fromOneBased(1), null,
                 new Game("Valorant"), new Alias("JohnnyV"), new Alias("JohnnyValorant"), false), command);
+    }
+
+    @Test
+    public void parseCommand_aliasEditByProfile() throws Exception {
+        EditAliasCommand command = (EditAliasCommand) parser.parseCommand(
+                "alias edit me g/Valorant al/JohnnyV na/JohnnyValorant");
+        assertEquals(new EditAliasCommand(
+                null, null,
+                new Game("Valorant"), new Alias("JohnnyV"), new Alias("JohnnyValorant"), true), command);
     }
 
     @Test
@@ -141,12 +159,31 @@ public class AddressBookParserTest {
     }
 
     @Test
+    public void parseCommand_aliasAddByProfile() throws Exception {
+        AddAliasCommand command = (AddAliasCommand) parser.parseCommand(
+                "alias add me g/Valorant al/Benjumpin");
+        assertEquals(new AddAliasCommand(
+                null, null,
+                new Game("Valorant"), new Alias("Benjumpin"), true
+        ), command);
+    }
+
+    @Test
     public void parseCommand_aliasDelete() throws Exception {
         DeleteAliasCommand command = (DeleteAliasCommand) parser.parseCommand(
                 "alias delete n/Benjamin g/Valorant al/Benjumpin");
         assertEquals(new DeleteAliasCommand(null,
                 new Name("Benjamin"),
                 new Game("Valorant"), new Alias("Benjumpin"), false
+        ), command);
+    }
+
+    @Test
+    public void parseCommand_aliasDeleteByProfile() throws Exception {
+        DeleteAliasCommand command = (DeleteAliasCommand) parser.parseCommand(
+                "alias delete me g/Valorant al/Benjumpin");
+        assertEquals(new DeleteAliasCommand(null, null,
+                new Game("Valorant"), new Alias("Benjumpin"), true
         ), command);
     }
 
@@ -161,6 +198,15 @@ public class AddressBookParserTest {
     }
 
     @Test
+    public void parseCommand_gameAddByProfile() throws Exception {
+        AddGameCommand command = (AddGameCommand) parser.parseCommand(
+                "game add me g/Valorant");
+        assertEquals(new AddGameCommand(null, null,
+                new Game("Valorant"), true
+        ), command);
+    }
+
+    @Test
     public void parseCommand_gameDelete() throws Exception {
         DeleteGameCommand command = (DeleteGameCommand) parser.parseCommand(
                 "game delete n/Benjamin g/Valorant");
@@ -171,9 +217,39 @@ public class AddressBookParserTest {
     }
 
     @Test
+    public void parseCommand_gameDeleteByProfile() throws Exception {
+        DeleteGameCommand command = (DeleteGameCommand) parser.parseCommand(
+                "game delete me g/Valorant");
+        assertEquals(new DeleteGameCommand(null, null,
+                new Game("Valorant"), true
+        ), command);
+    }
+
+    @Test
     public void parseCommand_gameList() throws Exception {
         ListGameCommand command = (ListGameCommand) parser.parseCommand(
                 "game list n/Benjamin");
         assertEquals(new ListGameCommand(null, new Name("Benjamin"), false), command);
+    }
+
+    @Test
+    public void parseCommand_gameListByProfile() throws Exception {
+        ListGameCommand command = (ListGameCommand) parser.parseCommand(
+                "game list me");
+        assertEquals(new ListGameCommand(null, null, true), command);
+    }
+
+    @Test
+    public void parseCommand_copy() throws Exception {
+        CopyCommand command = (CopyCommand) parser.parseCommand(
+                CopyCommand.COMMAND_WORD + " 1");
+        assertEquals(new CopyCommand(INDEX_FIRST_PERSON, null, false), command);
+    }
+
+    @Test
+    public void parseCommand_copyProfile() throws Exception {
+        CopyCommand command = (CopyCommand) parser.parseCommand(
+                CopyCommand.COMMAND_WORD + " me");
+        assertEquals(new CopyCommand(null, null, true), command);
     }
 }
