@@ -53,11 +53,11 @@ public class Alias {
         }
 
         Alias otherAlias = (Alias) other;
-        return value.equalsIgnoreCase(otherAlias.value);
+        return value.equals(otherAlias.value);
     }
 
     @Override
     public int hashCode() {
-        return value.toLowerCase().hashCode();
+        return value.hashCode();
     }
 }

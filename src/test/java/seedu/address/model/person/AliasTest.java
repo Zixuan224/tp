@@ -61,14 +61,22 @@ public class AliasTest {
         // different values -> returns false
         assertFalse(alias.equals(new Alias("Other Alias")));
 
-        // different case -> returns true (equals is case-insensitive)
-        assertTrue(alias.equals(new Alias("valid alias")));
+        // different case -> returns false (equals is case-sensitive)
+        assertFalse(alias.equals(new Alias("valid alias")));
     }
 
     @Test
-    public void hashCode_caseInsensitive_equalAliasesHaveSameHashCode() {
-        Alias alias1 = new Alias("CaseInsensitive");
-        Alias alias2 = new Alias("caseinsensitive");
+    public void hashCode_caseSensitive_differentCaseAliasesHaveDifferentHashCodes() {
+        Alias alias1 = new Alias("CaseSensitive");
+        Alias alias2 = new Alias("casesensitive");
+        assertFalse(alias1.equals(alias2));
+        assertFalse(alias1.hashCode() == alias2.hashCode());
+    }
+
+    @Test
+    public void hashCode_sameValue_equalAliasesHaveSameHashCode() {
+        Alias alias1 = new Alias("SameAlias");
+        Alias alias2 = new Alias("SameAlias");
         assertTrue(alias1.equals(alias2));
         assertTrue(alias1.hashCode() == alias2.hashCode());
     }
