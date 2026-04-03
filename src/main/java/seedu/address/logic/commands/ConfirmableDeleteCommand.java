@@ -5,8 +5,10 @@ import seedu.address.model.Model;
 
 /**
  * Represents a delete command that requires user confirmation before executing.
+ * Intentionally decoupled from {@code UndoableCommand} to allow future commands
+ * that require confirmation but do not support undo.
  */
-public interface ConfirmableDeleteCommand extends UndoableCommand {
+public interface ConfirmableDeleteCommand {
 
     /**
      * Performs the actual deletion after the user has confirmed.

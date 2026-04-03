@@ -16,7 +16,7 @@ import seedu.address.model.person.Person;
 /**
  * Deletes a person identified by index or name from the address book.
  */
-public class DeleteContactCommand extends Command implements ConfirmableDeleteCommand {
+public class DeleteContactCommand extends Command implements ConfirmableDeleteCommand, UndoableCommand {
 
     public static final String COMMAND_WORD = "contact delete";
 

@@ -24,7 +24,7 @@ import seedu.address.model.person.Person;
 /**
  * Deletes an alias from an existing person in Harmony.
  */
-public class DeleteAliasCommand extends Command implements ConfirmableDeleteCommand {
+public class DeleteAliasCommand extends Command implements ConfirmableDeleteCommand, UndoableCommand {
 
     public static final String COMMAND_WORD = "alias delete";
 

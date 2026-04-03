@@ -96,7 +96,9 @@ public class LogicManager implements Logic {
 
         if (response.equals("y") || response.equals("yes")) {
             CommandResult result = confirmableCommand.performDeletion(model);
-            commandHistory.push(confirmableCommand);
+            if (confirmableCommand instanceof UndoableCommand) {
+                commandHistory.push((UndoableCommand) confirmableCommand);
+            }
             try {
                 storage.saveAddressBook(model.getAddressBook());
             } catch (AccessDeniedException e) {

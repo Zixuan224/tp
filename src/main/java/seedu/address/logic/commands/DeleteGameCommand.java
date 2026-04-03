@@ -20,7 +20,7 @@ import seedu.address.model.person.Person;
 /**
  * Deletes a game from an existing contact in the address book.
  */
-public class DeleteGameCommand extends Command implements ConfirmableDeleteCommand {
+public class DeleteGameCommand extends Command implements ConfirmableDeleteCommand, UndoableCommand {
 
     public static final String COMMAND_WORD = "delete";
     public static final String MESSAGE_USAGE = "game " + COMMAND_WORD
