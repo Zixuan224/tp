@@ -13,11 +13,12 @@ import seedu.address.logic.commands.ListGameCommand;
 import seedu.address.model.person.Name;
 
 public class ListGameCommandParserTest {
+    private static final String PROFILE_MUTUALLY_EXCLUSIVE_ERROR =
+            "Please do not provide a name prefix (n/) when targeting your own profile with 'me'.";
 
     private final ListGameCommandParser parser = new ListGameCommandParser();
 
-    private static final String PROFILE_MUTUALLY_EXCLUSIVE_ERROR =
-            "Please do not provide a name prefix (n/) when targeting your own profile with 'me'.";
+
 
     @Test
     public void parse_validArgsByName_returnsListGameCommand() {
