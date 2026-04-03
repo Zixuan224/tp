@@ -97,8 +97,7 @@ public class EditContactCommandTest {
 
     @Test
     public void execute_userProfile_success() throws Exception {
-        Person userProfile = new Person(new Name("John Doe"), new java.util.HashSet<>(),
-                new java.util.HashSet<>(), true);
+        Person userProfile = new Person(new Name("John Doe"), new java.util.HashSet<>(), true);
         AddressBook ab = new AddressBook();
         ab.addPerson(userProfile);
         Model profileModel = new ModelManager(ab, new UserPrefs());
@@ -116,6 +115,22 @@ public class EditContactCommandTest {
         Model emptyModel = new ModelManager(new AddressBook(), new UserPrefs());
         EditContactCommand command = new EditContactCommand(null, null, new Name("Johnny"), true);
         assertCommandFailure(command, emptyModel, "No user profile found.");
+    }
+
+    @Test
+    public void undo_editContact_restoresOriginalName() throws Exception {
+        Person personToEdit = model.getFilteredPersonList().get(0);
+        Name originalName = personToEdit.getName();
+        Name newName = new Name("Alicia");
+
+        EditContactCommand command = new EditContactCommand(null, originalName, newName, false);
+        command.execute(model);
+
+        assertEquals(newName, model.getFilteredPersonList().get(0).getName());
+
+        command.undo(model);
+
+        assertEquals(originalName, model.getFilteredPersonList().get(0).getName());
     }
 
     @Test

@@ -118,7 +118,6 @@ public class AddAliasCommand extends Command implements UndoableCommand {
 
         Person editedPerson = new Person(
                 personToEdit.getName(),
-                personToEdit.getTags(),
                 updatedGames,
                 personToEdit.isUserProfile()
         );

@@ -24,7 +24,7 @@ import seedu.address.model.person.Person;
 /**
  * Edits an alias of a game of an existing person in Harmony.
  */
-public class EditAliasCommand extends Command {
+public class EditAliasCommand extends Command implements UndoableCommand {
 
     public static final String COMMAND_WORD = "alias edit";
 
@@ -52,6 +52,8 @@ public class EditAliasCommand extends Command {
     private final Alias oldAlias;
     private final Alias newAlias;
     private final boolean useUserProfile;
+    private Person personBeforeEdit;
+    private Person personAfterEdit;
 
     /**
      * Creates an EditAliasCommand to update {@code oldAlias} to {@code newAlias} for the person.
@@ -129,11 +131,12 @@ public class EditAliasCommand extends Command {
 
         Person editedPerson = new Person(
                 personToEdit.getName(),
-                personToEdit.getTags(),
                 updatedGames,
                 personToEdit.isUserProfile()
         );
 
+        personBeforeEdit = personToEdit;
+        personAfterEdit = editedPerson;
         model.setPerson(personToEdit, editedPerson);
 
         return new CommandResult(String.format(
@@ -145,6 +148,12 @@ public class EditAliasCommand extends Command {
                 false,
                 false,
                 editedPerson);
+    }
+
+    @Override
+    public void undo(Model model) {
+        model.setPerson(personAfterEdit, personBeforeEdit);
+        model.updateFilteredPersonList(Model.PREDICATE_SHOW_ALL_PERSONS);
     }
 
     @Override

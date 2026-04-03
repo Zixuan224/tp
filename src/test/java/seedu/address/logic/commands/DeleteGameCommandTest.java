@@ -106,7 +106,7 @@ public class DeleteGameCommandTest {
     @Test
     public void execute_useUserProfile_success() throws Exception {
         Person userProfile = new Person(new seedu.address.model.person.Name("John Doe"),
-                new HashSet<>(), new HashSet<>(), true);
+                new HashSet<>(), true);
         AddressBook ab = new AddressBook();
         ab.addPerson(userProfile);
         Model profileModel = new ModelManager(ab, new UserPrefs());

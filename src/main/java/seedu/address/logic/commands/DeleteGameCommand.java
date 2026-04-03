@@ -95,7 +95,7 @@ public class DeleteGameCommand extends Command implements UndoableCommand {
 
         // Create a copy of the person with the updated games
         Person editedPerson = new Person(
-                personToEdit.getName(), personToEdit.getTags(), updatedGames, personToEdit.isUserProfile());
+                personToEdit.getName(), updatedGames, personToEdit.isUserProfile());
 
         personBeforeEdit = personToEdit;
         personAfterEdit = editedPerson;

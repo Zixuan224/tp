@@ -146,8 +146,7 @@ public class DeleteContactCommandTest {
 
     @Test
     public void execute_userProfile_returnsConfirmation() throws Exception {
-        Person userProfile = new Person(new Name("Janelle"), new java.util.HashSet<>(), new java.util.HashSet<>(),
-                true);
+        Person userProfile = new Person(new Name("Janelle"), new java.util.HashSet<>(), true);
         AddressBook ab = new AddressBook();
         ab.addPerson(userProfile);
         Model profileModel = new ModelManager(ab, new UserPrefs());

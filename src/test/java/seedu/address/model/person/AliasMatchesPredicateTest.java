@@ -19,7 +19,7 @@ public class AliasMatchesPredicateTest {
         aliases.add(new Alias(aliasValue));
         Set<Game> games = new HashSet<>();
         games.add(new Game(gameName, aliases));
-        return new Person(new Name(name), new HashSet<>(), games);
+        return new Person(new Name(name), games);
     }
 
     @Test

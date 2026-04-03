@@ -28,8 +28,6 @@
 
             <Label fx:id="name" styleClass="view-panel-header" wrapText="true"/>
 
-            <FlowPane fx:id="tags" hgap="5" vgap="5" />
-
             <VBox fx:id="gamesList" spacing="8" />
         </VBox>
     </ScrollPane>

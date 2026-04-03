@@ -9,7 +9,6 @@ import java.util.Set;
 
 import seedu.address.commons.util.ToStringBuilder;
 import seedu.address.model.game.Game;
-import seedu.address.model.tag.Tag;
 
 /**
  * Represents a Person in the address book.
@@ -21,24 +20,22 @@ public class Person {
     private final Name name;
 
     // Data fields
-    private final Set<Tag> tags = new HashSet<>();
     private final Set<Game> games = new HashSet<>();
     private final boolean isUserProfile;
 
     /**
      * Every field must be present and not null. isUserProfile defaults to false.
      */
-    public Person(Name name, Set<Tag> tags, Set<Game> games) {
-        this(name, tags, games, false);
+    public Person(Name name, Set<Game> games) {
+        this(name, games, false);
     }
 
     /**
      * Every field must be present and not null.
      */
-    public Person(Name name, Set<Tag> tags, Set<Game> games, boolean isUserProfile) {
-        requireAllNonNull(name, tags);
+    public Person(Name name, Set<Game> games, boolean isUserProfile) {
+        requireAllNonNull(name, games);
         this.name = name;
-        this.tags.addAll(tags);
         this.games.addAll(games);
         this.isUserProfile = isUserProfile;
     }
@@ -49,14 +46,6 @@ public class Person {
 
     public boolean isUserProfile() {
         return isUserProfile;
-    }
-
-    /**
-     * Returns an immutable tag set, which throws {@code UnsupportedOperationException}
-     * if modification is attempted.
-     */
-    public Set<Tag> getTags() {
-        return Collections.unmodifiableSet(tags);
     }
 
     /**
@@ -97,21 +86,18 @@ public class Person {
 
         Person otherPerson = (Person) other;
         return name.equals(otherPerson.name)
-                && tags.equals(otherPerson.tags)
                 && games.equals(otherPerson.games);
     }
 
     @Override
     public int hashCode() {
-        // use this method for custom fields hashing instead of implementing your own
-        return Objects.hash(name, tags, games);
+        return Objects.hash(name, games);
     }
 
     @Override
     public String toString() {
         return new ToStringBuilder(this)
                 .add("name", name)
-                .add("tags", tags)
                 .toString();
     }
 

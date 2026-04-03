@@ -1,7 +1,9 @@
 package seedu.address.logic.commands;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static seedu.address.logic.commands.CommandTestUtil.assertCommandFailure;
 import static seedu.address.logic.commands.CommandTestUtil.assertCommandSuccess;
 import static seedu.address.testutil.TypicalIndexes.INDEX_FIRST_PERSON;
@@ -45,7 +47,7 @@ public class EditAliasCommandTest {
         Set<Game> expectedGames = new HashSet<>();
         expectedGames.add(expectedGame);
 
-        Person editedPerson = new Person(firstPerson.getName(), firstPerson.getTags(), expectedGames);
+        Person editedPerson = new Person(firstPerson.getName(), expectedGames);
 
         Model expectedModel = new ModelManager(new AddressBook(model.getAddressBook()), new UserPrefs());
         expectedModel.setPerson(model.getFilteredPersonList().get(0), editedPerson);
@@ -77,7 +79,7 @@ public class EditAliasCommandTest {
         Set<Game> expectedGames = new HashSet<>();
         expectedGames.add(expectedGame);
 
-        Person editedPerson = new Person(firstPerson.getName(), firstPerson.getTags(), expectedGames);
+        Person editedPerson = new Person(firstPerson.getName(), expectedGames);
 
         Model expectedModel = new ModelManager(new AddressBook(model.getAddressBook()), new UserPrefs());
         expectedModel.setPerson(model.getFilteredPersonList().get(0), editedPerson);
@@ -170,7 +172,7 @@ public class EditAliasCommandTest {
 
     @Test
     public void execute_useUserProfile_success() throws Exception {
-        Person userProfile = new Person(new Name("John Doe"), new HashSet<>(), new HashSet<>(), true);
+        Person userProfile = new Person(new Name("John Doe"), new HashSet<>(), true);
         AddressBook ab = new AddressBook();
         ab.addPerson(userProfile);
         Model profileModel = new ModelManager(ab, new UserPrefs());
@@ -202,6 +204,33 @@ public class EditAliasCommandTest {
         EditAliasCommand editAliasCommand =
                 new EditAliasCommand(null, null, game, oldAlias, newAlias, true);
         assertCommandFailure(editAliasCommand, emptyModel, "No user profile found.");
+    }
+
+    @Test
+    public void undo_editAlias_restoresOriginalAlias() throws Exception {
+        Person firstPerson = model.getFilteredPersonList().get(0);
+        Game game = new Game("Valorant");
+        Alias oldAlias = new Alias("JohnnyV");
+        Alias newAlias = new Alias("JohnnyValorant");
+
+        new AddGameCommand(null, firstPerson.getName(), game, false).execute(model);
+        new AddAliasCommand(null, firstPerson.getName(), game, oldAlias, false).execute(model);
+
+        EditAliasCommand editAliasCommand =
+                new EditAliasCommand(null, firstPerson.getName(), game, oldAlias, newAlias, false);
+        editAliasCommand.execute(model);
+
+        Person afterEdit = model.getFilteredPersonList().get(0);
+        Game gameAfterEdit = afterEdit.getGames().stream().filter(g -> g.equals(game)).findFirst().orElseThrow();
+        assertTrue(gameAfterEdit.getAliases().contains(newAlias));
+        assertFalse(gameAfterEdit.getAliases().contains(oldAlias));
+
+        editAliasCommand.undo(model);
+
+        Person afterUndo = model.getFilteredPersonList().get(0);
+        Game gameAfterUndo = afterUndo.getGames().stream().filter(g -> g.equals(game)).findFirst().orElseThrow();
+        assertTrue(gameAfterUndo.getAliases().contains(oldAlias));
+        assertFalse(gameAfterUndo.getAliases().contains(newAlias));
     }
 
     @Test

@@ -34,7 +34,7 @@ public class AddGameCommandTest {
         expectedGames.add(gameToAdd);
 
         Person editedPerson = new Person(
-                firstPerson.getName(), firstPerson.getTags(), expectedGames);
+                firstPerson.getName(), expectedGames);
 
         AddGameCommand addGameCommand = new AddGameCommand(null,
                 firstPerson.getName(),
@@ -88,7 +88,7 @@ public class AddGameCommandTest {
 
         Set<Game> expectedGames = new HashSet<>(firstPerson.getGames());
         expectedGames.add(gameToAdd);
-        Person editedPerson = new Person(firstPerson.getName(), firstPerson.getTags(), expectedGames);
+        Person editedPerson = new Person(firstPerson.getName(), expectedGames);
 
         String expectedMessage = String.format(AddGameCommand.MESSAGE_SUCCESS,
                 gameToAdd.gameName,
@@ -115,7 +115,7 @@ public class AddGameCommandTest {
 
         Set<Game> expectedGames = new HashSet<>(firstPerson.getGames());
         expectedGames.add(gameToAdd);
-        Person editedPerson = new Person(firstPerson.getName(), firstPerson.getTags(), expectedGames);
+        Person editedPerson = new Person(firstPerson.getName(), expectedGames);
 
         String expectedMessage = String.format(AddGameCommand.MESSAGE_SUCCESS,
                 gameToAdd.gameName,
@@ -143,8 +143,7 @@ public class AddGameCommandTest {
 
     @Test
     public void execute_useUserProfile_success() throws Exception {
-        Person userProfile = new Person(new Name("John Doe"), new java.util.HashSet<>(), new java.util.HashSet<>(),
-                true);
+        Person userProfile = new Person(new Name("John Doe"), new java.util.HashSet<>(), true);
         AddressBook ab = new AddressBook();
         ab.addPerson(userProfile);
         Model profileModel = new ModelManager(ab, new UserPrefs());

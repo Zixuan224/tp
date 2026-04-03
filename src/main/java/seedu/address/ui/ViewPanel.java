@@ -1,12 +1,8 @@
 package seedu.address.ui;
 
-import java.util.Comparator;
-
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
-//import javafx.scene.control.Tooltip;
-import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import seedu.address.model.person.Person;
@@ -25,8 +21,6 @@ public class ViewPanel extends UiPart<Region> {
     private Label name;
     @FXML
     private VBox gamesList;
-    @FXML
-    private FlowPane tags;
 
     /**
      * Constructor for ViewPanel
@@ -44,7 +38,6 @@ public class ViewPanel extends UiPart<Region> {
         profileContainer.setVisible(false);
         profileContainer.setManaged(false);
         name.setText("");
-        tags.getChildren().clear();
         gamesList.getChildren().clear();
     }
 
@@ -62,17 +55,6 @@ public class ViewPanel extends UiPart<Region> {
         profileContainer.setManaged(true);
 
         name.setText("User: " + person.getName().fullName);
-
-        tags.getChildren().clear();
-
-        person.getTags().stream()
-                .sorted(Comparator.comparing(tag -> tag.tagName))
-                .forEach(tag -> {
-                    Label tagLabel = new Label(tag.tagName);
-                    // CHANGED: Use CSS class instead of hardcoded colors
-                    tagLabel.getStyleClass().add("profile-tag");
-                    tags.getChildren().add(tagLabel);
-                });
 
         gamesList.getChildren().clear();
 

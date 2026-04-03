@@ -4,7 +4,6 @@ import static seedu.address.logic.Messages.MESSAGE_INVALID_COMMAND_FORMAT;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_ALIAS;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_GAME;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_NAME;
-import static seedu.address.logic.parser.CliSyntax.PREFIX_TAG;
 
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -18,7 +17,6 @@ import seedu.address.model.game.Game;
 import seedu.address.model.person.Alias;
 import seedu.address.model.person.Name;
 import seedu.address.model.person.Person;
-import seedu.address.model.tag.Tag;
 
 /**
  * Parses input arguments and creates a new AddContactCommand object
@@ -40,7 +38,7 @@ public class AddContactCommandParser implements Parser<AddContactCommand> {
     public AddContactCommand parse(String args) throws ParseException {
         // 1. Add Game and Alias prefixes to tokenizer
         ArgumentMultimap argMultimap =
-                ArgumentTokenizer.tokenize(args, PREFIX_NAME, PREFIX_TAG, PREFIX_GAME, PREFIX_ALIAS);
+                ArgumentTokenizer.tokenize(args, PREFIX_NAME, PREFIX_GAME, PREFIX_ALIAS);
 
         if (!arePrefixesPresent(argMultimap, PREFIX_NAME)
                 || !argMultimap.getPreamble().isEmpty()) {
@@ -49,7 +47,6 @@ public class AddContactCommandParser implements Parser<AddContactCommand> {
 
         argMultimap.verifyNoDuplicatePrefixesFor(PREFIX_NAME);
         Name name = ParserUtil.parseName(argMultimap.getValue(PREFIX_NAME).get());
-        Set<Tag> tagList = ParserUtil.parseTags(argMultimap.getAllValues(PREFIX_TAG));
 
         // 2. Iterate linearly to maintain the 1-to-N or 1-to-0 mapping
         Map<Game, Set<Alias>> gameToAliasesMap = new LinkedHashMap<>();
@@ -79,7 +76,7 @@ public class AddContactCommandParser implements Parser<AddContactCommand> {
             gameList.add(new Game(entry.getKey().gameName, entry.getValue()));
         }
 
-        Person person = new Person(name, tagList, gameList);
+        Person person = new Person(name, gameList);
 
         return new AddContactCommand(person);
     }

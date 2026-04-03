@@ -92,7 +92,7 @@ public class LogicManagerTest {
 
     @Test
     public void execute_deleteContactCommand_returnsAwaitingConfirmation() throws Exception {
-        Person person = new PersonBuilder(AMY).withTags().build();
+        Person person = new PersonBuilder(AMY).build();
         model.addPerson(person);
 
         CommandResult result = logic.execute("contact delete n/" + person.getName());
@@ -104,7 +104,7 @@ public class LogicManagerTest {
 
     @Test
     public void execute_deleteConfirmYes_deletesContact() throws Exception {
-        Person person = new PersonBuilder(AMY).withTags().build();
+        Person person = new PersonBuilder(AMY).build();
         model.addPerson(person);
         logic.execute("contact delete n/" + person.getName());
 
@@ -117,7 +117,7 @@ public class LogicManagerTest {
 
     @Test
     public void execute_deleteConfirmYesFull_deletesContact() throws Exception {
-        Person person = new PersonBuilder(AMY).withTags().build();
+        Person person = new PersonBuilder(AMY).build();
         model.addPerson(person);
         logic.execute("contact delete n/" + person.getName());
 
@@ -130,7 +130,7 @@ public class LogicManagerTest {
 
     @Test
     public void execute_deleteConfirmNo_cancelsDeletion() throws Exception {
-        Person person = new PersonBuilder(AMY).withTags().build();
+        Person person = new PersonBuilder(AMY).build();
         model.addPerson(person);
         logic.execute("contact delete n/" + person.getName());
 
@@ -142,7 +142,7 @@ public class LogicManagerTest {
 
     @Test
     public void execute_deleteConfirmNoFull_cancelsDeletion() throws Exception {
-        Person person = new PersonBuilder(AMY).withTags().build();
+        Person person = new PersonBuilder(AMY).build();
         model.addPerson(person);
         logic.execute("contact delete n/" + person.getName());
 
@@ -154,7 +154,7 @@ public class LogicManagerTest {
 
     @Test
     public void execute_deleteConfirmInvalidInput_cancelsDeletion() throws Exception {
-        Person person = new PersonBuilder(AMY).withTags().build();
+        Person person = new PersonBuilder(AMY).build();
         model.addPerson(person);
         logic.execute("contact delete n/" + person.getName());
 
@@ -167,7 +167,7 @@ public class LogicManagerTest {
 
     @Test
     public void execute_deleteConfirmYes_subsequentCommandsWorkNormally() throws Exception {
-        Person person = new PersonBuilder(AMY).withTags().build();
+        Person person = new PersonBuilder(AMY).build();
         model.addPerson(person);
         logic.execute("contact delete n/" + person.getName());
         logic.execute("y");
@@ -178,7 +178,7 @@ public class LogicManagerTest {
 
     @Test
     public void execute_deleteConfirmNo_subsequentCommandsWorkNormally() throws Exception {
-        Person person = new PersonBuilder(AMY).withTags().build();
+        Person person = new PersonBuilder(AMY).build();
         model.addPerson(person);
         logic.execute("contact delete n/" + person.getName());
         logic.execute("n");
@@ -189,7 +189,7 @@ public class LogicManagerTest {
 
     @Test
     public void execute_undoCommand_revertsLastCommand() throws Exception {
-        Person person = new PersonBuilder(AMY).withTags().build();
+        Person person = new PersonBuilder(AMY).build();
         String addCommand = AddContactCommand.COMMAND_WORD + NAME_DESC_AMY;
 
         logic.execute(addCommand);
@@ -283,7 +283,7 @@ public class LogicManagerTest {
 
     @Test
     public void execute_deleteConfirmYes_storageIoExceptionThrown() throws Exception {
-        Person person = new PersonBuilder(AMY).withTags().build();
+        Person person = new PersonBuilder(AMY).build();
 
         // Inject a storage that always throws on save
         JsonAddressBookStorage failingStorage = new JsonAddressBookStorage(
@@ -308,7 +308,7 @@ public class LogicManagerTest {
 
     @Test
     public void execute_deleteConfirmYes_storageAdExceptionThrown() throws Exception {
-        Person person = new PersonBuilder(AMY).withTags().build();
+        Person person = new PersonBuilder(AMY).build();
 
         JsonAddressBookStorage failingStorage = new JsonAddressBookStorage(
                 temporaryFolder.resolve("failing2.json")) {
@@ -356,7 +356,7 @@ public class LogicManagerTest {
 
         // Triggers the saveAddressBook method by executing an add command
         String addCommand = AddContactCommand.COMMAND_WORD + NAME_DESC_AMY;
-        Person expectedPerson = new PersonBuilder(AMY).withTags().build();
+        Person expectedPerson = new PersonBuilder(AMY).build();
         ModelManager expectedModel = new ModelManager();
         expectedModel.addPerson(expectedPerson);
         assertCommandFailure(addCommand, CommandException.class, expectedMessage, expectedModel);

@@ -4,7 +4,6 @@ import static java.util.Objects.requireNonNull;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_ALIAS;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_GAME;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_NAME;
-import static seedu.address.logic.parser.CliSyntax.PREFIX_TAG;
 
 import java.util.List;
 
@@ -18,7 +17,6 @@ import seedu.address.model.game.Game;
 import seedu.address.model.person.Alias;
 import seedu.address.model.person.Name;
 import seedu.address.model.person.Person;
-import seedu.address.model.tag.Tag;
 
 /**
  * Copies a contact's addition command to the system clipboard.
@@ -91,10 +89,6 @@ public class CopyCommand extends Command {
         StringBuilder sb = new StringBuilder();
         sb.append(AddContactCommand.COMMAND_WORD).append(" ");
         sb.append(PREFIX_NAME).append(person.getName().fullName).append(" ");
-
-        for (Tag tag : person.getTags()) {
-            sb.append(PREFIX_TAG).append(tag.tagName).append(" ");
-        }
 
         for (Game game : person.getGames()) {
             sb.append(PREFIX_GAME).append(game.gameName).append(" ");
