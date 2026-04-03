@@ -235,11 +235,113 @@ public class LogicManagerTest {
 
     @Test
     public void execute_clearConfirmYes_subsequentCommandsWorkNormally() throws Exception {
+        // After confirming clear, pendingClearCommand is reset to null so
+        // the next input is parsed as a normal command, not another confirmation
         logic.execute(ClearCommand.COMMAND_WORD);
         logic.execute("y");
 
         CommandResult result = logic.execute(ListCommand.COMMAND_WORD);
         assertEquals(ListCommand.MESSAGE_SUCCESS, result.getFeedbackToUser());
+    }
+
+    @Test
+    public void execute_clearConfirmYesFull_clearsAddressBook() throws Exception {
+        // "yes" (full word) is accepted as a positive confirmation alongside "y"
+        Person person = new PersonBuilder(AMY).build();
+        model.addPerson(person);
+        logic.execute(ClearCommand.COMMAND_WORD);
+
+        CommandResult result = logic.execute("yes");
+
+        assertEquals(ClearCommand.MESSAGE_SUCCESS, result.getFeedbackToUser());
+        assertFalse(model.getFilteredPersonList().contains(person));
+    }
+
+    @Test
+    public void execute_clearConfirmNoFull_cancelsClear() throws Exception {
+        // "no" (full word) is accepted as a negative confirmation alongside "n"
+        Person person = new PersonBuilder(AMY).build();
+        model.addPerson(person);
+        logic.execute(ClearCommand.COMMAND_WORD);
+
+        CommandResult result = logic.execute("no");
+
+        assertEquals(ClearCommand.MESSAGE_CANCELLED, result.getFeedbackToUser());
+        assertTrue(model.getFilteredPersonList().contains(person));
+    }
+
+    @Test
+    public void execute_clearConfirmNo_subsequentCommandsWorkNormally() throws Exception {
+        // After cancelling clear, pendingClearCommand is reset to null so
+        // the next input is treated as a normal command
+        Person person = new PersonBuilder(AMY).build();
+        model.addPerson(person);
+        logic.execute(ClearCommand.COMMAND_WORD);
+        logic.execute("n");
+
+        CommandResult result = logic.execute(ListCommand.COMMAND_WORD);
+        assertEquals(ListCommand.MESSAGE_SUCCESS, result.getFeedbackToUser());
+    }
+
+    @Test
+    public void execute_clearConfirmYes_addedToCommandHistory() throws Exception {
+        // After confirming, the ClearCommand is pushed onto commandHistory so
+        // a subsequent undo can restore the address book
+        Person person = new PersonBuilder(AMY).build();
+        model.addPerson(person);
+        logic.execute(ClearCommand.COMMAND_WORD);
+        logic.execute("y");
+        assertFalse(model.getFilteredPersonList().contains(person));
+
+        logic.execute(UndoCommand.COMMAND_WORD);
+        assertTrue(model.getFilteredPersonList().contains(person));
+    }
+
+    @Test
+    public void execute_clearConfirmYes_storageIoExceptionThrown() throws Exception {
+        // When storage throws IOException during save after clear, a CommandException
+        // is raised with the standard IO error message — clear is still applied to
+        // the model but the save failed, matching the same pattern as delete confirmation
+        JsonAddressBookStorage failingStorage = new JsonAddressBookStorage(
+                temporaryFolder.resolve("failingClear.json")) {
+            @Override
+            public void saveAddressBook(ReadOnlyAddressBook addressBook, Path filePath)
+                    throws IOException {
+                throw DUMMY_IO_EXCEPTION;
+            }
+        };
+        StorageManager storage = new StorageManager(failingStorage,
+                new JsonUserPrefsStorage(temporaryFolder.resolve("prefsClear.json")));
+        logic = new LogicManager(model, storage);
+
+        logic.execute(ClearCommand.COMMAND_WORD);
+
+        assertThrows(CommandException.class,
+                String.format(LogicManager.FILE_OPS_ERROR_FORMAT, DUMMY_IO_EXCEPTION.getMessage()), () ->
+                logic.execute("y"));
+    }
+
+    @Test
+    public void execute_clearConfirmYes_storageAdExceptionThrown() throws Exception {
+        // When storage throws AccessDeniedException, a CommandException is raised
+        // with the permission error message format
+        JsonAddressBookStorage failingStorage = new JsonAddressBookStorage(
+                temporaryFolder.resolve("failingClear2.json")) {
+            @Override
+            public void saveAddressBook(ReadOnlyAddressBook addressBook, Path filePath)
+                    throws IOException {
+                throw DUMMY_AD_EXCEPTION;
+            }
+        };
+        StorageManager storage = new StorageManager(failingStorage,
+                new JsonUserPrefsStorage(temporaryFolder.resolve("prefsClear2.json")));
+        logic = new LogicManager(model, storage);
+
+        logic.execute(ClearCommand.COMMAND_WORD);
+
+        assertThrows(CommandException.class,
+                String.format(LogicManager.FILE_OPS_PERMISSION_ERROR_FORMAT, DUMMY_AD_EXCEPTION.getMessage()), () ->
+                logic.execute("y"));
     }
 
     @Test
