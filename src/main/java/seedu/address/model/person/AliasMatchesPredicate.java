@@ -18,7 +18,7 @@ public class AliasMatchesPredicate implements Predicate<Person> {
     public boolean test(Person person) {
         return person.getGames().stream()
                 .flatMap(game -> game.getAliases().stream())
-                .anyMatch(alias -> alias.value.equalsIgnoreCase(keyword));
+                .anyMatch(alias -> alias.value.toLowerCase().contains(keyword.toLowerCase()));
     }
 
     @Override

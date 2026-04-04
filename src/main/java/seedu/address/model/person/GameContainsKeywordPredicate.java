@@ -17,7 +17,7 @@ public class GameContainsKeywordPredicate implements Predicate<Person> {
     @Override
     public boolean test(Person person) {
         return person.getGames().stream()
-                .anyMatch(game -> game.gameName.equalsIgnoreCase(keyword));
+                .anyMatch(game -> game.gameName.toLowerCase().contains(keyword.toLowerCase()));
     }
 
     @Override

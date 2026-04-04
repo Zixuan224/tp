@@ -57,6 +57,21 @@ public class AliasMatchesPredicateTest {
     }
 
     @Test
+    public void test_partialKeyword_returnsTrue() {
+        // Partial match at start of alias
+        AliasMatchesPredicate predicate = new AliasMatchesPredicate("BenJ");
+        assertTrue(predicate.test(buildPersonWithAlias("Ben", "Valorant", "BenJumpin")));
+
+        // Partial match in middle of alias
+        predicate = new AliasMatchesPredicate("Jump");
+        assertTrue(predicate.test(buildPersonWithAlias("Ben", "Valorant", "BenJumpin")));
+
+        // Partial match case-insensitive
+        predicate = new AliasMatchesPredicate("benj");
+        assertTrue(predicate.test(buildPersonWithAlias("Ben", "Valorant", "BenJumpin")));
+    }
+
+    @Test
     public void test_personDoesNotHaveMatchingAlias_returnsFalse() {
         // no games
         AliasMatchesPredicate predicate = new AliasMatchesPredicate("BenJumpin");
