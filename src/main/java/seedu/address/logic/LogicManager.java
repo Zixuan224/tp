@@ -13,7 +13,7 @@ import seedu.address.commons.core.LogsCenter;
 import seedu.address.logic.commands.ClearCommand;
 import seedu.address.logic.commands.Command;
 import seedu.address.logic.commands.CommandResult;
-import seedu.address.logic.commands.DeleteContactCommand;
+import seedu.address.logic.commands.ConfirmableDeleteCommand;
 import seedu.address.logic.commands.UndoCommand;
 import seedu.address.logic.commands.UndoableCommand;
 import seedu.address.logic.commands.exceptions.CommandException;
@@ -39,7 +39,7 @@ public class LogicManager implements Logic {
     private final Storage storage;
     private final AddressBookParser addressBookParser;
     private Person pendingDeletePerson = null;
-    private DeleteContactCommand pendingDeleteCommand = null;
+    private ConfirmableDeleteCommand pendingConfirmableCommand = null;
     private ClearCommand pendingClearCommand = null;
     private final Deque<UndoableCommand> commandHistory = new ArrayDeque<>();
 
@@ -72,9 +72,7 @@ public class LogicManager implements Logic {
 
         if (commandResult.isAwaitingConfirmation()) {
             pendingDeletePerson = commandResult.getPendingPerson();
-            if (command instanceof DeleteContactCommand) {
-                pendingDeleteCommand = (DeleteContactCommand) command;
-            }
+            pendingConfirmableCommand = (ConfirmableDeleteCommand) command;
             return commandResult;
         }
 
@@ -103,17 +101,14 @@ public class LogicManager implements Logic {
      */
     private CommandResult handleDeleteConfirmation(String commandText) throws CommandException {
         String response = commandText.trim().toLowerCase();
-        Person person = pendingDeletePerson;
-        String name = person.getName().toString();
         pendingDeletePerson = null;
-        DeleteContactCommand deleteCommand = pendingDeleteCommand;
-        pendingDeleteCommand = null;
+        ConfirmableDeleteCommand confirmableCommand = pendingConfirmableCommand;
+        pendingConfirmableCommand = null;
 
         if (response.equals("y") || response.equals("yes")) {
-            model.deletePerson(person);
-            if (deleteCommand != null) {
-                deleteCommand.setDeletedPerson(person);
-                commandHistory.push(deleteCommand);
+            CommandResult result = confirmableCommand.performDeletion(model);
+            if (confirmableCommand instanceof UndoableCommand) {
+                commandHistory.push((UndoableCommand) confirmableCommand);
             }
             try {
                 storage.saveAddressBook(model.getAddressBook());
@@ -122,11 +117,11 @@ public class LogicManager implements Logic {
             } catch (IOException ioe) {
                 throw new CommandException(String.format(FILE_OPS_ERROR_FORMAT, ioe.getMessage()), ioe);
             }
-            return new CommandResult(String.format(DeleteContactCommand.MESSAGE_DELETE_PERSON_SUCCESS, name));
+            return result;
         } else if (response.equals("n") || response.equals("no")) {
-            return new CommandResult("Deletion of " + name + " cancelled.");
+            return new CommandResult(confirmableCommand.getCancelMessage());
         } else {
-            return new CommandResult("Invalid input. Deletion of " + name + " cancelled.");
+            return new CommandResult("Invalid input. " + confirmableCommand.getCancelMessage());
         }
     }
 

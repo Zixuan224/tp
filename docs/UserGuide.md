@@ -279,10 +279,12 @@ Format (by name): `game delete n/CONTACT_NAME g/GAME_NAME`
 * `INDEX` must be a positive integer 1, 2, 3, …​
 * `CONTACT_NAME` must match the contact's full name exactly (case-insensitive).
 * The game must exist for that contact.
+* A confirmation prompt will appear. Type `y` or `yes` to confirm, or `n` or `no` to cancel.
+* Any other input cancels the deletion.
 
 Examples:
-* `game delete 1 g/Minecraft`
-* `game delete n/John Doe g/Valorant`
+* `game delete 1 g/Minecraft` prompts for confirmation, then removes Minecraft from the 1st contact.
+* `game delete n/John Doe g/Valorant` prompts for confirmation, then removes Valorant from John Doe.
 
 ### Listing games of a contact : `game list`
 
@@ -332,10 +334,12 @@ Format (by name): `alias delete n/CONTACT_NAME g/GAME_NAME al/ALIAS`
 * `CONTACT_NAME` must match the contact's full name exactly (case-insensitive).
 * The contact must already have the specified game.
 * The alias must exist for that game.
+* A confirmation prompt will appear. Type `y` or `yes` to confirm, or `n` or `no` to cancel.
+* Any other input cancels the deletion.
 
 Examples:
-* `alias delete 1 g/Valorant al/Benjumpin`
-* `alias delete n/Benjamin g/Valorant al/Benjumpin`
+* `alias delete 1 g/Valorant al/Benjumpin` prompts for confirmation, then removes the alias from the 1st contact.
+* `alias delete n/Benjamin g/Valorant al/Benjumpin` prompts for confirmation, then removes the alias from Benjamin.
 
 --------------------------------------------------------------------------------------------------------------------
 

@@ -324,6 +324,36 @@ Redo is not implemented. Once a command is undone it is removed from the history
 
 --------------------------------------------------------------------------------------------------------------------
 
+### Delete Confirmation Feature
+The `contact delete`, `game delete`, and `alias delete` commands require a y/n confirmation from the user before deletion is applied, to prevent accidental data loss.
+
+#### Architecture and Execution
+The structural relationship of the delete commands is shown in the class diagram below.
+
+<puml src="diagrams/DeleteCommandClassDiagram.puml" alt="Delete Command Class Diagram" />
+
+All three delete commands implement `ConfirmableDeleteCommand`, which declares `performDeletion()` and `getCancelMessage()`. This gives `LogicManager` a single unified code path for all confirmation handling.
+
+The following sequence diagram illustrates the two-step flow for `contact delete n/Alice` followed by `y`:
+
+<puml src="diagrams/DeleteConfirmSequenceDiagram.puml" alt="Delete Confirmation Sequence Diagram" />
+
+Step-by-step execution:
+1. The user inputs `contact delete n/Alice`.
+2. `LogicManager` passes the input to `AddressBookParser`, which creates a `DeleteContactCommand`.
+3. `LogicManager` calls `DeleteContactCommand#execute(model)`, which finds the target but does **not** delete yet — returns a `CommandResult` with `isAwaitingConfirmation = true`.
+4. `LogicManager` stores the command in `pendingConfirmableCommand` and shows the confirmation prompt.
+5. The user inputs `y` — `LogicManager#handleDeleteConfirmation()` calls `performDeletion()` on the command, conditionally pushes it to `commandHistory` if it implements `UndoableCommand`, and saves the address book.
+6. If the user inputs `n` or any other input, `getCancelMessage()` is returned and the model is unchanged.
+
+#### Design Considerations:
+* **`ConfirmableDeleteCommand` is decoupled from `UndoableCommand`** — allows future commands to require confirmation without needing to support undo. All three current delete commands implement both interfaces explicitly.
+* **Alternative:** Have `LogicManager` perform the deletion directly (e.g. `model.deletePerson()`) after confirmation, without a `performDeletion()` method on the command.
+    * **Pros:** Simpler — no extra interface or method needed.
+    * **Cons:** `LogicManager` must know the internals of each delete command (e.g. which game or alias to remove), violating separation of concerns and requiring `instanceof` checks for each command type.
+
+--------------------------------------------------------------------------------------------------------------------
+
 ## **Documentation, logging, testing, configuration, dev-ops**
 
 * [Documentation guide](Documentation.md)
