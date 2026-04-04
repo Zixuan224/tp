@@ -49,6 +49,21 @@ public class GameContainsKeywordPredicateTest {
     }
 
     @Test
+    public void test_partialKeyword_returnsTrue() {
+        // Partial match at start of game name
+        GameContainsKeywordPredicate predicate = new GameContainsKeywordPredicate("Mine");
+        assertTrue(predicate.test(new PersonBuilder().withName("Alice").withGames("Minecraft").build()));
+
+        // Partial match in middle of game name
+        predicate = new GameContainsKeywordPredicate("lor");
+        assertTrue(predicate.test(new PersonBuilder().withName("Alice").withGames("Valorant").build()));
+
+        // Partial match case-insensitive
+        predicate = new GameContainsKeywordPredicate("mine");
+        assertTrue(predicate.test(new PersonBuilder().withName("Alice").withGames("Minecraft").build()));
+    }
+
+    @Test
     public void test_personDoesNotHaveMatchingGame_returnsFalse() {
         // no games
         GameContainsKeywordPredicate predicate = new GameContainsKeywordPredicate("Valorant");
