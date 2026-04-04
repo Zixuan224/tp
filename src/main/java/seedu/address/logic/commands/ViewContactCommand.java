@@ -15,19 +15,19 @@ import seedu.address.model.person.Name;
 import seedu.address.model.person.Person;
 
 /**
- * Displays the user profile in the contact list.
+ * Displays the full details of a specific contact or the user profile.
  */
-public class ViewProfileCommand extends Command {
+public class ViewContactCommand extends Command {
 
-    public static final String COMMAND_WORD = "profile view";
+    public static final String COMMAND_WORD = "contact view";
 
     public static final String MESSAGE_USAGE = COMMAND_WORD
-            + ": Views your own profile, or the full details of a specific contact.\n"
-            + "To view your profile: " + COMMAND_WORD + "\n"
-            + "To view a contact (by Index): " + COMMAND_WORD + " INDEX\n"
-            + "To view a contact (by Name): " + COMMAND_WORD + " " + PREFIX_NAME + "CONTACT_NAME\n"
+            + ": Views the full details of a specific contact. Use 'me' to view your own profile.\n"
+            + "Parameters (by Index): INDEX (must be a positive integer)\n"
+            + "Parameters (by Name): " + PREFIX_NAME + "CONTACT_NAME\n"
+            + "Parameters (User Profile): me\n"
             + "Example 1: " + COMMAND_WORD + " 1\n"
-            + "Example 2: " + COMMAND_WORD + " " + PREFIX_NAME + "Zi Xuan";
+            + "Example 2: " + COMMAND_WORD + " me";
 
     public static final String MESSAGE_SUCCESS_SELF = "Displaying your profile.";
     public static final String MESSAGE_NO_PROFILE = "No user profile found.";
@@ -36,20 +36,15 @@ public class ViewProfileCommand extends Command {
 
     private final Index targetIndex;
     private final Name targetName;
+    private final boolean useUserProfile;
 
     /**
      * Constructor for viewing a specific contact or self.
      */
-    public ViewProfileCommand(Index targetIndex, Name targetName) {
+    public ViewContactCommand(Index targetIndex, Name targetName, boolean useUserProfile) {
         this.targetIndex = targetIndex;
         this.targetName = targetName;
-    }
-
-    /**
-     * Default constructor for viewing self
-     */
-    public ViewProfileCommand() {
-        this(null, null);
+        this.useUserProfile = useUserProfile;
     }
 
     @Override
@@ -57,29 +52,30 @@ public class ViewProfileCommand extends Command {
         if (other == this) {
             return true;
         }
-        if (!(other instanceof ViewProfileCommand)) {
+        if (!(other instanceof ViewContactCommand)) {
             return false;
         }
-        ViewProfileCommand e = (ViewProfileCommand) other;
+        ViewContactCommand e = (ViewContactCommand) other;
 
         boolean isSameIndex = (targetIndex == null && e.targetIndex == null)
                 || (targetIndex != null && targetIndex.equals(e.targetIndex));
         boolean isSameName = (targetName == null && e.targetName == null)
                 || (targetName != null && targetName.equals(e.targetName));
 
-        return isSameIndex && isSameName;
+        return isSameIndex && isSameName && useUserProfile == e.useUserProfile;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(targetIndex, targetName);
+        return Objects.hash(targetIndex, targetName, useUserProfile);
     }
 
     @Override
     public CommandResult execute(Model model) throws CommandException {
         requireNonNull(model);
+
         // VIEW SELF
-        if (targetIndex == null && targetName == null) {
+        if (useUserProfile) {
             if (model.getUserProfile().isEmpty()) {
                 throw new CommandException(MESSAGE_NO_PROFILE);
             }
@@ -87,6 +83,7 @@ public class ViewProfileCommand extends Command {
             Person userProfile = model.getUserProfile().get();
             return new CommandResult(MESSAGE_SUCCESS_SELF, false, false, userProfile);
         }
+
         // VIEW CONTACT
         List<Person> lastShownList = model.getFilteredPersonList();
         Person personToView = null;

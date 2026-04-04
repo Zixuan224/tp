@@ -37,8 +37,10 @@ public class ClearCommandTest {
     @Test
     public void executeConfirmed_nonEmptyAddressBook_success() {
         Model model = new ModelManager(getTypicalAddressBook(), new UserPrefs());
-        Model expectedModel = new ModelManager(getTypicalAddressBook(), new UserPrefs());
-        expectedModel.setAddressBook(new AddressBook());
+        Person userProfile = model.getFilteredPersonList().get(0);
+        AddressBook ab = new AddressBook();
+        ab.addPerson(userProfile);
+        Model expectedModel = new ModelManager(ab, new UserPrefs());
 
         ClearCommand clearCommand = new ClearCommand();
         clearCommand.execute(model);

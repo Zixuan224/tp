@@ -27,41 +27,53 @@ public class CopyCommand extends Command {
 
     public static final String MESSAGE_USAGE = COMMAND_WORD
             + ": Copies the 'contact add' command for the specified contact to the clipboard.\n"
-            + "Parameters: INDEX (must be a positive integer) OR " + PREFIX_NAME + "NAME\n"
+            + "Parameters (by Index): INDEX (must be a positive integer)\n"
+            + "Parameters (by Name): " + PREFIX_NAME + "NAME\n"
+            + "Parameters (User Profile): me\n"
             + "Example 1: " + COMMAND_WORD + " 1\n"
-            + "Example 2: " + COMMAND_WORD + " " + PREFIX_NAME + "John Doe";
+            + "Example 2: " + COMMAND_WORD + " " + PREFIX_NAME + "John Doe\n"
+            + "Example 3: " + COMMAND_WORD + " me";
 
     public static final String MESSAGE_SUCCESS = "Copied contact to clipboard: %1$s";
     public static final String MESSAGE_PERSON_NOT_FOUND = "Error: Name not found";
+    public static final String MESSAGE_NO_PROFILE = "No user profile found.";
 
     private final Index targetIndex;
     private final Name targetName;
+    private final boolean useUserProfile;
 
     /**
      * @param targetIndex of the person in the filtered person list to copy
      * @param targetName of the person in the filtered person list to copy
+     * @param useUserProfile true if targeting the user profile via 'me'
      */
-    public CopyCommand(Index targetIndex, Name targetName) {
+    public CopyCommand(Index targetIndex, Name targetName, boolean useUserProfile) {
         this.targetIndex = targetIndex;
         this.targetName = targetName;
+        this.useUserProfile = useUserProfile;
     }
 
     @Override
     public CommandResult execute(Model model) throws CommandException {
         requireNonNull(model);
-        List<Person> lastShownList = model.getFilteredPersonList();
         Person personToCopy;
 
-        if (targetIndex != null) {
-            if (targetIndex.getZeroBased() >= lastShownList.size()) {
-                throw new CommandException(Messages.MESSAGE_INVALID_PERSON_DISPLAYED_INDEX);
-            }
-            personToCopy = lastShownList.get(targetIndex.getZeroBased());
+        if (useUserProfile) {
+            personToCopy = model.getUserProfile()
+                    .orElseThrow(() -> new CommandException(MESSAGE_NO_PROFILE));
         } else {
-            personToCopy = lastShownList.stream()
-                    .filter(p -> p.getName().equals(targetName))
-                    .findFirst()
-                    .orElseThrow(() -> new CommandException(MESSAGE_PERSON_NOT_FOUND));
+            List<Person> lastShownList = model.getFilteredPersonList();
+            if (targetIndex != null) {
+                if (targetIndex.getZeroBased() >= lastShownList.size()) {
+                    throw new CommandException(Messages.MESSAGE_INVALID_PERSON_DISPLAYED_INDEX);
+                }
+                personToCopy = lastShownList.get(targetIndex.getZeroBased());
+            } else {
+                personToCopy = lastShownList.stream()
+                        .filter(p -> p.getName().equals(targetName))
+                        .findFirst()
+                        .orElseThrow(() -> new CommandException(MESSAGE_PERSON_NOT_FOUND));
+            }
         }
 
         String copyString = generateCommandString(personToCopy);
@@ -114,6 +126,6 @@ public class CopyCommand extends Command {
         boolean nameEquals = (targetName == null && otherCopyCommand.targetName == null)
                 || (targetName != null && targetName.equals(otherCopyCommand.targetName));
 
-        return indexEquals && nameEquals;
+        return indexEquals && nameEquals && useUserProfile == otherCopyCommand.useUserProfile;
     }
 }

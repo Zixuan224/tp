@@ -45,7 +45,7 @@ public class EditContactCommandTest {
 
     @Test
     public void execute_editByIndex_success() {
-        Person personToEdit = model.getFilteredPersonList().get(0);
+        Person personToEdit = model.getFilteredPersonList().get(1);
         Name newName = new Name("Alicia");
         EditContactCommand command = new EditContactCommand(INDEX_FIRST_PERSON, null, newName, false);
 
@@ -68,7 +68,7 @@ public class EditContactCommandTest {
 
     @Test
     public void execute_invalidIndex_throwsCommandException() {
-        Index outOfBoundIndex = Index.fromOneBased(model.getFilteredPersonList().size() + 1);
+        Index outOfBoundIndex = Index.fromZeroBased(model.getFilteredPersonList().size() + 1);
         EditContactCommand command = new EditContactCommand(outOfBoundIndex, null, new Name("Ben"), false);
         assertCommandFailure(command, model, seedu.address.logic.Messages.MESSAGE_INVALID_PERSON_DISPLAYED_INDEX);
     }
@@ -83,7 +83,7 @@ public class EditContactCommandTest {
 
     @Test
     public void execute_duplicateNameByIndex_throwsCommandException() {
-        Person second = model.getFilteredPersonList().get(1);
+        Person second = model.getFilteredPersonList().get(2);
         EditContactCommand command = new EditContactCommand(INDEX_FIRST_PERSON, null, second.getName(), false);
         assertCommandFailure(command, model, EditContactCommand.MESSAGE_DUPLICATE_PERSON);
     }

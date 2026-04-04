@@ -31,12 +31,19 @@ public class PersonCard extends UiPart<Region> {
     private Label id;
 
     /**
-     * Creates a {@code PersonCode} with the given {@code Person} and index to display.
+     * Creates a {@code PersonCard} with the given {@code Person} and index to display.
      */
     public PersonCard(Person person, int displayedIndex) {
         super(FXML);
         this.person = person;
-        id.setText(displayedIndex + ". ");
+
+        // If the person is the user profile, replace the number with "User Profile:"
+        if (person.isUserProfile()) {
+            id.setText("User Profile: ");
+        } else {
+            id.setText(displayedIndex + ". ");
+        }
+
         name.setText(person.getName().fullName);
     }
 }

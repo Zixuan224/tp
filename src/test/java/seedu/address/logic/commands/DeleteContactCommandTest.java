@@ -9,6 +9,7 @@ import static seedu.address.testutil.TypicalIndexes.INDEX_FIRST_PERSON;
 import static seedu.address.testutil.TypicalIndexes.INDEX_SECOND_PERSON;
 import static seedu.address.testutil.TypicalPersons.ALICE;
 import static seedu.address.testutil.TypicalPersons.BENSON;
+import static seedu.address.testutil.TypicalPersons.CARL;
 import static seedu.address.testutil.TypicalPersons.getTypicalAddressBook;
 
 import org.junit.jupiter.api.Test;
@@ -68,7 +69,7 @@ public class DeleteContactCommandTest {
 
     @Test
     public void execute_invalidIndex_throwsCommandException() {
-        Index outOfBoundIndex = Index.fromOneBased(model.getFilteredPersonList().size() + 1);
+        Index outOfBoundIndex = Index.fromZeroBased(model.getFilteredPersonList().size() + 1);
         DeleteContactCommand deleteCommand = new DeleteContactCommand(outOfBoundIndex, null, false);
 
         assertCommandFailure(deleteCommand, model, Messages.MESSAGE_INVALID_PERSON_DISPLAYED_INDEX);
@@ -139,7 +140,7 @@ public class DeleteContactCommandTest {
         showPersonAtIndex(model, INDEX_FIRST_PERSON); // shows only ALICE
 
         // BENSON exists in address book but not in filtered list
-        DeleteContactCommand deleteCommand = new DeleteContactCommand(null, BENSON.getName(), false);
+        DeleteContactCommand deleteCommand = new DeleteContactCommand(null, CARL.getName(), false);
 
         assertCommandFailure(deleteCommand, model, DeleteContactCommand.MESSAGE_PERSON_NOT_FOUND);
     }

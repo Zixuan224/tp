@@ -32,13 +32,14 @@ public class EditContactCommandParser implements Parser<EditContactCommand> {
         argMultimap.verifyNoDuplicatePrefixesFor(PREFIX_NAME, PREFIX_NEW_NAME);
 
         String preamble = argMultimap.getPreamble().trim();
-        boolean useUserProfile = preamble.equals("0");
+        boolean useUserProfile = preamble.equalsIgnoreCase("me"); // Now checks for 'me'
         boolean hasNamePrefix = argMultimap.getValue(PREFIX_NAME).isPresent();
 
         if (!useUserProfile) {
             ParserUtil.verifyIndexOrNamePresent(preamble, hasNamePrefix, EditContactCommand.MESSAGE_USAGE);
         } else if (hasNamePrefix) {
-            throw new ParseException("Please provide either an index OR a name, not both.");
+            throw new ParseException("Please do not provide a name prefix (n/) "
+                    + "when targeting your own profile with 'me'.");
         }
 
         Name newName = ParserUtil.parseName(argMultimap.getValue(PREFIX_NEW_NAME).get());

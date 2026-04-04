@@ -16,11 +16,12 @@ import seedu.address.model.person.Alias;
 import seedu.address.model.person.Name;
 
 public class AliasCommandParserTest {
+    private static final String PROFILE_MUTUALLY_EXCLUSIVE_ERROR =
+            "Please do not provide a name prefix (n/) when targeting your own profile with 'me'.";
 
     private final AliasCommandParser parser = new AliasCommandParser();
 
     // Tests for ADD alias command
-
     @Test
     public void parse_addAliasValidInputByName_success() {
         AddAliasCommand expected = new AddAliasCommand(null, new Name("Benjamin"),
@@ -36,10 +37,24 @@ public class AliasCommandParserTest {
     }
 
     @Test
+    public void parse_addAliasValidInputByProfile_success() {
+        AddAliasCommand expected = new AddAliasCommand(null, null,
+                new Game("Valorant"), new Alias("Benjumpin"), true);
+        assertParseSuccess(parser, "add me g/Valorant al/Benjumpin", expected);
+    }
+
+    @Test
     public void parse_addAliasMutuallyExclusive_failure() {
         // Triggers the mutually exclusive error by providing both an index and a name
         assertParseFailure(parser, "add 1 n/Benjamin g/Valorant al/Benjumpin",
                 "Please provide either an index OR a name, not both.");
+    }
+
+    @Test
+    public void parse_addAliasProfileWithName_failure() {
+        // Triggers the mutually exclusive error by providing "me" and a name prefix
+        assertParseFailure(parser, "add me n/Benjamin g/Valorant al/Benjumpin",
+                PROFILE_MUTUALLY_EXCLUSIVE_ERROR);
     }
 
     @Test
@@ -53,6 +68,7 @@ public class AliasCommandParserTest {
         assertParseFailure(parser, "add n/Benjamin Benjumpin",
                 String.format(MESSAGE_INVALID_COMMAND_FORMAT, AddAliasCommand.MESSAGE_USAGE));
     }
+
 
     // Tests for DELETE alias command
 
@@ -71,10 +87,22 @@ public class AliasCommandParserTest {
     }
 
     @Test
+    public void parse_deleteAliasValidInputByProfile_success() {
+        DeleteAliasCommand expected = new DeleteAliasCommand(null, null,
+                new Game("Valorant"), new Alias("Benjumpin"), true);
+        assertParseSuccess(parser, "delete me g/Valorant al/Benjumpin", expected);
+    }
+
+    @Test
     public void parse_deleteAliasMutuallyExclusive_failure() {
-        // Triggers the mutually exclusive error by providing both an index and a name
         assertParseFailure(parser, "delete 1 n/Benjamin g/Valorant al/Benjumpin",
                 "Please provide either an index OR a name, not both.");
+    }
+
+    @Test
+    public void parse_deleteAliasProfileWithName_failure() {
+        assertParseFailure(parser, "delete me n/Benjamin g/Valorant al/Benjumpin",
+                PROFILE_MUTUALLY_EXCLUSIVE_ERROR);
     }
 
     @Test
@@ -88,6 +116,7 @@ public class AliasCommandParserTest {
         assertParseFailure(parser, "delete n/Benjamin Benjumpin",
                 String.format(MESSAGE_INVALID_COMMAND_FORMAT, DeleteAliasCommand.MESSAGE_USAGE));
     }
+
 
     // Tests for EDIT alias command
 
@@ -106,6 +135,13 @@ public class AliasCommandParserTest {
     }
 
     @Test
+    public void parse_editAliasValidInputByProfile_success() {
+        EditAliasCommand expected = new EditAliasCommand(null, null,
+                new Game("Valorant"), new Alias("JohnnyV"), new Alias("JohnnyValorant"), true);
+        assertParseSuccess(parser, "edit me g/Valorant al/JohnnyV na/JohnnyValorant", expected);
+    }
+
+    @Test
     public void parse_editAliasMissingNewAliasPrefix_failure() {
         assertParseFailure(parser, "edit n/Benjamin g/Valorant al/JohnnyV",
                 String.format(MESSAGE_INVALID_COMMAND_FORMAT, EditAliasCommand.MESSAGE_USAGE));
@@ -118,9 +154,9 @@ public class AliasCommandParserTest {
     }
 
     @Test
-    public void parse_editAliasUserProfileWithName_failure() {
-        assertParseFailure(parser, "edit 0 n/Benjamin g/Valorant al/JohnnyV na/JohnnyValorant",
-                "Please provide either an index OR a name, not both.");
+    public void parse_editAliasProfileWithName_failure() {
+        assertParseFailure(parser, "edit me n/Benjamin g/Valorant al/JohnnyV na/JohnnyValorant",
+                PROFILE_MUTUALLY_EXCLUSIVE_ERROR);
     }
 
     // Tests for unknown actions and formats

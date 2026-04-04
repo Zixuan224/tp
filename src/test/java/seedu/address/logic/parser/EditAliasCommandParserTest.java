@@ -4,6 +4,7 @@ import static seedu.address.logic.commands.CommandTestUtil.VALID_ALIAS_JETT;
 import static seedu.address.logic.commands.CommandTestUtil.VALID_ALIAS_STEVE;
 import static seedu.address.logic.commands.CommandTestUtil.VALID_GAME_VALORANT;
 import static seedu.address.logic.commands.CommandTestUtil.VALID_NAME_AMY;
+import static seedu.address.logic.parser.CliSyntax.PREFIX_NAME;
 import static seedu.address.logic.parser.CommandParserTestUtil.assertParseFailure;
 import static seedu.address.logic.parser.CommandParserTestUtil.assertParseSuccess;
 import static seedu.address.testutil.TypicalIndexes.INDEX_FIRST_PERSON;
@@ -16,9 +17,10 @@ import seedu.address.model.person.Alias;
 import seedu.address.model.person.Name;
 
 public class EditAliasCommandParserTest {
+    private static final String PROFILE_MUTUALLY_EXCLUSIVE_ERROR =
+            "Please do not provide a name prefix (n/) when targeting your own profile with 'me'.";
 
     private final EditAliasCommandParser parser = new EditAliasCommandParser();
-
     @Test
     public void parse_byIndex_success() {
         EditAliasCommand expected = new EditAliasCommand(
@@ -51,8 +53,15 @@ public class EditAliasCommandParserTest {
                 new Game(VALID_GAME_VALORANT),
                 new Alias(VALID_ALIAS_STEVE), new Alias(VALID_ALIAS_JETT),
                 true);
+
+        // Standard lowercase "me"
         assertParseSuccess(parser,
-                " 0 g/" + VALID_GAME_VALORANT + " al/" + VALID_ALIAS_STEVE + " na/" + VALID_ALIAS_JETT,
+                " me g/" + VALID_GAME_VALORANT + " al/" + VALID_ALIAS_STEVE + " na/" + VALID_ALIAS_JETT,
+                expected);
+
+        // Case-insensitive and whitespace padded
+        assertParseSuccess(parser,
+                "   ME   g/" + VALID_GAME_VALORANT + " al/" + VALID_ALIAS_STEVE + " na/" + VALID_ALIAS_JETT,
                 expected);
     }
 
@@ -99,8 +108,23 @@ public class EditAliasCommandParserTest {
     @Test
     public void parse_userProfileWithName_failure() {
         assertParseFailure(parser,
-                " 0 n/" + VALID_NAME_AMY + " g/" + VALID_GAME_VALORANT
+                " me n/" + VALID_NAME_AMY + " g/" + VALID_GAME_VALORANT
                         + " al/" + VALID_ALIAS_STEVE + " na/" + VALID_ALIAS_JETT,
-                "Please provide either an index OR a name, not both.");
+                PROFILE_MUTUALLY_EXCLUSIVE_ERROR);
+    }
+
+    @Test
+    public void parse_duplicatePrefixes_failure() {
+        assertParseFailure(parser,
+                " 1 n/" + VALID_NAME_AMY + " n/" + VALID_NAME_AMY + " g/" + VALID_GAME_VALORANT
+                        + " al/" + VALID_ALIAS_STEVE + " na/" + VALID_ALIAS_JETT,
+                seedu.address.logic.Messages.getErrorMessageForDuplicatePrefixes(PREFIX_NAME));
+    }
+
+    @Test
+    public void parse_emptyInput_failure() {
+        assertParseFailure(parser, "",
+                String.format(seedu.address.logic.Messages.MESSAGE_INVALID_COMMAND_FORMAT,
+                        EditAliasCommand.MESSAGE_USAGE));
     }
 }

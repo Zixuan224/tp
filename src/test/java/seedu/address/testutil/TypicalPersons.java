@@ -15,7 +15,7 @@ import seedu.address.model.person.Person;
  */
 public class TypicalPersons {
 
-    public static final Person ALICE = new PersonBuilder().withName("Alice Pauline").build();
+    public static final Person ALICE = new PersonBuilder().withName("Alice Pauline").buildMe();
     public static final Person BENSON = new PersonBuilder().withName("Benson Meier").build();
     public static final Person CARL = new PersonBuilder().withName("Carl Kurz").build();
     public static final Person DANIEL = new PersonBuilder().withName("Daniel Meier").build();

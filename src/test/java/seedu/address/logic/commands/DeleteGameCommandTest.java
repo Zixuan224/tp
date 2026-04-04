@@ -71,7 +71,7 @@ public class DeleteGameCommandTest {
 
     @Test
     public void execute_deleteGameByIndex_success() throws Exception {
-        Person firstPerson = model.getFilteredPersonList().get(0);
+        Person firstPerson = model.getFilteredPersonList().get(1);
         Game gameToProcess = new Game("Minecraft");
 
         new AddGameCommand(INDEX_FIRST_PERSON, null, gameToProcess, false).execute(model);
@@ -81,7 +81,7 @@ public class DeleteGameCommandTest {
 
         Model expectedModel = new ModelManager(getTypicalAddressBook(), new UserPrefs());
 
-        Person editedPerson = expectedModel.getFilteredPersonList().get(0);
+        Person editedPerson = expectedModel.getFilteredPersonList().get(1);
 
         String expectedMessage = String.format(DeleteGameCommand.MESSAGE_SUCCESS,
                 gameToProcess.gameName,
@@ -95,7 +95,7 @@ public class DeleteGameCommandTest {
     @Test
     public void execute_invalidIndex_failure() {
         seedu.address.commons.core.index.Index outOfBoundIndex =
-                seedu.address.commons.core.index.Index.fromOneBased(model.getFilteredPersonList().size() + 1);
+                seedu.address.commons.core.index.Index.fromZeroBased(model.getFilteredPersonList().size() + 1);
         Game gameToDelete = new Game("Minecraft");
         DeleteGameCommand deleteGameCommand = new DeleteGameCommand(outOfBoundIndex, null, gameToDelete, false);
 

@@ -107,7 +107,7 @@ public class AddGameCommandTest {
 
     @Test
     public void execute_addGameByIndex_success() {
-        Person firstPerson = model.getFilteredPersonList().get(0);
+        Person firstPerson = model.getFilteredPersonList().get(1);
         Game gameToAdd = new Game("Minecraft");
 
         // Testing the Index path (Name is null)
@@ -132,7 +132,7 @@ public class AddGameCommandTest {
     @Test
     public void execute_invalidIndex_failure() {
         // Create an index that is larger than the size of the list
-        Index outOfBoundIndex = Index.fromOneBased(model.getFilteredPersonList().size() + 1);
+        Index outOfBoundIndex = Index.fromZeroBased(model.getFilteredPersonList().size() + 1);
         Game gameToAdd = new Game("Minecraft");
         AddGameCommand addGameCommand = new AddGameCommand(outOfBoundIndex, null, gameToAdd, false);
 

@@ -10,7 +10,7 @@ import seedu.address.logic.commands.Command;
 import seedu.address.logic.parser.exceptions.ParseException;
 
 /**
- * Parses contact-related commands by dispatching on the action word (add, delete, edit, etc.).
+ * Parses contact-related commands by dispatching on the action word (add, delete, edit, view, etc.).
  */
 public class ContactCommandParser implements Parser<Command> {
 
@@ -18,6 +18,7 @@ public class ContactCommandParser implements Parser<Command> {
     public static final String MESSAGE_USAGE = """
               contact: Manages contacts.
               contact add n/NAME [t/TAG]...
+              contact view me
               contact delete n/NAME""";
 
     private static final Pattern ACTION_FORMAT = Pattern.compile("(?<action>\\S+)(?<arguments>.*)");
@@ -36,6 +37,7 @@ public class ContactCommandParser implements Parser<Command> {
         case "add" -> new AddContactCommandParser().parse(arguments);
         case "delete" -> new DeleteContactCommandParser().parse(arguments);
         case "edit" -> new EditContactCommandParser().parse(arguments);
+        case "view" -> new ViewContactCommandParser().parse(arguments);
         default -> throw new ParseException(MESSAGE_UNKNOWN_COMMAND);
         };
     }

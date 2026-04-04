@@ -116,7 +116,7 @@ public class DeleteAliasCommandTest {
 
     @Test
     public void execute_deleteAliasByIndex_success() throws Exception {
-        Person firstPerson = model.getFilteredPersonList().get(0);
+        Person firstPerson = model.getFilteredPersonList().get(1);
         Game game = new Game("Valorant");
         Alias alias = new Alias("Benjumpin");
 
@@ -131,7 +131,7 @@ public class DeleteAliasCommandTest {
         Model expectedModel = new ModelManager(getTypicalAddressBook(), new UserPrefs());
         new AddGameCommand(INDEX_FIRST_PERSON, null, game, false).execute(expectedModel);
 
-        Person editedPerson = expectedModel.getFilteredPersonList().get(0);
+        Person editedPerson = expectedModel.getFilteredPersonList().get(1);
 
         String expectedMessage = String.format(DeleteAliasCommand.MESSAGE_SUCCESS,
                 firstPerson.getName(), game.gameName, alias);
@@ -143,7 +143,7 @@ public class DeleteAliasCommandTest {
 
     @Test
     public void execute_invalidIndex_failure() {
-        Index outOfBoundIndex = Index.fromOneBased(model.getFilteredPersonList().size() + 1);
+        Index outOfBoundIndex = Index.fromZeroBased(model.getFilteredPersonList().size() + 1);
         Game game = new Game("Valorant");
         Alias alias = new Alias("SomeAlias");
 

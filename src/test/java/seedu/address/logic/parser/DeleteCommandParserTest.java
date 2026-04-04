@@ -31,7 +31,7 @@ public class DeleteCommandParserTest {
 
     @Test
     public void parse_userProfile_returnsDeleteContactCommand() {
-        assertParseSuccess(parser, " 0", new DeleteContactCommand(null, null, true));
+        assertParseSuccess(parser, " me", new DeleteContactCommand(null, null, true));
     }
 
     @Test

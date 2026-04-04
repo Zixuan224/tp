@@ -8,31 +8,34 @@ import static seedu.address.testutil.TypicalIndexes.INDEX_FIRST_PERSON;
 import org.junit.jupiter.api.Test;
 
 import seedu.address.logic.Messages;
-import seedu.address.logic.commands.CopyCommand;
+import seedu.address.logic.commands.ViewContactCommand;
 import seedu.address.model.person.Name;
 
-public class CopyCommandParserTest {
+public class ViewContactCommandParserTest {
 
-    private CopyCommandParser parser = new CopyCommandParser();
+    private ViewContactCommandParser parser = new ViewContactCommandParser();
 
     @Test
-    public void parse_validIndex_returnsCopyCommand() {
-        assertParseSuccess(parser, "1", new CopyCommand(INDEX_FIRST_PERSON, null, false));
+    public void parse_validIndex_returnsViewContactCommand() {
+        assertParseSuccess(parser, "1", new ViewContactCommand(INDEX_FIRST_PERSON, null, false));
     }
 
     @Test
-    public void parse_validName_returnsCopyCommand() {
+    public void parse_validName_returnsViewContactCommand() {
         Name expectedName = new Name("John Doe");
-        assertParseSuccess(parser, " n/John Doe", new CopyCommand(null, expectedName, false));
+        assertParseSuccess(parser, " n/John Doe", new ViewContactCommand(null, expectedName, false));
     }
 
     @Test
-    public void parse_validUserProfile_returnsCopyCommand() {
-        // "me" preamble maps to user profile flag = true
-        assertParseSuccess(parser, "me", new CopyCommand(null, null, true));
+    public void parse_validUserProfile_returnsViewContactCommand() {
+        // "me" preamble maps to useUserProfile = true
+        assertParseSuccess(parser, "me", new ViewContactCommand(null, null, true));
 
-        // Ensure whitespace doesn't break it
-        assertParseSuccess(parser, "  me  ", new CopyCommand(null, null, true));
+        // Ensure whitespace doesn't break the match
+        assertParseSuccess(parser, "  me  ", new ViewContactCommand(null, null, true));
+
+        // Ensure case-insensitivity
+        assertParseSuccess(parser, "ME", new ViewContactCommand(null, null, true));
     }
 
     @Test
@@ -50,28 +53,20 @@ public class CopyCommandParserTest {
     @Test
     public void parse_emptyInput_throwsParseException() {
         assertParseFailure(parser, "",
-                String.format(MESSAGE_INVALID_COMMAND_FORMAT, CopyCommand.MESSAGE_USAGE));
+                String.format(MESSAGE_INVALID_COMMAND_FORMAT, ViewContactCommand.MESSAGE_USAGE));
         assertParseFailure(parser, "  ",
-                String.format(MESSAGE_INVALID_COMMAND_FORMAT, CopyCommand.MESSAGE_USAGE));
-    }
-
-    @Test
-    public void parse_validUserProfileCaseInsensitive_returnsCopyCommand() {
-        // Check uppercase "ME"
-        assertParseSuccess(parser, "ME", new CopyCommand(null, null, true));
-        // Check mixed case "Me"
-        assertParseSuccess(parser, "mE", new CopyCommand(null, null, true));
+                String.format(MESSAGE_INVALID_COMMAND_FORMAT, ViewContactCommand.MESSAGE_USAGE));
     }
 
     @Test
     public void parse_invalidIndex_throwsParseException() {
-        // Non-integer input should fail
+        // Non-integer input should fail at ParserUtil.parseIndex
         assertParseFailure(parser, "a", ParserUtil.MESSAGE_INVALID_INDEX);
     }
 
     @Test
     public void parse_bothIndexAndName_throwsParseException() {
-        // Providing an index and name prefix together should fail based on your ParserUtil logic
+        // Providing an index and name prefix together should fail at ParserUtil.verifyIndexOrNamePresent
         assertParseFailure(parser, "1 n/John Doe",
                 "Please provide either an index OR a name, not both.");
     }

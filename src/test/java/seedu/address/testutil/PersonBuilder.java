@@ -65,4 +65,7 @@ public class PersonBuilder {
         return new Person(name, games);
     }
 
+    public Person buildMe() {
+        return new Person(name, games, true);
+    }
 }
