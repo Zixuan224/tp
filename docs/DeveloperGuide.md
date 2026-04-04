@@ -106,6 +106,7 @@ How the `Logic` component works:
 1. The command can communicate with the `Model` when it is executed (e.g. to delete a person).<br>
    Note that although this is shown as a single step in the diagram above (for simplicity), in the code it can take several interactions (between the command object and the `Model`) to achieve.
 1. The result of the command execution is encapsulated as a `CommandResult` object which is returned back from `Logic`.
+1. If the command implements the `UndoableCommand` interface, `LogicManager` pushes it onto the `commandHistory` stack so it can be reversed by a subsequent `undo` command.
 
 Here are the other classes in `Logic` (omitted from the class diagram above) that are used for parsing a user command:
 
@@ -158,6 +159,62 @@ Classes used by multiple components are in the `seedu.address.commons` package.
 
 This section describes some noteworthy details on how certain features are implemented.
 
+### Copy Command Feature
+The `copy` command allows users to quickly serialize a specific contact's complex profile (including their name, tags, games, and aliases) into a perfectly formatted, executable CLI string (e.g., `contact add n/John Doe t/friend...`) and saves it directly to their operating system's clipboard.
+
+#### Architecture and Execution
+To avoid cluttering the main logic architecture diagram, the structural relationship of the `CopyCommand` is shown in the feature-specific class diagram below.
+
+![CopyCommandClassDiagram](images/CopyCommandClassDiagram.png)
+
+The command execution heavily relies on the `Logic` and `Model` components to retrieve the target contact, format the string, and then interfaces with the external OS `Clipboard`.
+
+Step-by-step execution:
+1. The user launches the application and inputs `copy 1` into the `CommandBox`.
+2. `LogicManager` passes the input to `AddressBookParser`, which maps the command word to the `CopyCommandParser`.
+3. `CopyCommandParser` parses the index, creates a `CopyCommand` object, and returns it.
+4. `LogicManager` calls `CopyCommand#execute(model)`.
+5. The command fetches the target `Person` from the `Model` using the provided index.
+6. The command formats the person's attributes into a valid CLI string.
+7. The command fetches the system `Clipboard` and sets its content to the formatted string.
+8. A `CommandResult` is returned to indicate success.
+
+The following sequence diagram illustrates this interaction:
+
+![CopySequenceDiagram](images/CopySequenceDiagram.png)
+
+#### Design Considerations:
+* **Alternative 1 (Current):** Interface directly with the `Clipboard` within the `CopyCommand` execution logic, but use a mock/stub clipboard for testing.
+    * **Pros:** Keeps the command highly cohesive and straightforward.
+    * **Cons:** Requires careful testing setup to ensure CI/CD pipelines (which run in headless Linux environments without physical clipboards) do not crash with `IllegalStateException`.
+* **Alternative 2:** Have the `CopyCommand` return the generated string inside the `CommandResult`, and force the `MainWindow` (UI) to push it to the clipboard.
+    * **Pros:** Avoids headless testing issues entirely since the Logic component never touches the OS.
+    * **Cons:** Violates the separation of concerns. The UI should merely display results, not execute system-level operations meant to be triggered by a specific command.
+
+---
+
+### Command History Navigation (Up/Down Arrows)
+To improve the Quality of Life (QoL) of the CLI interface, users can navigate their session's command history using the Up and Down arrow keys.
+
+#### Architecture and Execution
+A naive implementation would store the history state directly inside the UI's `CommandBox`. However, UI components are notoriously difficult to test automatically without relying on heavy frameworks like TestFX.
+
+To maintain strict adherence to testability, the state tracking logic is completely decoupled into a standalone `CommandHistory` class within the `Logic` component.
+
+Step-by-step execution:
+1. The user presses the Up arrow key in the text field.
+2. The `CommandBox` triggers the `handleKeyPress(KeyEvent)` method.
+3. The `CommandBox` queries the `CommandHistory` logic class via `getPrevious()`.
+4. If a previous command exists, the text field is updated, and the cursor (`caret`) is forcefully positioned at the end of the loaded string.
+
+The following sequence diagram proves the UI-Logic decoupling during this interaction:
+
+![CommandHistorySequenceDiagram](images/CommandHistorySequenceDiagram.png)
+
+#### Design Considerations:
+* **UI vs Logic State Tracking:** By placing `CommandHistory.java` inside the `logic` package, we achieve 100% test coverage of the pointer math (including floor and ceiling boundary checks) using standard, lightning-fast headless JUnit tests, entirely bypassing the JavaFX Toolkit lifecycle.
+
+### \[Proposed\] Undo/redo feature
 ### Editing a contact's name feature
 
 #### Implementation
@@ -186,129 +243,114 @@ The `contact edit` command allows users to rename an existing contact while pres
 * **Index and name-based lookup** — The command supports both index and name identification, consistent with `alias edit` and `view`. A single constructor `(Index, Name, Name, boolean)` is used with the unused field passed as `null`, matching the pattern used by `EditAliasCommand`.
 * **Games and aliases preserved** — The new `Person` is constructed with the original person's `games` map, so all associated data is retained after a rename.
 
-### Delete confirmation feature
+### Undo feature
 
 #### Implementation
 
-The `contact delete`, `game delete`, and `alias delete` commands all require a y/n confirmation from the user before the deletion is applied. This is implemented via the `ConfirmableDeleteCommand` interface.
+The undo mechanism is implemented using a **command history stack** managed by `LogicManager`, together with an `UndoableCommand` interface that undoable commands implement.
 
-**`ConfirmableDeleteCommand` interface:**
+**Key classes involved:**
 
-All three delete commands implement `ConfirmableDeleteCommand`, which extends `UndoableCommand` and declares two methods:
-* `performDeletion(Model model)` — performs the actual deletion after the user confirms.
-* `getCancelMessage()` — returns the command-specific cancellation message shown when the user declines.
+* `UndoableCommand` (interface) — declares `void undo(Model model)`, which each undoable command implements to reverse its own effect.
+* `UndoCommand` — pops the most recent command from the history stack and calls its `undo()` method.
+* `LogicManager` — owns the history stack (`Deque<UndoableCommand> commandHistory`) and pushes commands onto it after successful execution.
 
-**Two-step execution flow:**
+**How the history stack is maintained:**
 
-1. User types a delete command (e.g. `game delete 1 g/Minecraft`).
-2. `LogicManager` calls `command.execute(model)`, which validates the target, stores internal state (e.g. `personBeforeEdit`, `personAfterEdit`), and returns a `CommandResult` with `isAwaitingConfirmation = true`.
-3. `LogicManager` stores the command in `pendingConfirmableCommand` and the pending person in `pendingDeletePerson`.
-4. User types `y` or `yes` → `LogicManager` calls `confirmableCommand.performDeletion(model)`, pushes the command to `commandHistory` for undo support, and saves the address book.
-5. User types `n`, `no`, or anything else → `LogicManager` calls `confirmableCommand.getCancelMessage()` and returns without modifying the model.
-
-**Design considerations:**
-
-* **Single code path** — `LogicManager.handleDeleteConfirmation()` handles all three delete commands identically via the `ConfirmableDeleteCommand` interface, with no `instanceof` checks.
-* **Encapsulated deletion logic** — Each command owns its deletion logic in `performDeletion()` rather than having `LogicManager` perform model operations directly.
-* **Undo support** — Since `ConfirmableDeleteCommand` extends `UndoableCommand`, commands pushed to `commandHistory` after confirmation can be reversed with `undo`.
-
-### \[Proposed\] Undo/redo feature
-
-#### Proposed Implementation
-
-The proposed undo/redo mechanism is facilitated by `VersionedAddressBook`. It extends `AddressBook` with an undo/redo history, stored internally as an `addressBookStateList` and `currentStatePointer`. Additionally, it implements the following operations:
-
-* `VersionedAddressBook#commit()` — Saves the current address book state in its history.
-* `VersionedAddressBook#undo()` — Restores the previous address book state from its history.
-* `VersionedAddressBook#redo()` — Restores a previously undone address book state from its history.
-
-These operations are exposed in the `Model` interface as `Model#commitAddressBook()`, `Model#undoAddressBook()` and `Model#redoAddressBook()` respectively.
-
-Given below is an example usage scenario and how the undo/redo mechanism behaves at each step.
-
-Step 1. The user launches the application for the first time. The `VersionedAddressBook` will be initialized with the initial address book state, and the `currentStatePointer` pointing to that single address book state.
-
-<puml src="diagrams/UndoRedoState0.puml" alt="UndoRedoState0" />
-
-Step 2. The user executes `delete 5` command to delete the 5th person in the address book. The `delete` command calls `Model#commitAddressBook()`, causing the modified state of the address book after the `delete 5` command executes to be saved in the `addressBookStateList`, and the `currentStatePointer` is shifted to the newly inserted address book state.
-
-<puml src="diagrams/UndoRedoState1.puml" alt="UndoRedoState1" />
-
-Step 3. The user executes `add n/David …​` to add a new person. The `add` command also calls `Model#commitAddressBook()`, causing another modified address book state to be saved into the `addressBookStateList`.
-
-<puml src="diagrams/UndoRedoState2.puml" alt="UndoRedoState2" />
+After a command executes successfully, `LogicManager` checks whether it implements `UndoableCommand`. If it does, the command is pushed onto the `commandHistory` deque (used as a LIFO stack). Read-only commands (e.g. `list`, `find`) do not implement `UndoableCommand` and are never added to history.
 
 <box type="info" seamless>
 
-**Note:** If a command fails its execution, it will not call `Model#commitAddressBook()`, so the address book state will not be saved into the `addressBookStateList`.
+**Note:** `UndoCommand` itself is not pushed to history — it is created directly in `LogicManager` when the keyword `undo` is detected, bypassing the parser.
 
 </box>
 
-Step 4. The user now decides that adding the person was a mistake, and decides to undo that action by executing the `undo` command. The `undo` command will call `Model#undoAddressBook()`, which will shift the `currentStatePointer` once to the left, pointing it to the previous address book state, and restores the address book to that state.
+**How each command reverses itself (per-command state capture):**
 
-<puml src="diagrams/UndoRedoState3.puml" alt="UndoRedoState3" />
+Rather than saving a full snapshot of the address book after each command, each undoable command captures only what it needs:
 
+| Command | State captured | Undo action |
+|---|---|---|
+| `AddContactCommand` | The `Person` added | `model.deletePerson(toAdd)` |
+| `DeleteContactCommand` | The `Person` deleted (set after confirmation) | `model.addPerson(deletedPerson)` |
+| `ClearCommand` | Full `AddressBook` snapshot (before clear) | `model.setAddressBook(previousAddressBook)` |
+| `AddGameCommand` | `personBeforeEdit`, `personAfterEdit` | `model.setPerson(personAfterEdit, personBeforeEdit)` |
+| `DeleteGameCommand` | `personBeforeEdit`, `personAfterEdit` | `model.setPerson(personAfterEdit, personBeforeEdit)` |
+| `AddAliasCommand` | `personBeforeEdit`, `personAfterEdit` | `model.setPerson(personAfterEdit, personBeforeEdit)` |
+| `DeleteAliasCommand` | `personBeforeEdit`, `personAfterEdit` | `model.setPerson(personAfterEdit, personBeforeEdit)` |
+| `EditContactCommand` | `personBeforeEdit`, `personAfterEdit` | `model.setPerson(personAfterEdit, personBeforeEdit)` |
+| `EditAliasCommand` | `personBeforeEdit`, `personAfterEdit` | `model.setPerson(personAfterEdit, personBeforeEdit)` |
 
-<box type="info" seamless>
+**Special case — delete confirmation:**
 
-**Note:** If the `currentStatePointer` is at index 0, pointing to the initial AddressBook state, then there are no previous AddressBook states to restore. The `undo` command uses `Model#canUndoAddressBook()` to check if this is the case. If so, it will return an error to the user rather
-than attempting to perform the undo.
+`DeleteContactCommand` requires the user to confirm before the deletion is committed. The command is only pushed to `commandHistory` after the user confirms with `y`/`yes`. Cancelling the deletion means nothing is added to history.
 
-</box>
+Given below is an example usage scenario showing how the undo mechanism behaves.
 
-The following sequence diagram shows how an undo operation goes through the `Logic` component:
+Step 1. The user executes `contact add n/David` to add a new contact. `AddContactCommand` executes, stores the added `Person`, and is pushed onto `commandHistory`.
 
-<puml src="diagrams/UndoSequenceDiagram-Logic.puml" alt="UndoSequenceDiagram-Logic" />
+Step 2. The user executes `game add n/David g/Chess` to add a game. `AddGameCommand` executes, stores `personBeforeEdit` and `personAfterEdit`, and is pushed onto `commandHistory`.
 
-<box type="info" seamless>
+Step 3. The user executes `undo`. `LogicManager` creates `UndoCommand(commandHistory)`. It pops `AddGameCommand` from the stack and calls its `undo()`, which calls `model.setPerson(personAfterEdit, personBeforeEdit)`, restoring David's original state.
 
-**Note:** The lifeline for `UndoCommand` should end at the destroy marker (X) but due to a limitation of PlantUML, the lifeline reaches the end of diagram.
+Step 4. The user executes `undo` again. `UndoCommand` pops `AddContactCommand` and calls its `undo()`, which calls `model.deletePerson(toAdd)`, removing David entirely.
 
-</box>
+Step 5. The user executes `undo` again. The history stack is empty, so `UndoCommand` throws a `CommandException` with the message `"Error: Nothing to undo."`
 
-Similarly, how an undo operation goes through the `Model` component is shown below:
+The following sequence diagram shows how an undo operation flows through the `Logic` component:
 
-<puml src="diagrams/UndoSequenceDiagram-Model.puml" alt="UndoSequenceDiagram-Model" />
-
-The `redo` command does the opposite — it calls `Model#redoAddressBook()`, which shifts the `currentStatePointer` once to the right, pointing to the previously undone state, and restores the address book to that state.
-
-<box type="info" seamless>
-
-**Note:** If the `currentStatePointer` is at index `addressBookStateList.size() - 1`, pointing to the latest address book state, then there are no undone AddressBook states to restore. The `redo` command uses `Model#canRedoAddressBook()` to check if this is the case. If so, it will return an error to the user rather than attempting to perform the redo.
-
-</box>
-
-Step 5. The user then decides to execute the command `list`. Commands that do not modify the address book, such as `list`, will usually not call `Model#commitAddressBook()`, `Model#undoAddressBook()` or `Model#redoAddressBook()`. Thus, the `addressBookStateList` remains unchanged.
-
-<puml src="diagrams/UndoRedoState4.puml" alt="UndoRedoState4" />
-
-Step 6. The user executes `clear`, which calls `Model#commitAddressBook()`. Since the `currentStatePointer` is not pointing at the end of the `addressBookStateList`, all address book states after the `currentStatePointer` will be purged. Reason: It no longer makes sense to redo the `add n/David …​` command. This is the behavior that most modern desktop applications follow.
-
-<puml src="diagrams/UndoRedoState5.puml" alt="UndoRedoState5" />
+<puml src="diagrams/UndoSequenceDiagram.puml" alt="UndoSequenceDiagram" />
 
 The following activity diagram summarizes what happens when a user executes a new command:
 
-<puml src="diagrams/CommitActivityDiagram.puml" width="250" />
+<puml src="diagrams/UndoActivityDiagram.puml" width="250" />
 
 #### Design considerations:
 
-**Aspect: How undo & redo executes:**
+**Aspect: How undo executes:**
 
-* **Alternative 1 (current choice):** Saves the entire address book.
-  * Pros: Easy to implement.
-  * Cons: May have performance issues in terms of memory usage.
+* **Current choice:** Per-command state capture — each command stores only the data it needs to reverse itself.
+  * Pros: Low memory overhead; no full address book snapshots needed for most commands.
+  * Cons: Every new undoable command must correctly implement `undo()`.
 
-* **Alternative 2:** Individual command knows how to undo/redo by
-  itself.
-  * Pros: Will use less memory (e.g. for `delete`, just save the person being deleted).
-  * Cons: We must ensure that the implementation of each individual command are correct.
+* **Alternative:** Save a full address book snapshot after every command (VersionedAddressBook approach).
+  * Pros: Simpler to implement per command — no per-command state logic needed.
+  * Cons: Higher memory usage, especially with large contact lists.
 
-_{more aspects and alternatives to be added}_
+**Aspect: No redo support:**
 
-### \[Proposed\] Data archiving
+Redo is not implemented. Once a command is undone it is removed from the history stack permanently.
 
-_{Explain here how the data archiving feature will be implemented}_
 
+--------------------------------------------------------------------------------------------------------------------
+
+### Delete Confirmation Feature
+The `contact delete`, `game delete`, and `alias delete` commands require a y/n confirmation from the user before deletion is applied, to prevent accidental data loss.
+
+#### Architecture and Execution
+The structural relationship of the delete commands is shown in the class diagram below.
+
+<puml src="diagrams/DeleteCommandClassDiagram.puml" alt="Delete Command Class Diagram" />
+
+All three delete commands implement `ConfirmableDeleteCommand`, which declares `performDeletion()` and `getCancelMessage()`. This gives `LogicManager` a single unified code path for all confirmation handling.
+
+The following sequence diagram illustrates the two-step flow for `contact delete n/Alice` followed by `y`:
+
+<puml src="diagrams/DeleteConfirmSequenceDiagram.puml" alt="Delete Confirmation Sequence Diagram" />
+
+Step-by-step execution:
+1. The user inputs `contact delete n/Alice`.
+2. `LogicManager` passes the input to `AddressBookParser`, which creates a `DeleteContactCommand`.
+3. `LogicManager` calls `DeleteContactCommand#execute(model)`, which finds the target but does **not** delete yet — returns a `CommandResult` with `isAwaitingConfirmation = true`.
+4. `LogicManager` stores the command in `pendingConfirmableCommand` and shows the confirmation prompt.
+5. The user inputs `y` — `LogicManager#handleDeleteConfirmation()` calls `performDeletion()` on the command, conditionally pushes it to `commandHistory` if it implements `UndoableCommand`, and saves the address book.
+6. If the user inputs `n` or any other input, `getCancelMessage()` is returned and the model is unchanged.
+
+#### Design Considerations:
+* **`ConfirmableDeleteCommand` is decoupled from `UndoableCommand`** — allows future commands to require confirmation without needing to support undo. All three current delete commands implement both interfaces explicitly.
+* **Alternative:** Have `LogicManager` perform the deletion directly (e.g. `model.deletePerson()`) after confirmation, without a `performDeletion()` method on the command.
+    * **Pros:** Simpler — no extra interface or method needed.
+    * **Cons:** `LogicManager` must know the internals of each delete command (e.g. which game or alias to remove), violating separation of concerns and requiring `instanceof` checks for each command type.
 
 --------------------------------------------------------------------------------------------------------------------
 
@@ -385,24 +427,17 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 * The list is not empty.
 
 **MSS**
-1.  User requests to delete a specific contact by name or index.
+1.  User requests to delete a specific contact by name.
 2.  System identifies the matching contact.
-3.  System prompts the user for confirmation.
-4.  User confirms the deletion.
-5.  System removes the contact and its associated aliases and games.
-6.  System confirms deletion.
+3.  System removes the contact and its associated aliases and games.
+4.  System confirms deletion.
 
     Use case ends.
 
 **Extensions**
 
-* 2a. No contact is found with matching name or index.
-  * 2a1. System informs user that no matching contact is found.
-
-    Use case ends.
-
-* 4a. User cancels the deletion.
-  * 4a1. System informs user that the deletion has been cancelled.
+* 2a. No contact is found with matching name.
+  * 2a1. System informs user that no matching user is found.
 
     Use case ends.
 
@@ -476,19 +511,10 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 **MSS**
 1. User requests to remove a specific alias from a contact.
 2. System identifies the contact and specific alias.
-3. System prompts the user for confirmation.
-4. User confirms the deletion.
-5. System removes the alias from the record.
-6. System confirms the removal.
+3. System removes the alias from the record.
+4. System confirms the removal.
 
    Use case ends.
-
-**Extensions**
-
-* 4a. User cancels the deletion.
-  * 4a1. System informs user that the deletion has been cancelled.
-
-    Use case ends.
 
 **Use Case: UC7 - Add a game to Contact**
 
@@ -526,25 +552,10 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
 **MSS**
 1. User requests to remove a specific game from a contact.
-2. System identifies the contact and specific game.
-3. System prompts the user for confirmation.
-4. User confirms the deletion.
-5. System removes the game from the contact.
-6. System displays the contact’s detail panel.
+2. System removes the game from the contact.
+3. System displays the contact’s detail panel.
 
    Use case ends.
-
-**Extensions**
-
-* 2a. The contact or game does not exist.
-  * 2a1. System informs the user that the contact or game was not found.
-
-    Use case ends.
-
-* 4a. User cancels the deletion.
-  * 4a1. System informs user that the deletion has been cancelled.
-
-    Use case ends.
 
 *{More to be added}*
 
