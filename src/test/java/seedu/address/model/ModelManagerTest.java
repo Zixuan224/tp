@@ -94,8 +94,41 @@ public class ModelManagerTest {
     }
 
     @Test
+    public void deletePerson_personIsRemovedFromAddressBook() {
+        modelManager.addPerson(ALICE);
+        modelManager.deletePerson(ALICE);
+        assertFalse(modelManager.hasPerson(ALICE));
+    }
+
+    @Test
+    public void setPerson_personIsEditedInAddressBook() {
+        modelManager.addPerson(ALICE);
+        modelManager.setPerson(ALICE, BENSON);
+        assertFalse(modelManager.hasPerson(ALICE));
+        assertTrue(modelManager.hasPerson(BENSON));
+    }
+
+    @Test
     public void getFilteredPersonList_modifyList_throwsUnsupportedOperationException() {
         assertThrows(UnsupportedOperationException.class, () -> modelManager.getFilteredPersonList().remove(0));
+    }
+
+    @Test
+    public void updateFilteredPersonList_nullPredicate_throwsNullPointerException() {
+        assertThrows(NullPointerException.class, () -> modelManager.updateFilteredPersonList(null));
+    }
+
+    @Test
+    public void setAddressBook_nullAddressBook_throwsNullPointerException() {
+        assertThrows(NullPointerException.class, () -> modelManager.setAddressBook(null));
+    }
+
+    @Test
+    public void setAddressBook_validAddressBook_setsAddressBook() {
+        AddressBook newData = new AddressBook();
+        newData.addPerson(ALICE);
+        modelManager.setAddressBook(newData);
+        assertEquals(newData, modelManager.getAddressBook());
     }
 
     @Test
