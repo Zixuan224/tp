@@ -170,4 +170,39 @@ public class UniquePersonListTest {
     public void toStringMethod() {
         assertEquals(uniquePersonList.asUnmodifiableObservableList().toString(), uniquePersonList.toString());
     }
+
+    @Test
+    public void addFirst_nullPerson_throwsNullPointerException() {
+        assertThrows(NullPointerException.class, () -> uniquePersonList.addFirst(null));
+    }
+
+    @Test
+    public void addFirst_duplicatePerson_throwsDuplicatePersonException() {
+        uniquePersonList.addFirst(ALICE);
+        assertThrows(DuplicatePersonException.class, () -> uniquePersonList.addFirst(ALICE));
+    }
+
+    @Test
+    public void addFirst_validPersonToEmptyList_addsPerson() {
+        uniquePersonList.addFirst(ALICE);
+        assertTrue(uniquePersonList.contains(ALICE));
+        // Verify it is at the first index
+        assertEquals(ALICE, uniquePersonList.asUnmodifiableObservableList().get(0));
+    }
+
+    @Test
+    public void addFirst_validPersonToNonEmptyList_addsPersonToFront() {
+        // Add BOB normally (goes to the end)
+        uniquePersonList.add(BOB);
+
+        // Add ALICE to the front
+        uniquePersonList.addFirst(ALICE);
+
+        assertTrue(uniquePersonList.contains(ALICE));
+        assertTrue(uniquePersonList.contains(BOB));
+
+        // Verify ALICE is at index 0 and BOB was shifted to index 1
+        assertEquals(ALICE, uniquePersonList.asUnmodifiableObservableList().get(0));
+        assertEquals(BOB, uniquePersonList.asUnmodifiableObservableList().get(1));
+    }
 }
