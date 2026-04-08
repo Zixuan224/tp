@@ -5,6 +5,8 @@ import static seedu.address.testutil.Assert.assertThrows;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
@@ -37,4 +39,20 @@ public class JsonSerializableAddressBookTest {
                 dataFromFile::toModelType);
     }
 
+    @Test
+    public void toModelType_multipleUserProfiles_throwsIllegalValueException() throws Exception {
+        // Get a valid user profile using the existing generation method
+        AddressBook ab = new AddressBook();
+        ab.addUserProfile();
+        JsonAdaptedPerson profileJson = new JsonAdaptedPerson(ab.getPersonList().get(0));
+
+        // Create an invalid JSON payload with TWO user profiles
+        List<JsonAdaptedPerson> invalidList = Arrays.asList(profileJson, profileJson);
+        JsonSerializableAddressBook jsonAddressBook = new JsonSerializableAddressBook(invalidList);
+
+        // Verify it triggers our new protection guard
+        assertThrows(IllegalValueException.class,
+                "Data file contains multiple user profiles! Only 1 is allowed.",
+                jsonAddressBook::toModelType);
+    }
 }
