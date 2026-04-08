@@ -132,6 +132,40 @@ public class ModelManagerTest {
     }
 
     @Test
+    public void addUserProfile_emptyProfile_addsPlaceholderProfile() {
+        // Set an empty AddressBook to guarantee there is no user profile
+        modelManager.setAddressBook(new AddressBook());
+        assertTrue(modelManager.getUserProfile().isEmpty());
+
+        // Action
+        modelManager.addUserProfile();
+
+        // Verify that a user profile has been generated and added
+        assertFalse(modelManager.getUserProfile().isEmpty());
+    }
+
+    @Test
+    public void addUserProfile_existingProfile_doesNotOverwrite() {
+        // Set an empty AddressBook
+        modelManager.setAddressBook(new AddressBook());
+
+        // Create and add a known, custom user profile
+        Person customProfile = new Person(new Name("Custom Profile"), new HashSet<>(), true);
+        modelManager.addPerson(customProfile);
+
+        // Sanity check to ensure the custom profile exists
+        assertFalse(modelManager.getUserProfile().isEmpty());
+        assertEquals(customProfile, modelManager.getUserProfile().get());
+
+        // Action: Attempt to add a profile when one already exists
+        modelManager.addUserProfile();
+
+        // Verify that the existing custom profile was untouched and NOT overwritten
+        assertFalse(modelManager.getUserProfile().isEmpty());
+        assertEquals(customProfile, modelManager.getUserProfile().get());
+    }
+
+    @Test
     public void equals() {
         AddressBook addressBook = new AddressBookBuilder().withPerson(ALICE).withPerson(BENSON).build();
         AddressBook differentAddressBook = new AddressBook();
