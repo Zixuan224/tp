@@ -140,6 +140,11 @@ public class AddContactCommandTest {
         }
 
         @Override
+        public void addUserProfile() {
+            throw new AssertionError("This method should not be called.");
+        }
+
+        @Override
         public void setAddressBook(ReadOnlyAddressBook newData) {
             throw new AssertionError("This method should not be called.");
         }
