@@ -34,7 +34,8 @@ public class AddGameCommand extends Command implements UndoableCommand {
             + "Example 3: game " + COMMAND_WORD + " me " + PREFIX_GAME + "Minecraft";
 
     public static final String MESSAGE_SUCCESS = "Game %1$s added to %2$s";
-    public static final String MESSAGE_CONTACT_NOT_FOUND = "Error: Contact does not exist.";
+    public static final String MESSAGE_CONTACT_NOT_FOUND = "Error: Contact not found in the current list."
+            + " Use 'list' to show all contacts.";
     public static final String MESSAGE_DUPLICATE_GAME = "Error: Game already exists for the contact.";
 
     private final Index targetIndex;

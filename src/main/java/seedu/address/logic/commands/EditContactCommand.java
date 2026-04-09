@@ -31,7 +31,8 @@ public class EditContactCommand extends Command implements UndoableCommand {
             + "Example 3: " + COMMAND_WORD + " me " + PREFIX_NEW_NAME + "Jan";
 
     public static final String MESSAGE_EDIT_PERSON_SUCCESS = "Contact updated: %1$s \u2192 %2$s";
-    public static final String MESSAGE_PERSON_NOT_FOUND = "Error: Name not found";
+    public static final String MESSAGE_PERSON_NOT_FOUND = "Error: Contact not found in the current list."
+            + " Use 'list' to show all contacts.";
     public static final String MESSAGE_DUPLICATE_PERSON = "Error: A contact with that name already exists";
 
     private final Index targetIndex;

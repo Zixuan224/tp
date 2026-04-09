@@ -31,7 +31,8 @@ public class ListGameCommand extends Command {
 
     public static final String MESSAGE_SUCCESS = "%1$s's games: %2$s";
     public static final String MESSAGE_NO_GAMES = "%1$s currently has no games.";
-    public static final String MESSAGE_CONTACT_NOT_FOUND = "Error: Contact does not exist.";
+    public static final String MESSAGE_CONTACT_NOT_FOUND = "Error: Contact not found in the current list."
+            + " Use 'list' to show all contacts.";
 
     private final Index targetIndex;
     private final Name targetName;

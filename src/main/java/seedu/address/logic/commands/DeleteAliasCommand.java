@@ -43,7 +43,8 @@ public class DeleteAliasCommand extends Command implements ConfirmableDeleteComm
             + "Example 3: " + COMMAND_WORD + " me " + PREFIX_GAME + "Valorant " + PREFIX_ALIAS + "Benjumpin";
 
     public static final String MESSAGE_SUCCESS = "Alias \"%3$s\" removed from %1$s in %2$s";
-    public static final String MESSAGE_PERSON_NOT_FOUND = "Error: Name does not exist";
+    public static final String MESSAGE_PERSON_NOT_FOUND = "Error: Contact not found in the current list."
+            + " Use 'list' to show all contacts.";
     public static final String MESSAGE_ALIAS_NOT_FOUND = "Error: Alias does not exist for this contact";
     public static final String MESSAGE_GAME_NOT_FOUND = "Error: Game does not exist for this contact";
     public static final String MESSAGE_DELETE_CONFIRMATION =

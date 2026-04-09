@@ -32,7 +32,8 @@ public class ViewContactCommand extends Command {
     public static final String MESSAGE_SUCCESS_SELF = "Displaying your profile.";
     public static final String MESSAGE_NO_PROFILE = "No user profile found.";
     public static final String MESSAGE_SUCCESS_CONTACT = "Viewing Contact: %1$s";
-    public static final String MESSAGE_PERSON_NOT_FOUND = "Error: Contact does not exist.";
+    public static final String MESSAGE_PERSON_NOT_FOUND = "Error: Contact not found in the current list."
+            + " Use 'list' to show all contacts.";
 
     private final Index targetIndex;
     private final Name targetName;
