@@ -29,7 +29,7 @@ Harmony is a **desktop app for managing contacts and their gaming aliases, optim
 * [Adding a contact : `contact add`](#adding-a-contact--contact-add)
 * [Viewing a contact's profile : `contact view`](#viewing-a-contacts-profile--contact-view)
 * [Editing a contact's name : `contact edit`](#editing-a-contacts-name--contact-edit)
-* [Locating contacts : `find`](#locating-contacts--find)
+* [Locating contacts : `find`](#locating-contacts-find)
 * [Deleting a contact : `contact delete`](#deleting-a-contact--contact-delete)
 * [Copying a contact : `copy`](#copying-a-contact--copy)
 
