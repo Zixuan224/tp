@@ -3,6 +3,9 @@
 /build/
 src/main/resources/docs/
 
+# Temporary editor files
+*.tmp.*
+
 # IDEA files
 /.idea/
 /out/

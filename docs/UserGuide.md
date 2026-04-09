@@ -18,8 +18,8 @@ Harmony is a **desktop app for managing contacts and their gaming aliases, optim
 * [Quick start](#quick-start)
 
 **General**
-* [Listing all contacts : `list`](#listing-all-persons--list)
 * [Viewing help : `help`](#viewing-help--help)
+* [Listing all contacts : `list`](#listing-all-contacts--list)
 * [Undoing the last command : `undo`](#undoing-the-last-command--undo)
 * [Clearing all entries : `clear`](#clearing-all-entries--clear)
 * [Changing the UI theme : `theme`](#changing-the-ui-theme--theme)
@@ -30,8 +30,9 @@ Harmony is a **desktop app for managing contacts and their gaming aliases, optim
 * [Viewing a contact's profile : `view`](#viewing-a-contacts-profile--view)
 * [Copying a contact : `copy`](#copying-a-contact--copy)
 * [Editing a contact's name : `contact edit`](#editing-a-contacts-name--contact-edit)
+* [Locating contacts : `find`](#locating-contacts-find)
 * [Deleting a contact : `contact delete`](#deleting-a-contact--contact-delete)
-* [Locating contacts : `find`](#locating-persons--find)
+* [Copying a contact : `copy`](#copying-a-contact--copy)
 
 **Game Management**
 * [Adding a game : `game add`](#adding-a-game-to-a-contact--game-add)
@@ -69,7 +70,7 @@ Harmony is a **desktop app for managing contacts and their gaming aliases, optim
 
     * `alias add 1 g/Valorant al/JohnnyV` : Adds the alias `JohnnyV` to the 1st contact's `Valorant` game.
 
-    * `contact edit me n/Benny` : Edits your User Profile to display `Benny` as the name.
+    * `contact edit me e/Benny` : Edits your User Profile to display `Benny` as the name.
 
     * `view me` : Opens the profile view panel to display your own user profile.
 
@@ -100,10 +101,10 @@ Harmony is a **desktop app for managing contacts and their gaming aliases, optim
   e.g. in `contact add n/NAME`, `NAME` is a parameter which can be used as `contact add n/John Doe`.
 
 * Items in square brackets are optional.<br>
-  e.g. `contact add n/NAME [t/TAG]` can be used as `contact add n/John Doe t/friend` or as `contact add n/John Doe`.
+  e.g. `find KEYWORD [MORE_KEYWORDS]` can be used as `find John Doe` or as `find John`.
 
 * Items with `…`​ after them can be used multiple times including zero times.<br>
-  e.g. `[t/TAG]…​` can be used as ` ` (i.e. 0 times), `t/friend`, `t/friend t/family` etc.
+  e.g. in `contact add n/NAME [g/GAME [al/ALIAS]…​]…​`, `[al/ALIAS]…​` means you can specify multiple aliases: `contact add n/Alice g/Valorant al/Ace al/ProGamer`.
 
 * For `game`, `alias`, and target-specific commands, a contact can be targeted by their index (`INDEX`), by name (`n/CONTACT_NAME`), or by using the `me` keyword to target your own User Profile.<br>
   e.g. `game add 1 g/Valorant`, `game add n/John Doe g/Valorant`, and `game add me g/Valorant` are all valid.
@@ -111,14 +112,16 @@ Harmony is a **desktop app for managing contacts and their gaming aliases, optim
 * `INDEX` must be a positive integer and must appear before any prefixed parameters.<br>
   e.g. `game add 1 g/Valorant`, not `game add g/Valorant 1`.
 
-* Prefixed parameters (those using `n/`, `g/`, `al/`, `t/`, etc.) can be in any order.<br>
-  e.g. `contact add n/John Doe t/friend` and `contact add t/friend n/John Doe` are both acceptable.
+* Prefixed parameters (those using `n/`, `g/`, `al/`, etc.) can be in any order.<br>
+  e.g. `alias add n/John Doe g/Valorant al/JohnV` and `alias add g/Valorant n/John Doe al/JohnV` are both acceptable.
 
 * Extraneous parameters for commands that do not take in parameters (such as `help`, `list`, `exit` and `clear`) will be ignored.<br>
   e.g. `help 123` will be interpreted as `help`.
 
 * If you are using a PDF version of this document, be careful when copying and pasting commands that span multiple lines as space characters surrounding line-breaks may be omitted when copied over to the application.
   </box>
+
+## General
 
 ### Viewing help : `help`
 
@@ -127,6 +130,32 @@ Shows a message explaining how to access the help page.
 ![help message](images/helpMessage.png)
 
 Format: `help`
+
+
+### Listing all contacts : `list`
+
+Shows a list of all contacts in Harmony.
+
+Format: `list`
+
+
+### Undoing the last command : `undo`
+
+Reverses the most recently executed undoable command.
+
+Format: `undo`
+
+* Undoable commands include: `contact add`, `contact delete`, `contact edit`, `game add`, `game delete`, `alias add`, `alias delete`, and `clear`.
+* Multiple consecutive `undo` calls will reverse commands in reverse order of execution.
+* If there are no commands left to undo, an error message is shown.
+
+
+### Clearing all entries : `clear`
+
+Clears all entries from Harmony.
+
+Format: `clear`
+
 
 ### Changing the UI theme : `theme`
 
@@ -142,20 +171,30 @@ Examples:
 * `theme light`
 * `theme rainbow`
 
+
+### Exiting the program : `exit`
+
+Exits the program.
+
+Format: `exit`
+
+--------------------------------------------------------------------------------------------------------------------
+
+## Contact Management
+
 ### Adding a contact : `contact add`
 
 Adds a contact to Harmony.
 
-Format: `contact add n/NAME [t/TAG]…​ [g/GAME [al/ALIAS]…​]…​`
+Format: `contact add n/NAME [g/GAME [al/ALIAS]…​]…​`
 
 <box type="tip" seamless>
 
-**Tip:** A contact can have any number of tags, games, and aliases (including 0). Aliases must be declared after the game they belong to.
+**Tip:** A contact can have any number of games and aliases (including 0). Aliases must be declared after the game they belong to.
 </box>
 
 Examples:
 * `contact add n/John Doe`
-* `contact add n/Betsy Crowe t/friend t/classmate`
 * `contact add n/Alice g/Valorant al/AliceV g/Minecraft`
 
 
@@ -179,28 +218,6 @@ Examples:
 * `view me`
 
 
-### Copying a contact : `copy`
-
-Copies the exact `contact add` command for the specified contact (or your own profile) to your system clipboard. This makes it incredibly easy to share contact details with other Harmony users!
-
-Format:
-* By index: `copy INDEX`
-* By name: `copy n/NAME`
-* User Profile: `copy me`
-
-Examples:
-* `copy 1`
-* `copy n/John Doe`
-* `copy me`
-
-
-### Listing all persons : `list`
-
-Shows a list of all persons in Harmony.
-
-Format: `list`
-
-
 ### Editing a contact's name : `contact edit`
 
 Renames an existing contact or your own User Profile in Harmony.
@@ -221,9 +238,9 @@ Examples:
 * `contact edit me e/ProGamer99` Renames your own user profile to `ProGamer99`.
 
 
-### Locating persons: `find`
+### Locating contacts: `find`
 
-Finds persons by name, game, or alias.
+Finds contacts by name, game, or alias.
 
 **Find by name:**
 
@@ -244,21 +261,21 @@ Examples:
 
 Format: `find g/GAME_NAME`
 
-* Returns all persons who have the specified game.
+* Returns all contacts who have the specified game.
 * The search is case-insensitive.
 
 Examples:
-* `find g/Valorant` returns all persons who have `Valorant` in their game list.
+* `find g/Valorant` returns all contacts who have `Valorant` in their game list.
 
 **Find by alias:**
 
 Format: `find al/ALIAS`
 
-* Returns all persons who have the specified alias (across all games).
+* Returns all contacts who have the specified alias (across all games).
 * The search is case-insensitive.
 
 Examples:
-* `find al/Benjumpin` returns all persons with the alias `Benjumpin`.
+* `find al/Benjumpin` returns all contacts with the alias `Benjumpin`.
 
 **Combined search:**
 
@@ -289,29 +306,26 @@ Examples:
 * `contact delete n/John Doe` prompts for confirmation, then deletes the contact named `John Doe`.
 
 
-### Undoing the last command : `undo`
+### Copying a contact : `copy`
 
-Reverses the most recently executed undoable command.
+Copies the exact `contact add` command for the specified contact (or your own profile) to your system clipboard. This makes it easy to share contact details with other Harmony users!
 
-Format: `undo`
+Format:
+* By index: `copy INDEX`
+* By name: `copy n/NAME`
+* User Profile: `copy me`
 
-* Undoable commands include: `contact add`, `contact delete`, `contact edit`, `game add`, `game delete`, `alias add`, `alias delete`, and `clear`.
-* Multiple consecutive `undo` calls will reverse commands in reverse order of execution.
-* If there are no commands left to undo, an error message is shown.
+The copied output will look like:
+```
+contact add n/John Doe g/Valorant al/JohnnyV g/Minecraft
+```
 
+Your friend can paste this command directly into their own Harmony command box to add you as a contact, complete with all your games and aliases.
 
-### Clearing all entries : `clear`
-
-Clears all entries from Harmony.
-
-Format: `clear`
-
-
-### Exiting the program : `exit`
-
-Exits the program.
-
-Format: `exit`
+Examples:
+* `copy 1`
+* `copy n/John Doe`
+* `copy me`
 
 --------------------------------------------------------------------------------------------------------------------
 
@@ -475,7 +489,7 @@ Furthermore, certain edits can cause Harmony to behave in unexpected ways (e.g.,
 | **Help** | `help` |
 | **Undo** | `undo` |
 | **Theme** | `theme THEME_NAME`<br> e.g., `theme light` |
-| **Contact Add** | `contact add n/NAME [t/TAG]…​ [g/GAME [al/ALIAS]…​]…​` <br> e.g., `contact add n/James Ho t/friend t/colleague` |
+| **Contact Add** | `contact add n/NAME [g/GAME [al/ALIAS]…​]…​` <br> e.g., `contact add n/James Ho` |
 | **View** | `view INDEX` or `view n/NAME` or `view me`<br> e.g., `view me` (also: `contact view me`) |
 | **Contact Delete** | `contact delete INDEX` or `contact delete n/NAME`<br> e.g., `contact delete 1` or `contact delete n/James Ho` |
 | **Contact Edit** | `contact edit INDEX e/NEW_NAME` or `contact edit n/NAME e/NEW_NAME` or `contact edit me e/NEW_NAME`<br> e.g., `contact edit me e/James Lee` |
