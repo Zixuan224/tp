@@ -35,7 +35,8 @@ public class CopyCommand extends Command {
             + "Example 3: " + COMMAND_WORD + " me";
 
     public static final String MESSAGE_SUCCESS = "Copied contact to clipboard: %1$s";
-    public static final String MESSAGE_PERSON_NOT_FOUND = "Error: Name not found";
+    public static final String MESSAGE_PERSON_NOT_FOUND = "Error: Contact not found in the current list."
+            + " Use 'list' to show all contacts.";
     public static final String MESSAGE_NO_PROFILE = "No user profile found.";
 
     private final Index targetIndex;

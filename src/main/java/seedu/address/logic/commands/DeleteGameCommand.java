@@ -33,7 +33,8 @@ public class DeleteGameCommand extends Command implements ConfirmableDeleteComma
             + "Example 3: game " + COMMAND_WORD + " me " + PREFIX_GAME + "Minecraft";
 
     public static final String MESSAGE_SUCCESS = "Game \"%1$s\" removed from %2$s";
-    public static final String MESSAGE_CONTACT_NOT_FOUND = "Error: Contact does not exist.";
+    public static final String MESSAGE_CONTACT_NOT_FOUND = "Error: Contact not found in the current list."
+            + " Use 'list' to show all contacts.";
     public static final String MESSAGE_GAME_NOT_FOUND = "Error: This contact does not have this game.";
     public static final String MESSAGE_DELETE_CONFIRMATION =
             "Are you sure you want to delete game \"%1$s\" from %2$s? (y/n)";

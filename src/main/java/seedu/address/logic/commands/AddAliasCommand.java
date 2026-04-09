@@ -44,7 +44,8 @@ public class AddAliasCommand extends Command implements UndoableCommand {
             + COMMAND_WORD + " me " + PREFIX_GAME + "Valorant " + PREFIX_ALIAS + "Benjumpin";
 
     public static final String MESSAGE_SUCCESS = "Alias '%3$s' added to %1$s's game: %2$s";
-    public static final String MESSAGE_PERSON_NOT_FOUND = "Error: Contact does not exist.";
+    public static final String MESSAGE_PERSON_NOT_FOUND = "Error: Contact not found in the current list."
+            + " Use 'list' to show all contacts.";
     public static final String MESSAGE_ALIAS_NOT_FOUND = "Error: Alias does not exist for this contact";
     public static final String MESSAGE_GAME_NOT_FOUND = "Error: This contact does not have this game.";
     public static final String MESSAGE_DUPLICATE_ALIAS = "Error: This alias already exists for this game.";

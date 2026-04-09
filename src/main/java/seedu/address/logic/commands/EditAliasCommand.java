@@ -46,7 +46,8 @@ public class EditAliasCommand extends Command implements UndoableCommand {
             + PREFIX_ALIAS + "JohnnyV " + PREFIX_NEW_ALIAS + "JohnnyValorant";
 
     public static final String MESSAGE_SUCCESS = "Alias \"%3$s\" updated to \"%4$s\" for %1$s in %2$s";
-    public static final String MESSAGE_PERSON_NOT_FOUND = "Error: Name not found";
+    public static final String MESSAGE_PERSON_NOT_FOUND = "Error: Contact not found in the current list."
+            + " Use 'list' to show all contacts.";
     public static final String MESSAGE_GAME_NOT_FOUND = "Error: Game not found";
     public static final String MESSAGE_ALIAS_NOT_FOUND = "Error: Alias not found";
     public static final String MESSAGE_DUPLICATE_ALIAS = "Error: This alias already exists for this game.";
