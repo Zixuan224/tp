@@ -33,14 +33,15 @@ Harmony is a **desktop app for managing contacts and their gaming aliases, optim
 * [Deleting a contact : `contact delete`](#deleting-a-contact--contact-delete)
 * [Locating contacts : `find`](#locating-persons--find)
 
-**Alias Management**
-* [Adding an alias : `alias add`](#adding-an-alias-to-a-game--alias-add)
-* [Deleting an alias : `alias delete`](#deleting-an-alias-from-a-game--alias-delete)
-
 **Game Management**
 * [Adding a game : `game add`](#adding-a-game-to-a-contact--game-add)
 * [Deleting a game : `game delete`](#deleting-a-game-from-a-contact--game-delete)
 * [Listing games : `game list`](#listing-games-of-a-contact--game-list)
+
+**Alias Management**
+* [Adding an alias : `alias add`](#adding-an-alias-to-a-game--alias-add)
+* [Editing an alias : `alias edit`](#editing-an-alias-of-a-game--alias-edit)
+* [Deleting an alias : `alias delete`](#deleting-an-alias-from-a-game--alias-delete)
 
 --------------------------------------------------------------------------------------------------------------------
 
@@ -369,6 +370,12 @@ Examples:
 
 ## Alias Management
 
+<box type="info" seamless>
+
+**Note:** Alias commands require the contact to already have the specified game. Use `game add` first if needed.
+
+</box>
+
 ### Adding an alias to a game : `alias add`
 
 Adds an alias to a game of an existing contact or your user profile.
@@ -385,6 +392,25 @@ Format (User Profile): `alias add me g/GAME_NAME al/ALIAS`
 Examples:
 * `alias add 1 g/Valorant al/Benjumpin`
 * `alias add me g/Valorant al/Benjumpin`
+
+### Editing an alias of a game : `alias edit`
+
+Updates an existing alias of a game for a contact or your user profile.
+
+Format (by index): `alias edit INDEX g/GAME_NAME al/OLD_ALIAS na/NEW_ALIAS`
+Format (by name): `alias edit n/CONTACT_NAME g/GAME_NAME al/OLD_ALIAS na/NEW_ALIAS`
+Format (User Profile): `alias edit me g/GAME_NAME al/OLD_ALIAS na/NEW_ALIAS`
+
+* `INDEX` must be a positive integer 1, 2, 3, …​
+* `CONTACT_NAME` must match the contact's full name exactly (case-insensitive).
+* The contact must already have the specified game.
+* `OLD_ALIAS` must already exist for that game.
+* `NEW_ALIAS` must not already exist for that game.
+
+Examples:
+* `alias edit 1 g/Valorant al/JohnnyV na/JohnnyValorant`
+* `alias edit n/John Doe g/Valorant al/JohnnyV na/JohnnyValorant`
+* `alias edit me g/Valorant al/JohnnyV na/JohnnyValorant`
 
 ### Deleting an alias from a game : `alias delete`
 
@@ -455,6 +481,7 @@ Furthermore, certain edits can cause Harmony to behave in unexpected ways (e.g.,
 | **Copy** | `copy INDEX` or `copy n/NAME` or `copy me`<br> e.g., `copy 1` |
 | **Clear** | `clear` |
 | **Alias Add** | `alias add INDEX g/GAME_NAME al/ALIAS` or `alias add n/CONTACT_NAME g/GAME_NAME al/ALIAS` or `alias add me g/GAME_NAME al/ALIAS`<br> e.g., `alias add 1 g/Valorant al/Benjumpin` |
+| **Alias Edit** | `alias edit INDEX g/GAME_NAME al/OLD_ALIAS na/NEW_ALIAS` or `alias edit n/CONTACT_NAME g/GAME_NAME al/OLD_ALIAS na/NEW_ALIAS` or `alias edit me g/GAME_NAME al/OLD_ALIAS na/NEW_ALIAS`<br> e.g., `alias edit 1 g/Valorant al/JohnnyV na/JohnnyValorant` |
 | **Alias Delete** | `alias delete INDEX g/GAME_NAME al/ALIAS` or `alias delete n/CONTACT_NAME g/GAME_NAME al/ALIAS` or `alias delete me g/GAME_NAME al/ALIAS`<br> e.g., `alias delete 1 g/Valorant al/Benjumpin` |
 | **Game Add** | `game add INDEX g/GAME_NAME` or `game add n/CONTACT_NAME g/GAME_NAME` or `game add me g/GAME_NAME`<br> e.g., `game add 1 g/Minecraft` |
 | **Game Delete** | `game delete INDEX g/GAME_NAME` or `game delete n/CONTACT_NAME g/GAME_NAME` or `game delete me g/GAME_NAME`<br> e.g., `game delete 1 g/Minecraft` |
