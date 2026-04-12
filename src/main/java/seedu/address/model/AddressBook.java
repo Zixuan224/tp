@@ -1,13 +1,12 @@
 package seedu.address.model;
 
 import static java.util.Objects.requireNonNull;
+import static seedu.address.model.util.GeneratePlaceholder.PLACEHOLDER_PROFILE;
 
-import java.util.HashSet;
 import java.util.List;
 
 import javafx.collections.ObservableList;
 import seedu.address.commons.util.ToStringBuilder;
-import seedu.address.model.person.Name;
 import seedu.address.model.person.Person;
 import seedu.address.model.person.UniquePersonList;
 
@@ -83,7 +82,7 @@ public class AddressBook implements ReadOnlyAddressBook {
      * The UserProfile must not already exist in the address book.
      */
     public void addUserProfile() {
-        persons.addFirst(new Person(new Name("PLACEHOLDER"), new HashSet<>(), true));
+        persons.addFirst(PLACEHOLDER_PROFILE);
     }
 
     /**

@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static seedu.address.model.Model.PREDICATE_SHOW_ALL_PERSONS;
+import static seedu.address.model.util.GeneratePlaceholder.PLACEHOLDER_PROFILE;
 import static seedu.address.testutil.Assert.assertThrows;
 import static seedu.address.testutil.TypicalPersons.ALICE;
 import static seedu.address.testutil.TypicalPersons.BENSON;
@@ -30,7 +31,7 @@ public class ModelManagerTest {
         assertEquals(new UserPrefs(), modelManager.getUserPrefs());
         assertEquals(new GuiSettings(), modelManager.getGuiSettings());
         AddressBook ab = new AddressBook();
-        ab.addPerson(new Person(new Name("PLACEHOLDER"), new HashSet<>(), true));
+        ab.addPerson(PLACEHOLDER_PROFILE);
         assertEquals(ab, new AddressBook(modelManager.getAddressBook()));
     }
 
