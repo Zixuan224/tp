@@ -1,14 +1,19 @@
 package seedu.address.logic.parser;
 
+import static seedu.address.logic.Messages.MESSAGE_DUPLICATE_FIELDS;
 import static seedu.address.logic.Messages.MESSAGE_INVALID_COMMAND_FORMAT;
+import static seedu.address.logic.parser.CliSyntax.PREFIX_ALIAS;
+import static seedu.address.logic.parser.CliSyntax.PREFIX_GAME;
 import static seedu.address.logic.parser.CommandParserTestUtil.assertParseFailure;
 import static seedu.address.logic.parser.CommandParserTestUtil.assertParseSuccess;
 
 import java.util.List;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import seedu.address.logic.commands.FindCommand;
+import seedu.address.logic.parser.exceptions.ParseException;
 import seedu.address.model.person.AliasMatchesPredicate;
 import seedu.address.model.person.GameContainsKeywordPredicate;
 import seedu.address.model.person.NameContainsKeywordsPredicate;
@@ -126,5 +131,24 @@ public class FindCommandParserTest {
     public void parse_emptyAliasInCombined_throwsParseException() {
         assertParseFailure(parser, "n/Alice al/",
                 String.format(MESSAGE_INVALID_COMMAND_FORMAT, FindCommand.MESSAGE_USAGE));
+    }
+
+    @Test
+    public void parse_duplicateGamePrefix_throwsParseException() {
+        assertParseFailure(parser, "g/Minecraft g/WoW",
+                MESSAGE_DUPLICATE_FIELDS + PREFIX_GAME);
+    }
+
+    @Test
+    public void parse_duplicateAliasPrefix_throwsParseException() {
+        assertParseFailure(parser, "al/Ace al/King",
+                MESSAGE_DUPLICATE_FIELDS + PREFIX_ALIAS);
+    }
+
+    @Test
+    public void parse_duplicateGameAndAliasPrefix_throwsParseException() {
+        // Both g/ and al/ are duplicated — exact message order is non-deterministic (Set),
+        // so we only assert that a ParseException is thrown
+        Assertions.assertThrows(ParseException.class, () -> parser.parse("g/Minecraft g/WoW al/Ace al/King"));
     }
 }
