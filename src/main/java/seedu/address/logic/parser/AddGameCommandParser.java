@@ -26,6 +26,8 @@ public class AddGameCommandParser implements Parser<AddGameCommand> {
             throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT, AddGameCommand.MESSAGE_USAGE));
         }
 
+        argMultimap.verifyNoDuplicatePrefixesFor(PREFIX_NAME, PREFIX_GAME);
+
         String preamble = argMultimap.getPreamble().trim();
         boolean useUserProfile = preamble.equalsIgnoreCase("me"); // Now checks for 'me'
         boolean hasNamePrefix = argMultimap.getValue(PREFIX_NAME).isPresent();

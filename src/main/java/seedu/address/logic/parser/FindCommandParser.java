@@ -30,6 +30,8 @@ public class FindCommandParser implements Parser<FindCommand> {
     public FindCommand parse(String args) throws ParseException {
         ArgumentMultimap argMultimap = ArgumentTokenizer.tokenize(" " + args, PREFIX_GAME, PREFIX_ALIAS);
 
+        argMultimap.verifyNoDuplicatePrefixesFor(PREFIX_GAME, PREFIX_ALIAS);
+
         String preamble = argMultimap.getPreamble().trim();
         Optional<String> gameValue = argMultimap.getValue(PREFIX_GAME);
         Optional<String> aliasValue = argMultimap.getValue(PREFIX_ALIAS);
