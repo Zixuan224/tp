@@ -47,21 +47,97 @@ Harmony is a **desktop app for managing contacts and their gaming aliases, optim
 
 ## Quick start
 
-1. Ensure you have Java `17` or above installed in your Computer.<br>
+1. Ensure you have Java `17` installed on your computer. Refer to the [Java installation guide](https://se-education.org/guides/tutorials/javaInstallation.html) for instructions specific to your operating system.
+
+   <box type="info" seamless>
+
    **Mac users:** Ensure you have the precise JDK version prescribed [here](https://se-education.org/guides/tutorials/javaInstallationMac.html).
 
-1. Download the latest `.jar` file from [here](https://github.com/AY2526S2-CS2103T-W09-1/tp/releases).
+   </box>
 
-1. Copy the file to the folder you want to use as the _home folder_ for Harmony.
+2. Download the latest `harmony.jar` file from [here](https://github.com/AY2526S2-CS2103T-W09-1/tp/releases).
 
-1. Open a command terminal, `cd` into the folder you put the jar file in, and use the `java -jar harmony.jar` command to run the application.<br>
+3. Place `harmony.jar` in an empty folder where the app is allowed to create files. Do not use a write-protected folder, as Harmony needs to save data in the same directory.
+
+4. Open a command terminal and verify you are running Java 17 by running:
+   ```
+   java -version
+   ```
+   Do this even if you have done it before — your OS may have auto-updated the default Java version.
+
+5. Navigate to the folder containing `harmony.jar` and run the app. Select your operating system below:
+
+   <tabs>
+     <tab header="Windows">
+
+   Open the **DOS prompt** or **PowerShell** (**not** the WSL terminal) and run:
+   ```
+   cd path\to\folder
+   java -jar "harmony.jar"
+   ```
+
+   <box type="info" seamless>
+
+   Replace `path\to\folder` with the actual path to the folder containing `harmony.jar`.<br>
+   e.g., `cd C:\Users\John\Downloads\Harmony`
+
+   </box>
+
+     </tab>
+     <tab header="Mac">
+
+   Open **Terminal** and run:
+   ```
+   cd path/to/folder
+   java -jar "harmony.jar"
+   ```
+
+   <box type="info" seamless>
+
+   Replace `path/to/folder` with the actual path to the folder containing `harmony.jar`.<br>
+   e.g., `cd /Users/John/Downloads/Harmony`
+
+   </box>
+
+     </tab>
+     <tab header="Linux">
+
+   Open a **terminal** and run:
+   ```
+   cd path/to/folder
+   java -jar "harmony.jar"
+   ```
+
+   <box type="info" seamless>
+
+   Replace `path/to/folder` with the actual path to the folder containing `harmony.jar`.<br>
+   e.g., `cd /home/john/Downloads/Harmony`
+
+   </box>
+
+   <box type="warning" seamless>
+
+   **Wayland display server:** If the app fails with a `Gdk-CRITICAL` error, run this instead:
+   ```
+   GDK_BACKEND=x11 java -jar "harmony.jar"
+   ```
+
+   </box>
+
+     </tab>
+   </tabs>
+
+   <box type="tip" seamless>
+
+   Always launch Harmony using the `java -jar` command rather than double-clicking the file. This ensures the correct Java version is used. We strongly recommend surrounding the filename with double quotes in case special characters in the filename cause the command to break.
+
+   </box>
+
    A GUI similar to the below should appear in a few seconds.<br>
    ![Ui](images/Ui.png)
 
-1. Type the command in the command box and press Enter to execute it. e.g. typing **`help`** and pressing Enter will open the help window.<br>
+6. Type the command in the command box and press Enter to execute it. e.g. typing **`help`** and pressing Enter will open the help window.<br><br>
    Some example commands you can try:
-
-    * `list` : Lists all contacts.
 
     * `contact add n/John Doe` : Adds a contact named `John Doe` to Harmony.
 
@@ -73,6 +149,10 @@ Harmony is a **desktop app for managing contacts and their gaming aliases, optim
 
     * `view me` : Opens the profile view panel to display your own user profile.
 
+    * `find n/Ben` : Find all contacts with name containing `Ben` such as `Benny`, `Ben` etc.
+
+    * `list` : Lists all contacts.
+
     * `copy 1` : Copies the exact command needed to recreate the 1st contact to your system clipboard.
 
     * `theme light` : Switches the application's visual interface to Light Mode.
@@ -83,7 +163,7 @@ Harmony is a **desktop app for managing contacts and their gaming aliases, optim
 
     * `exit` : Exits the app.
 
-1. Refer to the [Features](#features) below for details of each command.
+7. Refer to the [Features](#features) below for details of each command.
 
 --------------------------------------------------------------------------------------------------------------------
 
@@ -102,13 +182,19 @@ Harmony is a **desktop app for managing contacts and their gaming aliases, optim
 * For `game` and `alias` commands, a contact can be targeted either by their index in the displayed list (`INDEX`) or by name (`n/CONTACT_NAME`).<br>
   e.g. `game add 1 g/Valorant` and `game add n/John Doe g/Valorant` both add the game to the same contact.
 * Items in square brackets are optional.<br>
-  e.g. `find KEYWORD [MORE_KEYWORDS]` can be used as `find John Doe` or as `find John`.
+  e.g. `find [n/NAME] [g/GAME_NAME] [al/ALIAS]` can be used as `find n/Alice` or `find n/Alice g/Valorant`.
 
 * Items with `…`​ after them can be used multiple times including zero times.<br>
   e.g. in `contact add n/NAME [g/GAME [al/ALIAS]…​]…​`, `[al/ALIAS]…​` means you can specify multiple aliases: `contact add n/Alice g/Valorant al/Ace al/ProGamer`.
 
 * For `game`, `alias`, and target-specific commands, a contact can be targeted by their index (`INDEX`), by name (`n/CONTACT_NAME`), or by using the `me` keyword to target your own User Profile.<br>
   e.g. `game add 1 g/Valorant`, `game add n/John Doe g/Valorant`, and `game add me g/Valorant` are all valid.
+
+  <box type="tip" seamless>
+
+  `me` is a special reserved keyword — it is **not** the same as `n/me`. Using `n/me` searches for contacts whose name contains "me", whereas `me` specifically targets your own User Profile.
+
+  </box>
 
 * `INDEX` must be a positive integer and must appear before any prefixed parameters.<br>
   e.g. `game add 1 g/Valorant`, not `game add g/Valorant 1`.
@@ -124,7 +210,34 @@ Harmony is a **desktop app for managing contacts and their gaming aliases, optim
 * If you are using a PDF version of this document, be careful when copying and pasting commands that span multiple lines as space characters surrounding line-breaks may be omitted when copied over to the application.
   </box>
 
+--------------------------------------------------------------------------------------------------------------------
+
 ## General
+
+### Your User Profile
+
+Harmony reserves a special entry called your **User Profile** — it represents you, the user, and is separate from your contact list.
+
+You can interact with your User Profile using the `me` keyword in place of an index or name in any command that supports it. For example:
+
+* `view me` — view your own profile
+* `contact edit me e/ProGamer` — rename your profile
+* `game add me g/Valorant` — add a game to your profile
+* `alias add me g/Valorant al/ProV` — add an alias to a game on your profile
+
+<box type="tip" seamless>
+
+Your User Profile always appears at the top of the contact list. It is not counted in the contact list total displayed after commands like `list` or `find`.
+
+</box>
+
+<box type="warning" seamless>
+
+`me` is a reserved keyword and cannot be used as a contact name. It always refers to your own User Profile, never to a contact named "me".
+
+</box>
+
+--------------------------------------------------------------------------------------------------------------------
 
 ### Viewing help: `help`
 
@@ -222,6 +335,12 @@ Format:
 * Use the exact keyword `me` to view your own user profile.
 * `contact view` also works as an alternative form.
 
+<box type="info" seamless>
+
+`view` operates on the **currently displayed list**. If you have used `find` to filter contacts, `view INDEX` refers to the index in that filtered list. Use `list` to restore the full contact list first if needed.
+
+</box>
+
 Examples:
 * `view 1`
 * `view n/John Doe`
@@ -250,54 +369,34 @@ Examples:
 
 ### Locating contacts: `find`
 
-Finds contacts by name, game, or alias.
+Finds contacts whose name, game, or alias contains the given search string (case-insensitive, partial match).
 
-**Find by name:**
+Format: `find [n/NAME] [g/GAME_NAME] [al/ALIAS]`
 
-Format: `find KEYWORD [MORE_KEYWORDS]`
-
-* The search is case-insensitive. e.g `hans` will match `Hans`
-* The order of the keywords does not matter. e.g. `Hans Bo` will match `Bo Hans`
-* Only full words will be matched e.g. `Han` will not match `Hans`
-* All keywords must be present in the name (i.e. `AND` search).
-  e.g. `find Hans Bo` will only return contacts whose name contains both `Hans` and `Bo`
-
-Examples:
-* `find John` returns `john` and `John Doe`
-* `find John Doe` returns `John Doe` but not `John Smith` or `Jane Doe`
-* `find alex david` returns `Alex David` but not `Alex Yeoh` or `David Li`
-
-**Find by game:**
-
-Format: `find g/GAME_NAME`
-
-* Returns all contacts who have the specified game.
-* The search is case-insensitive.
-
-Examples:
-* `find g/Valorant` returns all contacts who have `Valorant` in their game list.
-
-**Find by alias:**
-
-Format: `find al/ALIAS`
-
-* Returns all contacts who have the specified alias (across all games).
-* The search is case-insensitive.
-
-Examples:
-* `find al/Benjumpin` returns all contacts with the alias `Benjumpin`.
-
-**Combined search:**
-
-Format: `find [KEYWORD]…​ [g/GAME_NAME] [al/ALIAS]`
-
-* All specified constraints must be satisfied (i.e. `AND` search).
 * At least one constraint must be provided.
+* All specified constraints must be satisfied (i.e. `AND` search).
+* All fields use **substring matching** — partial input is sufficient.
+* The search is case-insensitive for all fields.
+
+<box type="info" seamless>
+
+`find` uses **partial word search** — you do not need to type the full name, game, or alias. For example, `find n/Ali` will match `Alice`, `Alicia`, and any contact whose name contains `Ali`. This makes searching faster, especially when you only remember part of a contact's details.
+
+</box>
+
+<box type="tip" seamless>
+
+`al/` matches aliases across all games, not just the game specified by `g/`.
+
+</box>
 
 Examples:
-* `find Alice g/Valorant` returns contacts named `Alice` who have `Valorant` in their game list.
-* `find g/Valorant al/Ace` returns contacts who play `Valorant` and have an alias called `Ace` (alias can be associated with any game, not necessarily `Valorant`).
-* `find Alice g/Valorant al/Ace` returns contacts named `Alice` who play `Valorant` and have an alias called `Ace` (alias can be associated with any game, not necessarily `Valorant`).
+* `find n/Alice` returns contacts whose name contains `Alice`, e.g. `Alice Tan`, `Malice`.
+* `find g/League` returns contacts with a game containing `League`, e.g. `League of Legends`.
+* `find al/Ace` returns contacts with any alias containing `Ace`, e.g. `Ace`, `AceV`.
+* `find n/Alice g/Valorant` returns contacts named `Alice` who also play `Valorant`.
+* `find g/Valorant al/Ace` returns contacts who play `Valorant` and have an alias containing `Ace` (alias can be from any game).
+* `find n/Alice g/Valorant al/Ace` returns contacts named `Alice` who play `Valorant` and have an alias containing `Ace`.
 
 
 ### Deleting a contact: `contact delete`
@@ -508,7 +607,5 @@ Furthermore, certain edits can cause Harmony to behave in unexpected ways (e.g.,
 | **Game Add**       | `game add INDEX g/GAME_NAME` or `game add n/CONTACT_NAME g/GAME_NAME`<br> e.g., `game add 1 g/Minecraft`                                                               |
 | **Game Delete**    | `game delete INDEX g/GAME_NAME` or `game delete n/CONTACT_NAME g/GAME_NAME`<br> e.g., `game delete 1 g/Minecraft`                                                      |
 | **Game List**      | `game list INDEX` or `game list n/CONTACT_NAME`<br> e.g., `game list 1`                                                                                                |
-| **Find (name)**    | `find KEYWORD [MORE_KEYWORDS]`<br> e.g., `find James Jake`                                                                                                             |
-| **Find (game)**    | `find g/GAME_NAME`<br> e.g., `find g/Valorant`                                                                                                                         |
-| **Find (alias)**   | `find al/ALIAS`<br> e.g., `find al/Benjumpin`                                                                                                                          |
+| **Find**           | `find [n/NAME] [g/GAME_NAME] [al/ALIAS]`<br> e.g., `find n/Alice`, `find g/Valorant`, `find n/Alice g/Valorant al/Ace`                                                 |
 | **Theme**          | `theme THEME_NAME`<br> e.g., `theme light`                                                                                                                             |
