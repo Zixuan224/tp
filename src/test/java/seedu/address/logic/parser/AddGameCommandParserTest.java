@@ -1,6 +1,9 @@
 package seedu.address.logic.parser;
 
+import static seedu.address.logic.Messages.MESSAGE_DUPLICATE_FIELDS;
 import static seedu.address.logic.Messages.MESSAGE_INVALID_COMMAND_FORMAT;
+import static seedu.address.logic.parser.CliSyntax.PREFIX_GAME;
+import static seedu.address.logic.parser.CliSyntax.PREFIX_NAME;
 import static seedu.address.logic.parser.CommandParserTestUtil.assertParseFailure;
 import static seedu.address.logic.parser.CommandParserTestUtil.assertParseSuccess;
 import static seedu.address.testutil.TypicalIndexes.INDEX_FIRST_PERSON;
@@ -82,5 +85,17 @@ public class AddGameCommandParserTest {
                 String.format(MESSAGE_INVALID_COMMAND_FORMAT, AddGameCommand.MESSAGE_USAGE));
         assertParseFailure(parser, "  ",
                 String.format(MESSAGE_INVALID_COMMAND_FORMAT, AddGameCommand.MESSAGE_USAGE));
+    }
+
+    @Test
+    public void parse_duplicateGamePrefix_throwsParseException() {
+        assertParseFailure(parser, " n/Zi Xuan g/Minecraft g/WoW",
+                MESSAGE_DUPLICATE_FIELDS + PREFIX_GAME);
+    }
+
+    @Test
+    public void parse_duplicateNamePrefix_throwsParseException() {
+        assertParseFailure(parser, " n/Zi Xuan n/Alice g/Minecraft",
+                MESSAGE_DUPLICATE_FIELDS + PREFIX_NAME);
     }
 }
