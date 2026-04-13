@@ -86,7 +86,7 @@ Harmony is a **desktop app built for gamers** 🎮 who want to **manage their ga
    Open the **DOS prompt** or **PowerShell** (**not** the WSL terminal) and run:
    ```
    cd path\to\folder
-   java -jar "harmony.jar"
+   java -jar "[CS2103-T09-1][Harmony].jar"
    ```
 
    <box type="info" seamless>
@@ -102,7 +102,7 @@ Harmony is a **desktop app built for gamers** 🎮 who want to **manage their ga
    Open **Terminal** and run:
    ```
    cd path/to/folder
-   java -jar "harmony.jar"
+   java -jar "[CS2103-T09-1][Harmony].jar"
    ```
 
    <box type="info" seamless>
@@ -118,7 +118,7 @@ Harmony is a **desktop app built for gamers** 🎮 who want to **manage their ga
    Open a **terminal** and run:
    ```
    cd path/to/folder
-   java -jar "harmony.jar"
+   java -jar "[CS2103-T09-1][Harmony].jar"
    ```
 
    <box type="info" seamless>
@@ -132,7 +132,7 @@ Harmony is a **desktop app built for gamers** 🎮 who want to **manage their ga
 
    **Wayland display server:** If the app fails with a `Gdk-CRITICAL` error, run this instead:
    ```
-   GDK_BACKEND=x11 java -jar "harmony.jar"
+   GDK_BACKEND=x11 java -jar "[CS2103-T09-1][Harmony].jar"
    ```
 
    </box>
