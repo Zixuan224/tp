@@ -139,29 +139,29 @@ Harmony is a **desktop app for managing contacts and their gaming aliases, optim
 6. Type the command in the command box and press Enter to execute it. e.g. typing **`help`** and pressing Enter will open the help window.<br><br>
    Some example commands you can try:
 
-    * `contact add n/John Doe` : Adds a contact named `John Doe` to Harmony.
+   * `contact add n/John Doe` : Adds a contact named `John Doe` to Harmony.
 
-    * `game add 1 g/Valorant` : Adds the game `Valorant` to the 1st contact shown.
+   * `game add 1 g/Valorant` : Adds the game `Valorant` to the 1st contact shown.
 
-    * `alias add 1 g/Valorant al/JohnnyV` : Adds the alias `JohnnyV` to the 1st contact's `Valorant` game.
+   * `alias add 1 g/Valorant al/JohnnyV` : Adds the alias `JohnnyV` to the 1st contact's `Valorant` game.
 
-    * `contact edit me e/Benny` : Edits your User Profile to display `Benny` as the name.
+   * `contact edit me e/Benny` : Edits your User Profile to display `Benny` as the name.
 
-    * `view me` : Opens the profile view panel to display your own user profile.
+   * `view me` : Opens the profile view panel to display your own user profile.
 
-    * `find n/Ben` : Find all contacts with name containing `Ben` such as `Benny`, `Ben` etc.
+   * `find n/Ben` : Find all contacts with name containing `Ben` such as `Benny`, `Ben` etc.
 
-    * `list` : Lists all contacts.
+   * `list` : Lists all contacts.
 
-    * `copy 1` : Copies the exact command needed to recreate the 1st contact to your system clipboard.
+   * `copy 1` : Copies the exact command needed to recreate the 1st contact to your system clipboard.
 
-    * `theme light` : Switches the application's visual interface to Light Mode.
+   * `theme light` : Switches the application's visual interface to Light Mode.
 
-    * `contact delete n/John Doe` : Deletes the contact named `John Doe` (with confirmation prompt).
+   * `contact delete n/John Doe` : Deletes the contact named `John Doe` (with confirmation prompt).
 
-    * `clear` : Deletes all contacts.
+   * `clear` : Deletes all contacts.
 
-    * `exit` : Exits the app.
+   * `exit` : Exits the app.
 
 7. Refer to the [Features](#features) below for details of each command.
 
@@ -179,28 +179,20 @@ Harmony is a **desktop app for managing contacts and their gaming aliases, optim
 * Words in `UPPER_CASE` are the parameters to be supplied by the user.<br>
   e.g. in `contact add n/NAME`, `NAME` is a parameter which can be used as `contact add n/John Doe`.
 
-* For `game` and `alias` commands, a contact can be targeted either by their index in the displayed list (`INDEX`) or by name (`n/CONTACT_NAME`).<br>
-  e.g. `game add 1 g/Valorant` and `game add n/John Doe g/Valorant` both add the game to the same contact.
 * Items in square brackets are optional.<br>
   e.g. `find [n/NAME] [g/GAME_NAME] [al/ALIAS]` can be used as `find n/Alice` or `find n/Alice g/Valorant`.
 
 * Items with `…`​ after them can be used multiple times including zero times.<br>
   e.g. in `contact add n/NAME [g/GAME [al/ALIAS]…​]…​`, `[al/ALIAS]…​` means you can specify multiple aliases: `contact add n/Alice g/Valorant al/Ace al/ProGamer`.
 
-* For `game`, `alias`, and target-specific commands, a contact can be targeted by their index (`INDEX`), by name (`n/CONTACT_NAME`), or by using the `me` keyword to target your own User Profile.<br>
-  e.g. `game add 1 g/Valorant`, `game add n/John Doe g/Valorant`, and `game add me g/Valorant` are all valid.
-
-  <box type="tip" seamless>
-
-  `me` is a special reserved keyword — it is **not** the same as `n/me`. Using `n/me` searches for contacts whose name contains "me", whereas `me` specifically targets your own User Profile.
-
-  </box>
+* For `game`, `alias`, and target-specific commands, a contact can be targeted by their index (`INDEX`), by name (`n/CONTACT_NAME`), or by the `me` keyword to target your own User Profile.<br>
+  e.g. `game add 1 g/Valorant`, `game add n/John Doe g/Valorant`, and `game add me g/Valorant` can all be used to target a contact.
 
 * `INDEX` must be a positive integer and must appear before any prefixed parameters.<br>
   e.g. `game add 1 g/Valorant`, not `game add g/Valorant 1`.
 
 * Prefixed parameters (those using `n/`, `g/`, `al/`, etc.) can be in any order.<br>
-  e.g. `contact add n/John Doe g/Minecraft` and `contact add g/Valorant n/John Doe` are both acceptable. Note: Game must exist before alias can be added 
+  e.g. `contact add n/John Doe g/Minecraft` and `contact add g/Valorant n/John Doe` are both acceptable. Note: Game must exist before alias can be added
 
 * Extraneous parameters for commands that do not take in parameters (such as `help`, `list`, `undo`, `clear` and `exit`) will be ignored.<br>
   e.g. `help 123` will be interpreted as `help`.
@@ -211,8 +203,6 @@ Harmony is a **desktop app for managing contacts and their gaming aliases, optim
   </box>
 
 --------------------------------------------------------------------------------------------------------------------
-
-## General
 
 ### Your User Profile
 
@@ -233,11 +223,12 @@ Your User Profile always appears at the top of the contact list. It is not count
 
 <box type="warning" seamless>
 
-`me` is a reserved keyword and cannot be used as a contact name. It always refers to your own User Profile, never to a contact named "me".
+`me` is a special reserved keyword — it is **not** the same as `n/me`. Parameter `n/me` refers to contacts whose name is "me", whereas `me` specifically targets your own User Profile.
 
 </box>
 
 --------------------------------------------------------------------------------------------------------------------
+## General
 
 ### Viewing help: `help`
 
@@ -330,7 +321,6 @@ Format:
 * By name: `view n/NAME`
 * User Profile: `view me`
 
-* `INDEX` must be a positive integer 1, 2, 3, …​
 * `NAME` must match the contact's full name exactly (case-insensitive).
 * Use the exact keyword `me` to view your own user profile.
 * `contact view` also works as an alternative form.
@@ -406,7 +396,6 @@ Deletes the specified contact from Harmony.
 Format: `contact delete INDEX` or `contact delete n/NAME`
 
 * Deletes the contact at the specified `INDEX` in the displayed list, or whose name matches `NAME` (case-insensitive).
-* `INDEX` must be a positive integer (e.g., 1, 2, 3…​).
 * A confirmation prompt will appear. Type `y` or `yes` to confirm, or `n` or `no` to cancel.
 * Any other input cancels the deletion.
 
@@ -444,11 +433,11 @@ Examples:
 
 Adds a game to an existing contact or your user profile.
 
-Format (by index): `game add INDEX g/GAME_NAME`
-Format (by name): `game add n/CONTACT_NAME g/GAME_NAME`
-Format (User Profile): `game add me g/GAME_NAME`
+Format:
+* By index: `game add INDEX g/GAME_NAME`
+* By name: `game add n/CONTACT_NAME g/GAME_NAME`
+* User Profile: `game add me g/GAME_NAME`
 
-* `INDEX` must be a positive integer 1, 2, 3, …​
 * `CONTACT_NAME` must match the contact's full name exactly (case-insensitive).
 * The game cannot already exist for that contact.
 
@@ -461,11 +450,11 @@ Examples:
 
 Removes a game from an existing contact or your user profile.
 
-Format (by index): `game delete INDEX g/GAME_NAME`
-Format (by name): `game delete n/CONTACT_NAME g/GAME_NAME`
-Format (User Profile): `game delete me g/GAME_NAME`
+Format:
+* By index: `game delete INDEX g/GAME_NAME`
+* By name: `game delete n/CONTACT_NAME g/GAME_NAME`
+* User Profile: `game delete me g/GAME_NAME`
 
-* `INDEX` must be a positive integer 1, 2, 3, …​
 * `CONTACT_NAME` must match the contact's full name exactly (case-insensitive).
 * The game must exist for that contact.
 * A confirmation prompt will appear. Type `y` or `yes` to confirm, or `n` or `no` to cancel.
@@ -473,21 +462,23 @@ Format (User Profile): `game delete me g/GAME_NAME`
 
 Examples:
 * `game delete 1 g/Minecraft` prompts for confirmation, then removes Minecraft from the 1st contact.
+* `game delete n/John Doe g/Minecraft` prompts for confirmation, then removes Minecraft from John Doe.
 * `game delete me g/Valorant` prompts for confirmation, then removes Valorant from your profile.
 
 ### Listing games of a contact: `game list`
 
 Lists all games of an existing contact or your user profile.
 
-Format (by index): `game list INDEX`
-Format (by name): `game list n/CONTACT_NAME`
-Format (User Profile): `game list me`
+Format:
+* By index: `game list INDEX`
+* By name: `game list n/CONTACT_NAME`
+* User Profile: `game list me`
 
-* `INDEX` must be a positive integer 1, 2, 3, …​
 * `CONTACT_NAME` must match the contact's full name exactly (case-insensitive).
 
 Examples:
 * `game list 1`
+* `game list n/John Doe`
 * `game list me`
 
 --------------------------------------------------------------------------------------------------------------------
@@ -504,28 +495,29 @@ Examples:
 
 Adds an alias to a game of an existing contact or your user profile.
 
-Format (by index): `alias add INDEX g/GAME_NAME al/ALIAS`
-Format (by name): `alias add n/CONTACT_NAME g/GAME_NAME al/ALIAS`
-Format (User Profile): `alias add me g/GAME_NAME al/ALIAS`
+Format:
+* By index: `alias add INDEX g/GAME_NAME al/ALIAS`
+* By name: `alias add n/CONTACT_NAME g/GAME_NAME al/ALIAS`
+* User Profile: `alias add me g/GAME_NAME al/ALIAS`
 
-* `INDEX` must be a positive integer 1, 2, 3, …​
 * `CONTACT_NAME` must match the contact's full name exactly (case-insensitive).
 * The contact must already have the specified game.
 * The alias cannot already exist for that game.
 
 Examples:
 * `alias add 1 g/Valorant al/Benjumpin`
+* `alias add n/John Doe g/Valorant al/Benjumpin`
 * `alias add me g/Valorant al/Benjumpin`
 
 ### Editing an alias of a game: `alias edit`
 
 Updates an existing alias of a game for a contact or your user profile.
 
-Format (by index): `alias edit INDEX g/GAME_NAME al/OLD_ALIAS na/NEW_ALIAS`
-Format (by name): `alias edit n/CONTACT_NAME g/GAME_NAME al/OLD_ALIAS na/NEW_ALIAS`
-Format (User Profile): `alias edit me g/GAME_NAME al/OLD_ALIAS na/NEW_ALIAS`
+Format:
+* By index: `alias edit INDEX g/GAME_NAME al/OLD_ALIAS na/NEW_ALIAS`
+* By name: `alias edit n/CONTACT_NAME g/GAME_NAME al/OLD_ALIAS na/NEW_ALIAS`
+* User Profile: `alias edit me g/GAME_NAME al/OLD_ALIAS na/NEW_ALIAS`
 
-* `INDEX` must be a positive integer 1, 2, 3, …​
 * `CONTACT_NAME` must match the contact's full name exactly (case-insensitive).
 * The contact must already have the specified game.
 * `OLD_ALIAS` must already exist for that game.
@@ -540,11 +532,11 @@ Examples:
 
 Removes an alias from a game of an existing contact or your user profile.
 
-Format (by index): `alias delete INDEX g/GAME_NAME al/ALIAS`
-Format (by name): `alias delete n/CONTACT_NAME g/GAME_NAME al/ALIAS`
-Format (User Profile): `alias delete me g/GAME_NAME al/ALIAS`
+Format:
+* By index: `alias delete INDEX g/GAME_NAME al/ALIAS`
+* By name: `alias delete n/CONTACT_NAME g/GAME_NAME al/ALIAS`
+* User Profile: `alias delete me g/GAME_NAME al/ALIAS`
 
-* `INDEX` must be a positive integer 1, 2, 3, …​
 * `CONTACT_NAME` must match the contact's full name exactly (case-insensitive).
 * The contact must already have the specified game.
 * The alias must exist for that game.
@@ -553,6 +545,7 @@ Format (User Profile): `alias delete me g/GAME_NAME al/ALIAS`
 
 Examples:
 * `alias delete 1 g/Valorant al/Benjumpin` prompts for confirmation, then removes the alias from the 1st contact.
+* `alias delete n/John Doe g/Valorant al/Benjumpin` prompts for confirmation, then removes the alias from John Doe.
 * `alias delete me g/Valorant al/Benjumpin` prompts for confirmation, then removes the alias from your profile.
 
 --------------------------------------------------------------------------------------------------------------------
