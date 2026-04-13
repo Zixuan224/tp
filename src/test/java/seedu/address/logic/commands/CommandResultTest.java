@@ -105,7 +105,7 @@ public class CommandResultTest {
         assertEquals(person, commandResult.getPendingPerson());
         assertFalse(commandResult.isShowHelp());
         assertFalse(commandResult.isExit());
-        assertNull(commandResult.getViewedPerson());
+        assertEquals(person, commandResult.getViewedPerson());
     }
 
     @Test
