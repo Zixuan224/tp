@@ -544,10 +544,20 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
 **MSS**
 1. User requests to remove a specific game from a contact.
-2. System removes the game from the contact.
-3. System displays the contact’s detail panel.
+2. System displays confirmation message for deletion
+3. User enters "y"
+4. System removes the game from the contact.
+5. System displays the contact’s detail panel.
 
    Use case ends.
+
+**Extensions**
+* 3a. User enters "n"
+    * 3a1. System aborts the deletion
+    * 3a2. System displays message that the deletion was aborted
+
+      Use case ends.
+
 
 ### Non-Functional Requirements
 
