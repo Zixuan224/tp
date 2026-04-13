@@ -285,8 +285,8 @@ Format: `find [KEYWORD]…​ [g/GAME_NAME] [al/ALIAS]`
 
 Examples:
 * `find Alice g/Valorant` returns contacts named `Alice` who have `Valorant` in their game list.
-* `find g/Valorant al/Ace` returns contacts who play `Valorant` with the alias `Ace`.
-* `find Alice g/Valorant al/Ace` returns contacts named `Alice` who play `Valorant` with the alias `Ace`.
+* `find g/Valorant al/Ace` returns contacts who play `Valorant` and have an alias called `Ace` (alias can be associated with any game, not necessarily `Valorant`).
+* `find Alice g/Valorant al/Ace` returns contacts named `Alice` who play `Valorant` and have an alias called `Ace` (alias can be associated with any game, not necessarily `Valorant`).
 
 
 ### Deleting a contact: `contact delete`
