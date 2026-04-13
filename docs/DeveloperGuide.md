@@ -593,13 +593,13 @@ testers are expected to do more *exploratory* testing.
    1. Prerequisites: List all persons using the `list` command. Multiple persons in the list.
 
    2. Test case: `contact delete 1`<br>
-      Expected: First contact is deleted from the list. Details of the deleted contact shown in the status message. Timestamp in the status bar is updated.
+      Expected: First contact is deleted from the list. A message appears confirming the reset of the UserProfile. y/yes results in deletion and details of the deleted contact shown in the status message, n/no cancels the operation. Timestamp in the status bar is updated.
 
-   3. Test case: `contact delete 0`<br>
-      Expected: No person is deleted. Error details shown in the status message. Status bar remains the same.
+   3. Test case: `contact delete me`<br>
+      Expected: A message appears confirming the reset of the UserProfile. y/yes results in reset to PLACEHOLDER UserProfile, n/no cancels the operation.
 
    4. Other incorrect delete commands to try: `contact delete`, `contact delete x`, `...` (where x is larger than the list size)<br>
-      Expected: Similar to previous.
+      Expected: No person is deleted. Error details shown in the status message. Status bar remains the same.
 
 
 ### Editing a contact's name
