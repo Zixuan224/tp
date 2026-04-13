@@ -6,7 +6,7 @@ pageNav: 3
 
 # Harmony User Guide
 
-Harmony is a **desktop app for managing contacts and their gaming aliases, optimized for use via a Command Line Interface** (CLI) while still having the benefits of a Graphical User Interface (GUI). If you can type fast, Harmony can help you keep track of your friends' gaming identities faster than traditional GUI apps.
+Harmony is a **desktop app built for gamers** 🎮 who want to **manage their gaming contacts and aliases in one place**, optimized for use via a **Command Line Interface (CLI)** while still having the benefits of a Graphical User Interface (GUI). Whether you play across **multiple games or platforms**, Harmony helps you keep track of your friends' **in-game identities** — their usernames, aliases, and the games they play — all **without leaving your keyboard** ⌨️. If you can type fast, Harmony can get you there **faster than any traditional GUI app** 🚀.
 
 <page-nav-print />
 
