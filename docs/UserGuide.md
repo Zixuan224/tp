@@ -86,7 +86,7 @@ Harmony is a **desktop app built for gamers** 🎮 who want to **manage their ga
    Open the **DOS prompt** or **PowerShell** (**not** the WSL terminal) and run:
    ```
    cd path\to\folder
-   java -jar "[CS2103-T09-1][Harmony].jar"
+   java -jar "harmony.jar"
    ```
 
    <box type="info" seamless>
@@ -102,7 +102,7 @@ Harmony is a **desktop app built for gamers** 🎮 who want to **manage their ga
    Open **Terminal** and run:
    ```
    cd path/to/folder
-   java -jar "[CS2103-T09-1][Harmony].jar"
+   java -jar "harmony.jar"
    ```
 
    <box type="info" seamless>
@@ -118,7 +118,7 @@ Harmony is a **desktop app built for gamers** 🎮 who want to **manage their ga
    Open a **terminal** and run:
    ```
    cd path/to/folder
-   java -jar "[CS2103-T09-1][Harmony].jar"
+   java -jar "harmony.jar"
    ```
 
    <box type="info" seamless>
@@ -132,7 +132,7 @@ Harmony is a **desktop app built for gamers** 🎮 who want to **manage their ga
 
    **Wayland display server:** If the app fails with a `Gdk-CRITICAL` error, run this instead:
    ```
-   GDK_BACKEND=x11 java -jar "[CS2103-T09-1][Harmony].jar"
+   GDK_BACKEND=x11 java -jar "harmony.jar"
    ```
 
    </box>
@@ -148,6 +148,9 @@ Harmony is a **desktop app built for gamers** 🎮 who want to **manage their ga
 
    A GUI similar to the below should appear in a few seconds.<br>
    ![Ui](images/Ui.png)
+
+   **Harmony UI components**<br>
+   ![Harmony UI Components](images/UiAnnotated.png)
 
 6. Type the command in the command box and press Enter to execute it. e.g. typing **`help`** and pressing Enter will open the help window.<br><br>
    Some example commands you can try:
@@ -285,6 +288,14 @@ Format: `undo`
 
 </box>
 
+Sample output:
+```
+Undo successful.
+```
+```
+Error: Nothing to undo.
+```
+
 
 ### Clearing all entries: `clear`
 
@@ -297,6 +308,9 @@ Format: `clear`
 A confirmation prompt will appear. Type `y` or `yes` to confirm, or `n` or `no` to cancel.
 
 </box>
+
+**Confirmation prompt**<br>
+![Clear confirmation prompt](images/clearConfirmation.png)
 
 
 ### Changing the UI theme: `theme`
@@ -312,6 +326,12 @@ Format: `theme THEME_NAME`
 * The application will immediately update its interface to the specified theme.
 
 </box>
+
+**Light theme**<br>
+![Light theme](images/themeLight.png)
+
+**Dark theme**<br>
+![Dark theme](images/themeDark.png)
 
 Examples:
 * `theme light`
@@ -359,6 +379,9 @@ Examples:
 
 
 Displays the full details, including all games and aliases, of a specific contact or your own user profile in the side panel.
+
+**Side panel after `view n/Alice`**<br>
+![View command result](images/he)
 
 Format:
 * By index: `view INDEX`
@@ -540,6 +563,14 @@ Format:
 * By index: `game list INDEX`
 * By name: `game list n/CONTACT_NAME`
 * User Profile: `game list me`
+
+Sample output:
+```
+Alice's games: Minecraft, Valorant
+```
+```
+Alice currently has no games.
+```
 
 Examples:
 * `game list 1`
