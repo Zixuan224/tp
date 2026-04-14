@@ -528,6 +528,8 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 3. User enters new name.
 4. System outputs contact updated message.
 
+   Use case ends.
+
 **Extensions**
 * 1a. User tries to edit a non-existent contact.
   * 1a1. System outputs: Contact does not exist.
@@ -674,12 +676,20 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
 ### Non-Functional Requirements
 
-1.   Initial startup should take no longer than 2s.
-2.   A user with above average typing speed for regular English text (i.e. not code, not system admin commands) should be able to accomplish most of the tasks faster using commands than using the mouse.
+1. Initial startup should take no longer than 2 seconds.
+2. A user with above average typing speed for regular English text (i.e. not code, not system admin commands) should be able to accomplish most of the tasks faster using commands than using the mouse.
+3. The app is intended for a **single user** — it does not support concurrent access or multiple user accounts.
+4. All contact data should **persist between sessions** — data is saved automatically after every command and restored on the next launch.
+5. The app should work on **Windows, macOS, and Linux** with Java 17 or above installed.
+6. The app should function **fully offline** — no internet connection is required for any feature.
 
 ### Glossary
 
-* **Alias**: Alternate usernames used by the user
+* **Alias**: An alternate in-game username used by a contact for a specific game
+* **Contact**: A person stored in Harmony's contact list, identified by a unique name
+* **Game**: A game title associated with a contact, under which aliases are grouped
+* **User Profile**: A special contact representing the user themselves, accessible via the `me` keyword
+* **Index**: The position number of a contact in the currently displayed list, starting from 1
 
 --------------------------------------------------------------------------------------------------------------------
 
@@ -804,10 +814,10 @@ testers are expected to do more *exploratory* testing.
 
    1. Prerequisites: Contact at index 1 has game `Valorant` with alias `ProPlayer`.
 
-   2. Test case: `alias edit 1 g/Valorant al/ProPlayer e/ElitePlayer`<br>
+   2. Test case: `alias edit 1 g/Valorant al/ProPlayer na/ElitePlayer`<br>
       Expected: Alias renamed from `ProPlayer` to `ElitePlayer`. Success message shown.
 
-   3. Test case: `alias edit 1 g/Valorant al/NonExistent e/NewAlias`<br>
+   3. Test case: `alias edit 1 g/Valorant al/NonExistent na/NewAlias`<br>
       Expected: No alias edited. Error message `Error: Alias not found` shown.
 
 3. Deleting an alias
@@ -834,7 +844,7 @@ testers are expected to do more *exploratory* testing.
    Expected: Only contacts matching both criteria (name contains `Alex` AND has game `Valorant`) are shown.
 
 6. Test case: `find` (no parameters)<br>
-   Expected: Error message shown. At least one search parameter required.
+   Expected: Error message `Invalid command format!` shown. At least one search parameter required.
 
 ### Viewing a contact
 
@@ -850,7 +860,7 @@ testers are expected to do more *exploratory* testing.
    Expected: User profile details displayed.
 
 5. Test case: `view 999` (index out of bounds)<br>
-   Expected: Error message shown.
+   Expected: Error message `The person index provided is invalid` shown.
 
 ### Listing games
 
@@ -873,7 +883,7 @@ testers are expected to do more *exploratory* testing.
    Expected: A formatted `contact add` command string for the first contact is copied to the system clipboard. Paste it into any text field to verify.
 
 3. Test case: `copy 999` (index out of bounds)<br>
-   Expected: Error message shown. Clipboard unchanged.
+   Expected: Error message `The person index provided is invalid` shown. Clipboard unchanged.
 
 ### Undoing a command
 
