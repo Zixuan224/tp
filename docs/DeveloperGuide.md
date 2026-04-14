@@ -924,7 +924,7 @@ Team size: 5
 
 3. **Improve component scaling when the application window is resized.** Currently, resizing the application window only widens the command result area while the bottom view panels do not scale proportionally, which does not translate well on larger screens. We plan to update the layout so all panels scale proportionally with the window size.
 
-4. **Accept hyphens and apostrophes in contact names.** The current name validation only accepts alphanumeric characters and spaces, rejecting real-world names such as `Mary-Jane` or `O'Brien`. We plan to extend the name validation regex to also permit hyphens (`-`) and apostrophes (`'`), so that `contact add n/Mary-Jane` and `contact add n/O'Brien` are accepted.
+4. **Accept special characters in contact names.** The current name validation only accepts alphanumeric characters and spaces, rejecting real-world names such as `Mary-Jane`, `O'Brien`, and `Kumar s/o Ravi`. We plan to extend the name validation regex to also permit hyphens (`-`), apostrophes (`'`), and forward slashes (`/`), so that names like `contact add n/Kumar s/o Ravi` are accepted.
 
 5. **Restate the contact name in the deletion confirmation prompt.** Currently, after triggering a deletion (e.g. `contact delete 1`), if the user scrolls away from the confirmation message, there is no reminder of which contact is about to be deleted when they type `y`. We plan to repeat the contact's name in the confirmation prompt so it is always visible, e.g. `Confirm deletion of Alex Yeoh? (y/n)`.
 
