@@ -191,22 +191,24 @@ The following sequence diagram illustrates this interaction:
 To improve the Quality of Life (QoL) of the CLI interface, users can navigate their session's command history using the Up and Down arrow keys.
 
 #### Architecture and Execution
-A naive implementation would store the history state directly inside the UI's `CommandBox`. However, UI components are notoriously difficult to test automatically without relying on heavy frameworks like TestFX.
+The command history state is managed directly within the `CommandBox` UI component. Because the history is only relevant to the current user session and involves direct manipulation of the JavaFX text field and caret position, a lightweight, self-contained implementation was chosen to minimize unnecessary dependencies between the UI and Logic components.
 
-To maintain strict adherence to testability, the state tracking logic is completely decoupled into a standalone `CommandHistory` class within the `Logic` component.
+The state is tracked using two internal variables:
+* `commandHistory`: An `ArrayList` storing the string values of previously executed commands.
+* `historyPointer`: An integer tracking the user's current index during navigation.
 
-Step-by-step execution:
-1. The user presses the Up arrow key in the text field.
-2. The `CommandBox` triggers the `handleKeyPress(KeyEvent)` method.
-3. The `CommandBox` queries the `CommandHistory` logic class via `getPrevious()`.
-4. If a previous command exists, the text field is updated, and the cursor (`caret`) is forcefully positioned at the end of the loaded string.
-
-The following sequence diagram proves the UI-Logic decoupling during this interaction:
+Step-by-step execution for navigating backwards:
+1. The user presses the Up arrow key while focused on the text field.
+2. The `CommandBox` captures the event via its `handleKeyPress(KeyEvent)` listener.
+3. The component checks if the `historyPointer` is greater than 0. If so, it decrements the pointer.
+4. The `setCommandTextFromHistory()` method retrieves the string from the `commandHistory` list at the new pointer index.
+5. The text field is updated, and the cursor (`caret`) is forcefully positioned at the end of the loaded string so the user can immediately begin typing.
+6. The `KeyEvent` is consumed to prevent the default JavaFX behavior (which would move the caret back to the beginning of the text).
 
 ![CommandHistorySequenceDiagram](images/CommandHistorySequenceDiagram.png)
 
 #### Design Considerations:
-* **UI vs Logic State Tracking:** By placing `CommandHistory.java` inside the `logic` package, we achieve 100% test coverage of the pointer math (including floor and ceiling boundary checks) using standard, lightning-fast headless JUnit tests, entirely bypassing the JavaFX Toolkit lifecycle.
+* **Integrated UI State vs. Logic Component:** While moving history tracking to the `Logic` package would decouple the data, keeping it inside `CommandBox` drastically simplifies the architecture. The history list and pointer are inherently tied to UI-specific actions (JavaFX `KeyEvent` handling, text property listeners, and caret manipulation). Furthermore, since the history does not need to persist across app launches (it is session-only), implementing a simple `ArrayList` within the UI layer avoids over-engineering the application's core Logic API.
 
 
 ### Editing a contact's name feature
@@ -236,6 +238,8 @@ The `contact edit` command allows users to rename an existing contact while pres
 * **Immutable `Person` model** — `Person` objects are immutable; editing creates a new `Person` rather than mutating the existing one. This keeps the model simple and consistent with the rest of the codebase.
 * **Index and name-based lookup** — The command supports both index and name identification, consistent with `alias edit` and `view`. A single constructor `(Index, Name, Name, boolean)` is used with the unused field passed as `null`, matching the pattern used by `EditAliasCommand`.
 * **Games and aliases preserved** — The new `Person` is constructed with the original person's `games` map, so all associated data is retained after a rename.
+
+---
 
 ### Undo feature
 
@@ -315,7 +319,7 @@ The following activity diagram summarizes what happens when a user executes a ne
 
 Redo is not implemented. Once a command is undone it is removed from the history stack permanently.
 
-
+---
 --------------------------------------------------------------------------------------------------------------------
 
 ### Delete Confirmation Feature
