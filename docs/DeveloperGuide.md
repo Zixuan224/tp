@@ -11,6 +11,14 @@
 
 --------------------------------------------------------------------------------------------------------------------
 
+## **Acknowledgements**
+
+* This project is based on the [AddressBook-Level3 (AB3)](https://se-education.org/addressbook-level3/) project created by the [SE-EDU initiative](https://se-education.org). The overall architecture, component structure (UI, Logic, Model, Storage), and base documentation were adapted from AB3.
+* The undo feature design was inspired by the proposed undo/redo implementation described in the [AB3 Developer Guide](https://se-education.org/addressbook-level3/DeveloperGuide.html). Our implementation differs in that it uses per-command state capture rather than the VersionedAddressBook (full snapshot) approach.
+* The `CopyCommand` uses the Java AWT `Clipboard` API (`java.awt.Toolkit`) to interface with the operating system clipboard.
+
+--------------------------------------------------------------------------------------------------------------------
+
 ## **Setting up, getting started**
 
 Refer to the guide [_Setting up and getting started_](SettingUp.md).
@@ -91,8 +99,6 @@ The sequence diagram below illustrates the interactions within the `Logic` compo
 
 **Note:** The lifeline for `DeleteContactCommandParser` should end at the destroy marker (X) but due to a limitation of PlantUML, the lifeline continues till the end of diagram.
 </box>
-
-How the `Logic` component works:
 
 How the `Logic` component works:
 
@@ -207,15 +213,16 @@ Step-by-step execution for navigating backwards:
 
 ![CommandHistorySequenceDiagram](images/CommandHistorySequenceDiagram.png)
 
-#### Design Considerations:
+#### Design Considerations
 * **Integrated UI State vs. Logic Component:** While moving history tracking to the `Logic` package would decouple the data, keeping it inside `CommandBox` drastically simplifies the architecture. The history list and pointer are inherently tied to UI-specific actions (JavaFX `KeyEvent` handling, text property listeners, and caret manipulation). Furthermore, since the history does not need to persist across app launches (it is session-only), implementing a simple `ArrayList` within the UI layer avoids over-engineering the application's core Logic API.
 
+---
 
 ### Editing a contact's name feature
 
-#### Implementation
-
 The `contact edit` command allows users to rename an existing contact while preserving all associated games and aliases. It is implemented via `EditContactCommand`, parsed by `EditContactCommandParser`, and routed through `ContactCommandParser`.
+
+#### Architecture and Execution
 
 **Parsing flow:**
 1. `AddressBookParser` receives `"contact edit 1 e/Jan"` (or `"contact edit n/Janelle e/Jan"`) and dispatches to `ContactCommandParser`.
@@ -233,7 +240,7 @@ The `contact edit` command allows users to rename an existing contact while pres
 5. `model.setPerson()` replaces the old entry, and the filtered list is reset to show all persons.
 6. A `CommandResult` is returned, displaying the updated contact.
 
-**Design considerations:**
+#### Design Considerations
 
 * **Immutable `Person` model** — `Person` objects are immutable; editing creates a new `Person` rather than mutating the existing one. This keeps the model simple and consistent with the rest of the codebase.
 * **Index and name-based lookup** — The command supports both index and name identification, consistent with `alias edit` and `view`. A single constructor `(Index, Name, Name, boolean)` is used with the unused field passed as `null`, matching the pattern used by `EditAliasCommand`.
@@ -241,11 +248,47 @@ The `contact edit` command allows users to rename an existing contact while pres
 
 ---
 
+### Delete Confirmation Feature
+The `contact delete`, `game delete`, and `alias delete` commands require a y/n confirmation from the user before deletion is applied, to prevent accidental data loss.
+
+#### Architecture and Execution
+The structural relationship of the delete commands is shown in the class diagram below.
+
+<puml src="diagrams/DeleteCommandClassDiagram.puml" alt="Delete Command Class Diagram" />
+
+All three delete commands implement `ConfirmableDeleteCommand`, which declares `performDeletion()` and `getCancelMessage()`. This gives `LogicManager` a single unified code path for all confirmation handling.
+
+The following sequence diagram illustrates the two-step flow for `contact delete n/Alice` followed by `y`:
+
+<puml src="diagrams/DeleteConfirmSequenceDiagram.puml" alt="Delete Confirmation Sequence Diagram" />
+
+Step-by-step execution:
+1. The user inputs `contact delete n/Alice`.
+2. `LogicManager` passes the input to `AddressBookParser`, which creates a `DeleteContactCommand`.
+3. `LogicManager` calls `DeleteContactCommand#execute(model)`, which finds the target but does **not** delete yet — returns a `CommandResult` with `isAwaitingConfirmation = true`.
+4. `LogicManager` stores the command in `pendingConfirmableCommand` and shows the confirmation prompt.
+5. The user inputs `y` — `LogicManager#handleDeleteConfirmation()` calls `performDeletion()` on the command, conditionally pushes it to `commandHistory` if it implements `UndoableCommand`, and saves the address book.
+6. If the user inputs `n` or any other input, `getCancelMessage()` is returned and the model is unchanged.
+
+#### Design Considerations:
+* **`ConfirmableDeleteCommand` is decoupled from `UndoableCommand`** — allows future commands to require confirmation without needing to support undo. All three current delete commands implement both interfaces explicitly.
+* **Alternative:** Have `LogicManager` perform the deletion directly (e.g. `model.deletePerson()`) after confirmation, without a `performDeletion()` method on the command.
+    * **Pros:** Simpler — no extra interface or method needed.
+    * **Cons:** `LogicManager` must know the internals of each delete command (e.g. which game or alias to remove), violating separation of concerns and requiring `instanceof` checks for each command type.
+
+<box type="info" seamless>
+
+**Note:** `ClearCommand` also requires a y/n confirmation before proceeding, but it does **not** implement `ConfirmableDeleteCommand`. Instead, it uses its own `executeConfirmed(Model model)` method, triggered by a separate `awaitingClearConfirmation` flag in `CommandResult` that `LogicManager` checks. This is because `ConfirmableDeleteCommand` is designed around commands that identify a specific target before asking for confirmation. `ClearCommand` has no such target resolution step — it unconditionally clears all contacts — so it does not fit the interface's contract.
+
+</box>
+
+---
+
 ### Undo feature
 
-#### Implementation
-
 The undo mechanism is implemented using a **command history stack** managed by `LogicManager`, together with an `UndoableCommand` interface that undoable commands implement.
+
+#### Architecture and Execution
 
 **Key classes involved:**
 
@@ -281,7 +324,7 @@ Rather than saving a full snapshot of the address book after each command, each 
 
 **Special case — delete confirmation:**
 
-`DeleteContactCommand` requires the user to confirm before the deletion is committed. The command is only pushed to `commandHistory` after the user confirms with `y`/`yes`. Cancelling the deletion means nothing is added to history.
+As described in the previous section, confirmable commands (`DeleteContactCommand`, `DeleteGameCommand`, `DeleteAliasCommand`) are only pushed to `commandHistory` after the user confirms with `y`/`yes`. Cancelling the deletion means nothing is added to history.
 
 Given below is an example usage scenario showing how the undo mechanism behaves.
 
@@ -303,7 +346,7 @@ The following activity diagram summarizes what happens when a user executes a ne
 
 <puml src="diagrams/UndoActivityDiagram.puml" width="250" />
 
-#### Design considerations:
+#### Design Considerations
 
 **Aspect: How undo executes:**
 
@@ -320,35 +363,31 @@ The following activity diagram summarizes what happens when a user executes a ne
 Redo is not implemented. Once a command is undone it is removed from the history stack permanently.
 
 ---
---------------------------------------------------------------------------------------------------------------------
 
-### Delete Confirmation Feature
-The `contact delete`, `game delete`, and `alias delete` commands require a y/n confirmation from the user before deletion is applied, to prevent accidental data loss.
+### Theme Switching Feature
+
+The `theme` command allows users to switch the application's visual appearance between `light`, `dark`, and `rainbow` themes at runtime.
 
 #### Architecture and Execution
-The structural relationship of the delete commands is shown in the class diagram below.
 
-<puml src="diagrams/DeleteCommandClassDiagram.puml" alt="Delete Command Class Diagram" />
+Theme switching is notable because it involves **UI-side effects triggered from the Logic layer** — `ThemeCommand` does not modify the `Model`, but instead signals `MainWindow` to swap CSS stylesheets by embedding the chosen theme string inside the `CommandResult`.
 
-All three delete commands implement `ConfirmableDeleteCommand`, which declares `performDeletion()` and `getCancelMessage()`. This gives `LogicManager` a single unified code path for all confirmation handling.
+The following sequence diagram illustrates the flow for `theme light`:
 
-The following sequence diagram illustrates the two-step flow for `contact delete n/Alice` followed by `y`:
-
-<puml src="diagrams/DeleteConfirmSequenceDiagram.puml" alt="Delete Confirmation Sequence Diagram" />
+<puml src="diagrams/ThemeSequenceDiagram.puml" alt="Theme Sequence Diagram" />
 
 Step-by-step execution:
-1. The user inputs `contact delete n/Alice`.
-2. `LogicManager` passes the input to `AddressBookParser`, which creates a `DeleteContactCommand`.
-3. `LogicManager` calls `DeleteContactCommand#execute(model)`, which finds the target but does **not** delete yet — returns a `CommandResult` with `isAwaitingConfirmation = true`.
-4. `LogicManager` stores the command in `pendingConfirmableCommand` and shows the confirmation prompt.
-5. The user inputs `y` — `LogicManager#handleDeleteConfirmation()` calls `performDeletion()` on the command, conditionally pushes it to `commandHistory` if it implements `UndoableCommand`, and saves the address book.
-6. If the user inputs `n` or any other input, `getCancelMessage()` is returned and the model is unchanged.
+1. The user inputs `theme light` (or `theme dark` / `theme rainbow`).
+2. `AddressBookParser` routes the command to `ThemeCommandParser`, which creates a `ThemeCommand("light")`.
+3. `ThemeCommand#execute()` validates the parameter against the accepted values (`light`, `dark`, `rainbow`) and returns a `CommandResult` carrying the theme string via `CommandResult(msg, "light")`.
+4. Back in `MainWindow#executeCommand()`, after receiving the result, it checks `commandResult.getThemeToSwitch()`.
+5. If non-null, `MainWindow#handleThemeSwitch(String theme)` is called, which swaps the active CSS stylesheets on the scene dynamically.
 
 #### Design Considerations:
-* **`ConfirmableDeleteCommand` is decoupled from `UndoableCommand`** — allows future commands to require confirmation without needing to support undo. All three current delete commands implement both interfaces explicitly.
-* **Alternative:** Have `LogicManager` perform the deletion directly (e.g. `model.deletePerson()`) after confirmation, without a `performDeletion()` method on the command.
-    * **Pros:** Simpler — no extra interface or method needed.
-    * **Cons:** `LogicManager` must know the internals of each delete command (e.g. which game or alias to remove), violating separation of concerns and requiring `instanceof` checks for each command type.
+* **Theme string carried in `CommandResult`** — `ThemeCommand` places the theme value inside `CommandResult` rather than calling the UI directly. This keeps `ThemeCommand` within the Logic layer and prevents a downward dependency from Logic onto UI.
+* **Alternative:** Have `ThemeCommand` interact with the UI directly (e.g. via a callback or static reference to `MainWindow`).
+    * **Pros:** No changes needed to `CommandResult`.
+    * **Cons:** Creates an illegal dependency from Logic to UI, violating the architecture's layered design.
 
 --------------------------------------------------------------------------------------------------------------------
 
@@ -382,17 +421,26 @@ Step-by-step execution:
 
 Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unlikely to have) - `*`
 
-| Priority | As a …​    | I want to …​                       | So that I can…​                                              |
-|----------|------------|------------------------------------|--------------------------------------------------------------|
-| `* * *`  | user       | add a new contact                  |                                                              |
-| `* * *`  | user       | delete a contact                   | remove contacts that I no longer need                        |
-| `* * *`  | user       | edit a contact's name              | modify a contact without removing associated alias and games |
-| `* * *`  | user       | display all contacts               |                                                              |
-| `* *`    | user       | add an alias to a contact          | keep track of alternate usernames used by the contact        |
-| `* *`    | user       | delete an alias from a contact     | remove aliases that the contact is no longer using           |
-| `* *`    | user       | add a game that the contact plays  | keep track of which games the contact plays                  |
-| `* *`    | user       | delete a game that a contact plays | remove games that the contact no longer plays                |
-| `*`      | new user   | see usage instructions             | refer to command syntax when I forget how to use the app     | \
+| Priority | As a …​    | I want to …​                                          | So that I can…​                                                    |
+|----------|------------|-------------------------------------------------------|--------------------------------------------------------------------|
+| `* * *`  | user       | add a new contact                                     | keep track of a new gaming contact                                 |
+| `* * *`  | user       | delete a contact                                      | remove contacts that I no longer need                              |
+| `* * *`  | user       | edit a contact's name                                 | modify a contact without removing associated aliases and games     |
+| `* * *`  | user       | display all contacts                                  | see everyone in my contact list at a glance                        |
+| `* * *`  | user       | clear all contacts at once                            | quickly reset the contact list                                     |
+| `* *`    | user       | add an alias to a contact                             | keep track of alternate usernames used by the contact              |
+| `* *`    | user       | delete an alias from a contact                        | remove aliases that the contact is no longer using                 |
+| `* *`    | user       | edit an alias of a contact                            | update an alias without deleting and re-adding it                  |
+| `* *`    | user       | add a game that the contact plays                     | keep track of which games the contact plays                        |
+| `* *`    | user       | delete a game that a contact plays                    | remove games that the contact no longer plays                      |
+| `* *`    | user       | undo my last action                                   | recover from accidental changes                                    |
+| `* *`    | user       | copy a contact's details to my clipboard              | quickly reuse their information to add them to another device      |
+| `* *`    | user       | search for contacts by name                           | find a specific contact quickly without scrolling through the list |
+| `* *`    | user       | view the full details of a contact                    | see all their games and aliases at once                            |
+| `*`      | user       | list all games a contact plays                        | get a quick overview of their games                                |
+| `*`      | user       | switch between light, dark, and rainbow themes        | use the app comfortably in different environments                  |
+| `*`      | user       | navigate previous commands using the Up/Down arrow keys | avoid retyping recently used commands                            |
+| `*`      | new user   | see usage instructions                                | refer to command syntax when I forget how to use the app           |
 
 ### Use cases
 
@@ -423,17 +471,23 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 * The list is not empty.
 
 **MSS**
-1.  User requests to delete a specific contact by name.
-2.  System identifies the matching contact.
-3.  System removes the contact and its associated aliases and games.
-4.  System confirms deletion.
+1. User requests to delete a specific contact by name or index.
+2. System identifies the matching contact and prompts for confirmation.
+3. User confirms with `y`.
+4. System removes the contact and its associated aliases and games.
+5. System confirms deletion.
 
-    Use case ends.
+   Use case ends.
 
 **Extensions**
 
-* 2a. No contact is found with matching name.
-  * 2a1. System informs user that no matching user is found.
+* 2a. No contact is found with the given name or index.
+  * 2a1. System informs user that no matching contact is found.
+
+    Use case ends.
+
+* 3a. User cancels with `n`.
+  * 3a1. System aborts the deletion and informs the user.
 
     Use case ends.
 
@@ -506,11 +560,24 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
 **MSS**
 1. User requests to remove a specific alias from a contact.
-2. System identifies the contact and specific alias.
-3. System removes the alias from the record.
-4. System confirms the removal.
+2. System identifies the contact and specific alias and prompts for confirmation.
+3. User confirms with `y`.
+4. System removes the alias from the record.
+5. System confirms the removal.
 
    Use case ends.
+
+**Extensions**
+* 3a. User cancels with `n`.
+  * 3a1. System aborts the deletion and informs the user.
+
+    Use case ends.
+
+<box type="info" seamless>
+
+**Note:** The confirmation flow follows the same pattern as UC8 (Delete a game from Contact).
+
+</box>
 
 **Use Case: UC7 - Add a game to Contact**
 
@@ -563,6 +630,48 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
       Use case ends.
 
 
+**Use Case: UC9 - Clear all contacts**
+
+**Precondition**
+* Harmony is running.
+
+**MSS**
+1. User requests to clear all contacts.
+2. System prompts for confirmation.
+3. User confirms with `y`.
+4. System removes all contacts, preserving the user profile.
+5. System confirms that the contact list has been cleared.
+
+   Use case ends.
+
+**Extensions**
+* 3a. User cancels with `n`.
+  * 3a1. System aborts the operation and informs the user.
+
+    Use case ends.
+
+
+**Use Case: UC10 - Undo last action**
+
+**MSS**
+1. User requests to undo the last action.
+2. System reverses the most recent undoable command.
+3. System displays a message confirming what was undone.
+
+   Use case ends.
+
+**Extensions**
+* 1a. There are no undoable commands in history.
+  * 1a1. System informs the user that there is nothing to undo.
+
+    Use case ends.
+
+* 1b. The last action was a delete command that required confirmation.
+  * The undo reverses the deletion only if the user had confirmed it. Cancelled deletions are not in history and cannot be undone.
+
+    Use case resumes from step 2.
+
+
 ### Non-Functional Requirements
 
 1.   Initial startup should take no longer than 2s.
@@ -600,25 +709,23 @@ testers are expected to do more *exploratory* testing.
    2. Re-launch the app by double-clicking the jar file.<br>
        Expected: The most recent window size and location is retained.
 
-### Deleting a person
+### Adding, editing, and deleting a contact
 
-1. Deleting a person while all persons are being shown
+1. Adding a new contact
 
-   1. Prerequisites: List all persons using the `list` command. Multiple persons in the list.
+   1. Test case: `contact add n/John Doe`<br>
+      Expected: Contact `John Doe` added with no games. Success message shown.
 
-   2. Test case: `contact delete 1`<br>
-      Expected: First contact is deleted from the list. A message appears confirming the reset of the UserProfile. y/yes results in deletion and details of the deleted contact shown in the status message, n/no cancels the operation. Timestamp in the status bar is updated.
+   2. Test case: `contact add n/John Doe g/Valorant al/JohnV`<br>
+      Expected: Contact `John Doe` added with game `Valorant` and alias `JohnV`. Success message shown.
 
-   3. Test case: `contact delete me`<br>
-      Expected: A message appears confirming the reset of the UserProfile. y/yes results in reset to PLACEHOLDER UserProfile, n/no cancels the operation.
+   3. Test case: `contact add n/Alex Yeoh` (where `Alex Yeoh` already exists)<br>
+      Expected: No contact added. Error message `Error: Contact already exists in the contact list` shown.
 
-   4. Other incorrect delete commands to try: `contact delete`, `contact delete x`, `...` (where x is larger than the list size)<br>
-      Expected: No person is deleted. Error details shown in the status message. Status bar remains the same.
+   4. Test case: `contact add` (missing `n/` prefix)<br>
+      Expected: No contact added. Invalid command format error shown.
 
-
-### Editing a contact's name
-
-1. Renaming a contact while all persons are shown
+2. Editing a contact's name
 
    1. Prerequisites: List all persons using the `list` command. At least one contact in the list (e.g. `Alex Yeoh` at index 1).
 
@@ -629,7 +736,7 @@ testers are expected to do more *exploratory* testing.
       Expected: First contact is renamed. Success message `Contact updated: [original name] → Alex` shown.
 
    4. Test case: `contact edit n/NonExistent e/NewName`<br>
-      Expected: No contact is renamed. Error message `Error: Name not found` shown.
+      Expected: No contact is renamed. Error message `Error: Contact not found in the current list. Use 'list' to show all contacts.` shown.
 
    5. Test case: `contact edit 999 e/NewName` (index out of bounds)<br>
       Expected: No contact is renamed. Invalid index error shown.
@@ -643,15 +750,208 @@ testers are expected to do more *exploratory* testing.
    8. Test case: `contact edit n/Alex Yeoh` (missing `e/` prefix)<br>
       Expected: No contact is renamed. Invalid command format error shown.
 
+3. Deleting a contact
+
+   1. Prerequisites: List all persons using the `list` command. Multiple persons in the list.
+
+   2. Test case: `contact delete 1`<br>
+      Expected: Confirmation prompt shown. Enter `y` — first contact deleted, success message shown. Enter `n` — deletion aborted.
+
+   3. Test case: `contact delete me`<br>
+      Expected: Confirmation prompt shown. Enter `y` — user profile reset to placeholder. Enter `n` — operation aborted.
+
+   4. Other incorrect delete commands to try: `contact delete`, `contact delete x` (where x is larger than the list size)<br>
+      Expected: No contact deleted. Error details shown in the status message.
+
+### Adding and deleting a game
+
+1. Adding a game to a contact
+
+   1. Prerequisites: At least one contact in the list (e.g. `Alex Yeoh` at index 1).
+
+   2. Test case: `game add 1 g/Minecraft`<br>
+      Expected: Game `Minecraft` added to the first contact. Updated contact details shown.
+
+   3. Test case: `game add n/Alex Yeoh g/Minecraft` (where `Minecraft` already exists for that contact)<br>
+      Expected: No game added. Error message `Error: Game already exists for the contact.` shown.
+
+   4. Test case: `game add me g/Valorant`<br>
+      Expected: Game `Valorant` added to the user profile. Updated profile shown.
+
+2. Deleting a game from a contact
+
+   1. Prerequisites: Contact at index 1 has at least one game (e.g. `Minecraft`).
+
+   2. Test case: `game delete 1 g/Minecraft`<br>
+      Expected: Confirmation prompt shown. Enter `y` to confirm — game removed, success message shown. Enter `n` — deletion aborted.
+
+   3. Test case: `game delete 1 g/NonExistentGame`<br>
+      Expected: No confirmation prompt. Error message `Error: This contact does not have this game.` shown.
+
+### Adding, editing, and deleting an alias
+
+1. Adding an alias
+
+   1. Prerequisites: Contact at index 1 has game `Valorant`.
+
+   2. Test case: `alias add 1 g/Valorant al/ProPlayer`<br>
+      Expected: Alias `ProPlayer` added to `Valorant` for the first contact. Success message shown.
+
+   3. Test case: `alias add 1 g/Valorant al/ProPlayer` (where `ProPlayer` already exists)<br>
+      Expected: No alias added. Error message `Error: This alias already exists for this game.` shown.
+
+2. Editing an alias
+
+   1. Prerequisites: Contact at index 1 has game `Valorant` with alias `ProPlayer`.
+
+   2. Test case: `alias edit 1 g/Valorant al/ProPlayer e/ElitePlayer`<br>
+      Expected: Alias renamed from `ProPlayer` to `ElitePlayer`. Success message shown.
+
+   3. Test case: `alias edit 1 g/Valorant al/NonExistent e/NewAlias`<br>
+      Expected: No alias edited. Error message `Error: Alias not found` shown.
+
+3. Deleting an alias
+
+   1. Prerequisites: Contact at index 1 has game `Valorant` with alias `ElitePlayer`.
+
+   2. Test case: `alias delete 1 g/Valorant al/ElitePlayer`<br>
+      Expected: Confirmation prompt shown. Enter `y` — alias removed, success message shown. Enter `n` — deletion aborted.
+
+### Finding contacts
+
+1. Prerequisites: Contact list contains at least `Alex Yeoh` who plays `Valorant` with alias `Ace`.
+
+2. Test case: `find n/Alex`<br>
+   Expected: Contacts whose names contain `Alex` are shown.
+
+3. Test case: `find g/Valorant`<br>
+   Expected: Contacts who have `Valorant` as a game are shown.
+
+4. Test case: `find al/Ace`<br>
+   Expected: Contacts who have alias `Ace` (in any game) are shown.
+
+5. Test case: `find n/Alex g/Valorant`<br>
+   Expected: Only contacts matching both criteria (name contains `Alex` AND has game `Valorant`) are shown.
+
+6. Test case: `find` (no parameters)<br>
+   Expected: Error message shown. At least one search parameter required.
+
+### Viewing a contact
+
+1. Prerequisites: At least one contact in the list.
+
+2. Test case: `view 1`<br>
+   Expected: Full details (games and aliases) of the first contact displayed in the detail panel.
+
+3. Test case: `view n/Alex Yeoh`<br>
+   Expected: Full details of `Alex Yeoh` displayed.
+
+4. Test case: `view me`<br>
+   Expected: User profile details displayed.
+
+5. Test case: `view 999` (index out of bounds)<br>
+   Expected: Error message shown.
+
+### Listing games
+
+1. Prerequisites: Contact at index 1 has at least one game.
+
+2. Test case: `game list 1`<br>
+   Expected: All games of the first contact listed in the result display.
+
+3. Test case: `game list me`<br>
+   Expected: All games of the user profile listed.
+
+4. Test case: `game list 1` (where contact has no games)<br>
+   Expected: Message indicating the contact has no games shown.
+
+### Copying a contact
+
+1. Prerequisites: At least one contact in the list.
+
+2. Test case: `copy 1`<br>
+   Expected: A formatted `contact add` command string for the first contact is copied to the system clipboard. Paste it into any text field to verify.
+
+3. Test case: `copy 999` (index out of bounds)<br>
+   Expected: Error message shown. Clipboard unchanged.
+
+### Undoing a command
+
+1. Prerequisites: At least one undoable command has been executed (e.g. `contact add n/Temp`).
+
+2. Test case: `undo`<br>
+   Expected: The last undoable command is reversed. Success message shown indicating what was undone.
+
+3. Test case: `undo` (with empty history)<br>
+   Expected: Error message `Error: Nothing to undo.` shown.
+
+4. Test case: Execute `contact delete 1`, cancel with `n`, then `undo`<br>
+   Expected: Nothing to undo — cancelled deletions are not added to history.
+
+### Clearing all contacts
+
+1. Test case: `clear`<br>
+   Expected: Confirmation prompt shown. Enter `y` — all contacts removed (user profile preserved). Enter `n` — operation aborted.
+
+2. Test case: `clear` on an already empty list, confirm with `y`<br>
+   Expected: Success message shown. Contact list remains empty.
+
+### Switching themes
+
+1. Test case: `theme light`<br>
+   Expected: Application switches to the light theme.
+
+2. Test case: `theme dark`<br>
+   Expected: Application switches to the dark theme.
+
+3. Test case: `theme rainbow`<br>
+   Expected: Application switches to the rainbow theme.
+
+4. Test case: `theme invalid`<br>
+   Expected: Error message `Invalid theme! Please specify either 'light' or 'dark'.` shown. Theme unchanged.
+
 --------------------------------------------------------------------------------------------------------------------
 
-## **Appendix: Planned Enhancement**
+## **Appendix: Planned Enhancements**
 
 Team size: 5
-* <b>Make the command result window to scale with text.</b> The current command result window is too small to fully view the result of the command. This might prevent users from viewing the full result without breaking from "full CLI"
-* <b>Make the Contact List panel scroll without mouse input.</b> The current Contact List panel can only be manipulated with a mouse (barring the find command to reduce the size of the list) once again breaking from "full CLI"
-* <b>Modify the scaling of components when application window is resized.</b> Currently, resizing the application window makes the command result wider, and the bottom view panels the same scaling, which does not translate well for the user experience on larger screens.
-* <b>Allow hyphens and apostrophes in contact names.</b> The current name validation only accepts alphanumeric characters and spaces, rejecting real-world names such as `Mary-Jane` or `O'Brien`. We plan to extend the name validation regex to also permit hyphens (`-`) and apostrophes (`'`), so that `contact add n/Mary-Jane` and `contact add n/O'Brien` are accepted.
-* <b>Restate the contact name in the deletion confirmation prompt.</b> Currently, after triggering a deletion (e.g. `contact delete 1`), if the user scrolls away from the confirmation message, there is no reminder of which contact is about to be deleted when they type `y`. We plan to repeat the contact's name in the confirmation prompt so it is always visible, e.g. `Confirm deletion of Alex Yeoh? (y/n)`.
-* <b>Make the UI reflect the changes from the undo command.</b> Currently undo command only refresh the UI but does not show the previous changes.
-* <b>Add the ability to edit Game.</b> At the moment, Games can only be created, deleted, and listed. If a Game were to be entered wrongly, the user would have to delete it and recreate it, which is troublesome.
+
+1. **Make the command result window scale with text.** The current command result window is too small to fully view the result of the command. This might prevent users from viewing the full result without breaking from "full CLI". We plan to make the result display area dynamically resize based on the length of the output text.
+
+2. **Make the Contact List panel scrollable without mouse input.** The current Contact List panel can only be scrolled with a mouse (barring the `find` command to reduce the list size), breaking from "full CLI". We plan to add keyboard shortcuts (e.g. `Ctrl+Up`/`Ctrl+Down`) to scroll through the contact list without a mouse.
+
+3. **Improve component scaling when the application window is resized.** Currently, resizing the application window only widens the command result area while the bottom view panels do not scale proportionally, which does not translate well on larger screens. We plan to update the layout so all panels scale proportionally with the window size.
+
+4. **Accept hyphens and apostrophes in contact names.** The current name validation only accepts alphanumeric characters and spaces, rejecting real-world names such as `Mary-Jane` or `O'Brien`. We plan to extend the name validation regex to also permit hyphens (`-`) and apostrophes (`'`), so that `contact add n/Mary-Jane` and `contact add n/O'Brien` are accepted.
+
+5. **Restate the contact name in the deletion confirmation prompt.** Currently, after triggering a deletion (e.g. `contact delete 1`), if the user scrolls away from the confirmation message, there is no reminder of which contact is about to be deleted when they type `y`. We plan to repeat the contact's name in the confirmation prompt so it is always visible, e.g. `Confirm deletion of Alex Yeoh? (y/n)`.
+
+6. **Make the UI reflect the state before and after an undo.** Currently the `undo` command updates the model but the UI only refreshes to show the new state without visually indicating what changed. We plan to highlight the affected contact in the list after an undo so the user can clearly see what was reversed.
+
+7. **Add the ability to edit a game name.** Currently, games can only be added, deleted, and listed. If a game name is entered incorrectly, the user must delete and re-add it, losing all associated aliases in the process. We plan to add a `game edit` command (e.g. `game edit 1 g/OldGame e/NewGame`) that renames the game while preserving its aliases.
+
+--------------------------------------------------------------------------------------------------------------------
+
+## **Appendix: Effort**
+
+**Difficulty level:** Significantly higher than AB3.
+
+**Effort relative to AB3:** We estimate the overall effort at approximately 2× that of AB3, based on the increased complexity of the data model, the number of new features, and the non-trivial cross-feature interactions introduced.
+
+**Key challenges and achievements:**
+
+* **Multiple interconnected entity types.** AB3 manages a single entity type (`Person`) with flat fields (name, phone, email, address, tags). Harmony manages a three-level hierarchy: `Person` → `Game` → `Alias`. Every command that touches games or aliases must navigate this nesting, handle the immutable `Person` model by reconstructing the full object, and propagate changes upward through the hierarchy. This significantly increased the complexity of every game and alias command compared to an equivalent AB3 command.
+
+* **Custom two-tier command syntax.** AB3 uses simple single-word commands (e.g. `add`, `delete`). Harmony introduces a namespaced command structure (`contact add`, `game delete`, `alias edit`) requiring a two-level parser architecture (`AddressBookParser` → `ContactCommandParser`/`GameCommandParser`/`AliasCommandParser`). Designing and testing this routing layer was a non-trivial addition.
+
+* **Undo mechanism.** AB3 does not implement undo. We built a per-command state capture approach where each undoable command stores only the minimal state needed to reverse itself (e.g. `personBeforeEdit`/`personAfterEdit`). This required careful design of the `UndoableCommand` interface and integration with `LogicManager`'s history stack across all modifying commands.
+
+* **Delete confirmation flow.** AB3 deletes immediately on command. We added a two-step confirmation flow (`ConfirmableDeleteCommand` interface + `pendingConfirmableCommand` in `LogicManager`) that required coordinating state across command executions without breaking the existing architecture.
+
+* **Clipboard integration and headless testing.** The `CopyCommand` interfaces directly with the OS clipboard via `java.awt.Toolkit`, which required solving a non-trivial CI/CD problem: headless Linux environments used in GitHub Actions do not expose a physical clipboard, causing `IllegalStateException`. This required a mock/stub clipboard setup for tests.
+
+* **Theme switching.** Implementing runtime CSS theme switching (light/dark/rainbow) required a clean signal path from the Logic layer to the UI without violating the architecture's layer boundaries. This was solved by embedding the theme string in `CommandResult` and having `MainWindow` act on it.
+
+**Effort saved through reuse:**
+
+The overall component structure (UI, Logic, Model, Storage), the JSON storage mechanism, and the JavaFX layout scaffolding were adapted from AB3 with modifications, saving significant boilerplate work. The base parser infrastructure (`ArgumentTokenizer`, `ArgumentMultimap`, `CliSyntax`) was reused with extensions for new prefixes (`g/`, `al/`, `e/`).
